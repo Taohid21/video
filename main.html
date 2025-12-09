@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>tio</title>
+    <title>tio - Social Network</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -15,9 +15,10 @@
             --primary: #1877f2;
             --divider: #e4e6eb;
             --nav-height: 55px;
-            --story-height: 200px;
-            --story-width: 112px;
+            --danger: #ff4d4d;
+            --success: #42b72a;
         }
+
         body.dark-mode {
             --bg-body: #18191a;
             --bg-card: #242526;
@@ -25,125 +26,134 @@
             --text-sub: #b0b3b8;
             --divider: #3e4042;
         }
+
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg-body); color: var(--text-main); padding-top: var(--nav-height); padding-bottom: 60px; min-height: 100vh; overflow-x: hidden; }
         
-        .navbar { position: fixed; top: 0; left: 0; width: 100%; height: var(--nav-height); background: var(--bg-card); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; z-index: 1000; border-bottom: 1px solid var(--divider); }
-        .logo { font-size: 26px; font-weight: 800; color: var(--primary); letter-spacing: -1px; }
-        .nav-icons i { font-size: 22px; color: var(--text-main); cursor: pointer; padding: 5px; }
+        /* Utility */
+        .btn { border: none; padding: 8px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-secondary { background: var(--divider); color: var(--text-main); }
+        .flex-center { display: flex; align-items: center; justify-content: center; }
 
-        .container { max-width: 100%; margin: 0 auto; }
+        /* Navbar */
+        .navbar { position: fixed; top: 0; left: 0; width: 100%; height: var(--nav-height); background: var(--bg-card); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; z-index: 1000; border-bottom: 1px solid var(--divider); }
+        .logo { font-size: 26px; font-weight: 800; color: var(--primary); letter-spacing: -1px; cursor: pointer; }
+        .nav-icons { display: flex; gap: 20px; }
+        .nav-icons i { font-size: 22px; color: var(--text-main); cursor: pointer; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--bg-body); }
+
+        .container { max-width: 600px; margin: 0 auto; } /* PC View fix */
         
         /* Stories */
-        .story-section { background: var(--bg-card); padding: 15px 10px; margin-bottom: 8px; overflow-x: auto; white-space: nowrap; display: flex; gap: 8px; }
-        .story-card { min-width: var(--story-width); height: var(--story-height); border-radius: 10px; position: relative; overflow: hidden; cursor: pointer; background: #333; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .story-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
-        .story-card:hover img { transform: scale(1.02); }
-        .story-overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 10px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); color: white; font-size: 13px; font-weight: 600; }
-        .add-story-card { background: var(--bg-card); display: flex; flex-direction: column; }
-        .add-story-img { height: 65%; width: 100%; object-fit: cover; }
-        .add-story-btn { height: 35%; background: var(--bg-card); position: relative; text-align: center; color: var(--text-main); font-size: 13px; font-weight: 600; padding-top: 25px; }
-        .add-icon-circle { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 32px; height: 32px; background: var(--primary); border-radius: 50%; border: 3px solid var(--bg-card); display: flex; align-items: center; justify-content: center; color: white; }
+        .story-section { background: var(--bg-card); padding: 15px 10px; margin-bottom: 10px; overflow-x: auto; white-space: nowrap; border-radius: 0 0 10px 10px; }
+        .story-circle { display: inline-block; width: 75px; margin-right: 10px; text-align: center; cursor: pointer; vertical-align: top; }
+        .story-ring { width: 65px; height: 65px; border-radius: 50%; padding: 2px; border: 2px solid var(--primary); position: relative; }
+        .story-ring img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--bg-card); }
+        .story-user { font-size: 11px; margin-top: 5px; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+        .add-story .story-ring { border-color: var(--divider); }
+        .add-story .plus { position: absolute; bottom: 0; right: 0; background: var(--primary); color: white; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-card); }
 
         /* Create Post */
-        .create-post-box { background: var(--bg-card); padding: 15px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+        .create-post-box { background: var(--bg-card); padding: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; border-radius: 8px; }
         .cp-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-        .cp-input { flex: 1; background: var(--bg-body); padding: 10px 15px; border-radius: 20px; color: var(--text-main); font-size: 15px; border: none; outline: none; }
+        .cp-input { flex: 1; background: var(--bg-body); padding: 10px 15px; border-radius: 20px; color: var(--text-main); font-size: 15px; border: none; outline: none; cursor: pointer; }
 
         /* Posts */
-        .post-card { background: var(--bg-card); margin-bottom: 8px; width: 100%; border-top: 1px solid var(--divider); border-bottom: 1px solid var(--divider); position: relative; }
+        .post-card { background: var(--bg-card); margin-bottom: 10px; width: 100%; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .post-header { display: flex; align-items: center; padding: 12px 15px; justify-content: space-between; }
-        .p-head-left { display: flex; align-items: center; gap: 10px; }
-        .p-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; }
-        .p-name { font-weight: 600; font-size: 15px; color: var(--text-main); cursor: pointer; }
+        .p-head-left { display: flex; align-items: center; gap: 10px; cursor: pointer;}
+        .p-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .p-name { font-weight: 600; font-size: 15px; color: var(--text-main); }
         .p-time { font-size: 12px; color: var(--text-sub); }
-        .post-content { padding: 0 15px 10px; font-size: 15px; line-height: 1.5; color: var(--text-main); word-break: break-word; }
-        .post-media { width: 100%; display: block; background: #000; display: flex; justify-content: center; }
-        .post-media img, .post-media video { width: 100%; max-height: 600px; object-fit: contain; }
+        .post-content { padding: 0 15px 10px; font-size: 15px; line-height: 1.5; color: var(--text-main); }
+        .post-media { width: 100%; display: block; background: #000; cursor: pointer; }
+        .post-media img, .post-media video { width: 100%; display: block; max-height: 600px; object-fit: contain; }
         .post-stats { padding: 10px 15px; display: flex; justify-content: space-between; color: var(--text-sub); font-size: 13px; border-bottom: 1px solid var(--divider); }
-        .post-actions { display: flex; height: 45px; align-items: center; position: relative; }
-        .p-action-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text-sub); font-weight: 500; font-size: 14px; cursor: pointer; height: 100%; position: relative; }
+        .post-actions { display: flex; height: 45px; align-items: center; }
+        .p-action-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text-sub); font-weight: 500; font-size: 14px; cursor: pointer; height: 100%; }
         .p-action-btn:active { background: var(--bg-body); }
         .p-action-btn.liked { color: var(--primary); }
 
-        /* Floating Hearts Animation */
-        .floating-heart { position: absolute; color: #ff3040; font-size: 20px; animation: floatUp 1s ease-out forwards; pointer-events: none; z-index: 10; }
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-50px) scale(1.5); } }
-
         /* Modals */
-        .modal-wrap { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; }
-        .modal-wrap.active { display: flex; }
-        .full-sheet { width: 100%; height: 100%; background: var(--bg-card); display: flex; flex-direction: column; }
-        .fs-header { padding: 15px; border-bottom: 1px solid var(--divider); display: flex; align-items: center; justify-content: space-between; font-weight: 700; font-size: 16px; background: var(--bg-card); }
-        .fs-close { font-size: 24px; cursor: pointer; padding: 5px; color: var(--text-main); }
-        .fs-body { flex: 1; overflow-y: auto; padding: 0; position: relative; }
-
-        /* Story Preview Modal */
-        .story-preview-container { flex: 1; display: flex; align-items: center; justify-content: center; background: #000; position: relative; }
-        .story-preview-img { max-width: 100%; max-height: 80vh; }
-        .story-post-btn { position: absolute; bottom: 20px; right: 20px; background: var(--primary); color: white; padding: 10px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; }
-
-        /* Story Viewer */
-        .story-view-modal { background: #000; }
-        .story-progress-bar { position: absolute; top: 10px; left: 10px; right: 10px; height: 3px; background: rgba(255,255,255,0.3); border-radius: 2px; overflow: hidden; z-index: 10; }
-        .story-progress-fill { height: 100%; background: white; width: 0%; transition: width 0.1s linear; }
-        .sv-img { width: 100%; height: 100%; object-fit: contain; }
-        .sv-user { position: absolute; top: 25px; left: 15px; display: flex; align-items: center; gap: 10px; z-index: 10; color: white; text-shadow: 1px 1px 2px black; }
-        .sv-avatar { width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--primary); }
-
-        /* Profile Styles */
-        .profile-top { background: var(--bg-card); padding-bottom: 20px; margin-bottom: 8px; border-bottom: 1px solid var(--divider); }
-        .cover-img { width: 100%; height: 200px; object-fit: cover; background: #ddd; }
-        .prof-info { padding: 0 20px; margin-top: -60px; position: relative; display: flex; flex-direction: column; align-items: center; }
-        .prof-pic-lg { width: 130px; height: 130px; border-radius: 50%; border: 4px solid var(--bg-card); object-fit: cover; background: #eee; }
-        .prof-name { font-size: 26px; font-weight: 700; margin-top: 10px; color: var(--text-main); }
-        .prof-bio { color: var(--text-sub); font-size: 15px; margin: 5px 0 15px; text-align: center; max-width: 80%; }
-        .prof-actions { display: flex; gap: 10px; margin-top: 10px; }
-        .prof-btn { padding: 8px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; font-size: 14px; display: flex; align-items: center; gap: 5px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-sec { background: var(--divider); color: var(--text-main); }
-
-        /* Search */
-        .search-modal { position: fixed; inset: 0; background: var(--bg-card); z-index: 3000; padding: 10px; display: none; }
-        .search-modal.active { display: block; }
-        .search-res-item { display: flex; align-items: center; gap: 10px; padding: 12px; border-bottom: 1px solid var(--divider); cursor: pointer; }
-
-        /* Nav */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: var(--bg-card); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--divider); z-index: 999; }
-        .bn-item { font-size: 24px; color: var(--text-sub); padding: 10px; position: relative; cursor: pointer; }
-        .bn-item.active { color: var(--primary); }
-
-        .section { display: none; }
-        .section.active { display: block; animation: fadeIn 0.2s; }
-        @keyframes fadeIn { from{opacity:0} to{opacity:1}}
+        .modal-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000; background: rgba(0,0,0,0.5); visibility: hidden; opacity: 0; transition: 0.2s; display: flex; align-items: flex-end; justify-content: center; }
+        .modal-wrap.active { visibility: visible; opacity: 1; }
         
-        .delete-btn { color: #ff4d4d; cursor: pointer; padding: 5px; }
-        .loading-skel { text-align: center; padding: 20px; color: var(--text-sub); }
+        .full-sheet { width: 100%; max-width: 600px; background: var(--bg-card); border-radius: 15px 15px 0 0; height: 85vh; display: flex; flex-direction: column; transform: translateY(100%); transition: 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .modal-wrap.active .full-sheet { transform: translateY(0); }
+        .modal-center { align-items: center !important; }
+        .modal-box { background: var(--bg-card); width: 90%; max-width: 400px; border-radius: 10px; padding: 20px; transform: scale(0.9); transition: 0.2s; }
+        .modal-wrap.active .modal-box { transform: scale(1); }
+        
+        .fs-header { padding: 15px; border-bottom: 1px solid var(--divider); display: flex; align-items: center; justify-content: space-between; font-weight: 700; font-size: 16px; }
+        .fs-close { background: var(--bg-body); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-main); }
+        .fs-body { flex: 1; overflow-y: auto; padding: 0; }
+
+        /* Profile */
+        .profile-top { background: var(--bg-card); padding-bottom: 20px; margin-bottom: 8px; position: relative; }
+        .cover-img { width: 100%; height: 200px; object-fit: cover; background: #ddd; }
+        .prof-info { padding: 0 15px; margin-top: -60px; position: relative; text-align: center; }
+        .prof-pic-lg { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--bg-card); object-fit: cover; background: #eee; }
+        .prof-name { font-size: 24px; font-weight: 700; margin-top: 5px; color: var(--text-main); }
+        .prof-bio { color: var(--text-sub); font-size: 14px; margin: 5px 0 15px; }
+        .prof-actions-btn { display: flex; gap: 10px; justify-content: center; margin-top: 10px; }
+        
+        /* Comments */
+        .comment-area { display: flex; flex-direction: column; height: 100%; }
+        .comment-list { flex: 1; overflow-y: auto; padding: 15px; }
+        .comment-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        .c-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+        .c-content { display: flex; flex-direction: column; gap: 4px; max-width: 85%; }
+        .c-bubble { background: var(--bg-body); padding: 10px 14px; border-radius: 18px; position: relative; }
+        .c-name { font-weight: 700; font-size: 13px; margin-bottom: 2px; color: var(--text-main); }
+        .c-text { font-size: 14px; color: var(--text-main); word-break: break-word; }
+        .comment-input-wrap { padding: 10px; border-top: 1px solid var(--divider); display: flex; align-items: center; gap: 10px; background: var(--bg-card); }
+        .c-input { flex: 1; background: var(--bg-body); border: none; padding: 12px 15px; border-radius: 25px; outline: none; color: var(--text-main); }
+
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: var(--bg-card); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid var(--divider); z-index: 999; }
+        .bn-item { font-size: 24px; color: var(--text-sub); padding: 10px; position: relative; cursor: pointer; flex: 1; text-align: center; }
+        .bn-item.active { color: var(--primary); }
+        
+        /* Search */
+        .search-modal { position: fixed; inset: 0; background: var(--bg-card); z-index: 3000; padding: 0; display: none; }
+        .search-modal.active { display: block; }
+        .search-header { padding: 10px; border-bottom: 1px solid var(--divider); display: flex; align-items: center; gap: 10px; }
+        .search-res-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-bottom: 1px solid var(--divider); cursor: pointer; }
+        .search-res-item:hover { background: var(--bg-body); }
+
+        /* Image Lightbox */
+        .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 4000; display: flex; align-items: center; justify-content: center; visibility: hidden; opacity: 0; transition: 0.2s; }
+        .lightbox.active { visibility: visible; opacity: 1; }
+        .lightbox img { max-width: 100%; max-height: 100%; }
+        .lb-close { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; cursor: pointer; }
+
+        .section { display: none; padding-bottom: 10px;}
+        .section.active { display: block; }
     </style>
 </head>
 <body>
 
+    <!-- Navbar -->
     <div class="navbar">
-        <div class="logo">tio</div>
+        <div class="logo" onclick="navTo('homeSection', document.querySelector('.bn-item:first-child'))">tio</div>
         <div class="nav-icons">
             <i class="fas fa-search" onclick="toggleSearch(true)"></i>
             <i class="fas fa-cog" onclick="openSettings()"></i>
         </div>
     </div>
 
-    <!-- HOME -->
+    <!-- Home Section -->
     <div id="homeSection" class="section active container">
-        <div class="story-section" id="storyList">
-            <!-- Add Story Card -->
-            <div class="story-card add-story-card" onclick="document.getElementById('storyUpload').click()">
-                <img id="myStoryThumb" class="add-story-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
-                <div class="add-story-btn">
-                    <div class="add-icon-circle"><i class="fas fa-plus"></i></div>
-                    Create Story
+        <div class="story-section">
+            <div class="story-circle add-story" onclick="document.getElementById('storyUpload').click()">
+                <div class="story-ring">
+                    <img id="myStoryThumb" src="https://via.placeholder.com/65">
+                    <div class="plus"><i class="fas fa-plus"></i></div>
                 </div>
-                <input type="file" id="storyUpload" hidden accept="image/*,video/*" onchange="handleStorySelect(this)">
+                <div class="story-user">Add Story</div>
+                <input type="file" id="storyUpload" hidden accept="image/*" onchange="openStoryPreview(this)">
             </div>
-            <!-- Stories load here -->
+            <div id="storyList" style="display:inline;"></div>
         </div>
 
         <div class="create-post-box" onclick="window.location.href='post.html'">
@@ -155,126 +165,144 @@
         <div id="newsFeed"></div>
     </div>
 
-    <!-- VIDEO -->
-    <div id="videoSection" class="section container">
-        <div id="videoFeed"></div>
-    </div>
-
-    <!-- FRIENDS -->
+    <!-- Friends Section -->
     <div id="friendsSection" class="section container">
-        <h3 style="padding: 15px;">Friend Requests</h3>
+        <h3 style="padding:15px;">Friend Requests</h3>
         <div id="requestList" style="padding: 0 10px;"></div>
     </div>
 
-    <!-- MY PROFILE -->
+    <!-- Profile Section (Dynamic: My Profile or Other) -->
     <div id="profileSection" class="section">
-        <div id="myProfileContent"></div>
+        <div class="profile-top">
+            <img class="cover-img" id="pCover">
+            <div class="prof-info">
+                <img class="prof-pic-lg" id="pPic">
+                <h2 class="prof-name" id="pName">Loading...</h2>
+                <p class="prof-bio" id="pBio"></p>
+                
+                <div class="prof-actions-btn" id="profActions">
+                    <!-- Buttons will be injected here via JS -->
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div style="padding: 0 15px; border-bottom: 1px solid var(--divider); margin-bottom: 10px;">
+                <h4 style="color: var(--text-main); padding-bottom: 10px;">Posts</h4>
+            </div>
+            <div id="profilePosts"></div>
+        </div>
     </div>
 
-    <!-- USER PROFILE (Other Users) -->
-    <div id="userProfileSection" class="section">
-        <div id="otherProfileContent"></div>
+    <!-- Settings Modal -->
+    <div class="modal-wrap" id="settingsModal">
+        <div class="full-sheet" style="height: auto; max-height: 70vh;">
+            <div class="fs-header">
+                Settings
+                <div class="fs-close" onclick="closeModal('settingsModal')"><i class="fas fa-times"></i></div>
+            </div>
+            <div class="fs-body">
+                <div style="padding: 20px;">
+                    <div class="btn btn-secondary" onclick="toggleTheme()" style="width: 100%; margin-bottom: 10px; display:flex; align-items:center; gap:10px;">
+                        <i class="fas fa-moon"></i> Toggle Dark Mode
+                    </div>
+                    <div class="btn btn-primary" onclick="logout()" style="width: 100%; background: var(--danger);">
+                        <i class="fas fa-sign-out-alt"></i> Log Out
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- SEARCH -->
+    <!-- Edit Profile Modal -->
+    <div class="modal-wrap" id="editProfileModal">
+        <div class="full-sheet">
+            <div class="fs-header">
+                Edit Profile
+                <div class="fs-close" onclick="closeModal('editProfileModal')"><i class="fas fa-times"></i></div>
+            </div>
+            <div class="fs-body" style="padding: 20px;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <img id="previewPic" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;" src="">
+                    <br>
+                    <label class="btn btn-secondary" style="margin-top: 10px; display: inline-block;">
+                        Change Photo <input type="file" id="filePic" hidden accept="image/*" onchange="previewImage(this, 'previewPic')">
+                    </label>
+                </div>
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <img id="previewCover" style="width: 100%; height: 120px; border-radius: 8px; object-fit: cover;" src="">
+                    <br>
+                    <label class="btn btn-secondary" style="margin-top: 10px; display: inline-block;">
+                        Change Cover <input type="file" id="fileCover" hidden accept="image/*" onchange="previewImage(this, 'previewCover')">
+                    </label>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="font-weight: 500;">Full Name</label>
+                    <input type="text" id="editName" class="c-input" style="background: var(--bg-body); border: 1px solid var(--divider); width: 100%;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="font-weight: 500;">Bio</label>
+                    <textarea id="editBio" class="c-input" rows="3" style="background: var(--bg-body); border: 1px solid var(--divider); width: 100%; border-radius: 10px;"></textarea>
+                </div>
+                <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="saveProfileData()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Story Preview Modal -->
+    <div class="modal-wrap modal-center" id="storyPreviewModal">
+        <div class="modal-box" style="text-align: center;">
+            <h3>Add to Story</h3>
+            <img id="storyPreviewImg" style="width: 100%; max-height: 300px; object-fit: contain; margin: 15px 0; border-radius: 8px;">
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-secondary" style="flex:1" onclick="closeModal('storyPreviewModal')">Cancel</button>
+                <button class="btn btn-primary" style="flex:1" onclick="confirmStoryUpload()">Share</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comments Modal -->
+    <div class="modal-wrap" id="commentModal">
+        <div class="full-sheet" style="height: 90vh;">
+            <div class="fs-header">
+                Comments
+                <div class="fs-close" onclick="closeModal('commentModal')"><i class="fas fa-times"></i></div>
+            </div>
+            <div class="comment-area">
+                <div class="comment-list" id="commentList"></div>
+                <div class="comment-input-wrap">
+                    <input type="text" class="c-input" id="commentInput" placeholder="Write a comment...">
+                    <i class="fas fa-paper-plane" style="color: var(--primary); font-size: 20px; padding: 10px; cursor: pointer;" onclick="submitComment()"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Modal -->
     <div class="search-modal" id="searchModal">
-        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
-            <i class="fas fa-arrow-left" style="font-size: 20px; padding: 10px;" onclick="toggleSearch(false)"></i>
-            <input type="text" style="flex: 1; padding: 12px; border-radius: 20px; border: 1px solid #ddd; outline: none;" placeholder="Search people..." oninput="runSearch(this.value)">
+        <div class="search-header">
+            <i class="fas fa-arrow-left" style="font-size: 20px; padding: 5px; cursor: pointer;" onclick="toggleSearch(false)"></i>
+            <input type="text" style="flex: 1; padding: 10px 15px; border-radius: 20px; border: none; background: var(--bg-body); outline: none;" placeholder="Search people..." id="searchInput" oninput="runSearch(this.value)">
         </div>
         <div id="searchResults"></div>
     </div>
 
-    <!-- STORY PREVIEW MODAL -->
-    <div class="modal-wrap" id="storyPreviewModal">
-        <div class="full-sheet" style="background: black;">
-            <div class="fs-header" style="background: transparent; color: white; border: none; position: absolute; width: 100%; z-index: 10;">
-                <span>Preview</span>
-                <i class="fas fa-times fs-close" style="color: white;" onclick="closeModal('storyPreviewModal')"></i>
-            </div>
-            <div class="story-preview-container">
-                <img id="previewStoryImg" class="story-preview-img">
-                <button class="story-post-btn" onclick="uploadStory()">Share to Story</button>
-            </div>
-        </div>
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox" onclick="this.classList.remove('active')">
+        <div class="lb-close">&times;</div>
+        <img id="lightboxImg" src="">
     </div>
 
-    <!-- STORY VIEWER -->
-    <div class="modal-wrap" id="storyViewerModal">
-        <div class="full-sheet story-view-modal">
-            <div class="story-progress-bar"><div class="story-progress-fill" id="storyProgress"></div></div>
-            <div class="sv-user">
-                <img id="svAvatar" class="sv-avatar">
-                <b id="svName">User</b>
-            </div>
-            <i class="fas fa-times fs-close" style="position: absolute; right: 15px; top: 20px; color: white; z-index: 20;" onclick="closeStoryViewer()"></i>
-            <img id="svImage" class="sv-img">
-        </div>
-    </div>
-
-    <!-- SETTINGS MODAL -->
-    <div class="modal-wrap" id="settingsModal">
-        <div class="full-sheet" style="height: auto; position: absolute; bottom: 0; border-radius: 15px 15px 0 0;">
-            <div class="fs-header">Settings <i class="fas fa-times fs-close" onclick="closeModal('settingsModal')"></i></div>
-            <div class="fs-body" style="padding: 10px;">
-                <div onclick="toggleTheme()" style="padding: 15px; border-bottom: 1px solid var(--divider); display: flex; gap: 10px; cursor: pointer;">
-                    <i class="fas fa-moon"></i> Dark Mode
-                </div>
-                <div onclick="openEditProfile()" style="padding: 15px; border-bottom: 1px solid var(--divider); display: flex; gap: 10px; cursor: pointer;">
-                    <i class="fas fa-user-edit"></i> Edit Profile
-                </div>
-                <div onclick="logout()" style="padding: 15px; color: red; display: flex; gap: 10px; cursor: pointer;">
-                    <i class="fas fa-sign-out-alt"></i> Log Out
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SHARE MODAL -->
-    <div class="modal-wrap" id="shareModal">
-        <div class="full-sheet" style="height: auto; position: absolute; bottom: 0; border-radius: 15px 15px 0 0;">
-            <div class="fs-header">Share <i class="fas fa-times fs-close" onclick="closeModal('shareModal')"></i></div>
-            <div class="fs-body" style="padding: 20px; display: flex; gap: 20px; justify-content: center;">
-                <div onclick="doCopyLink()" style="text-align: center; cursor: pointer;">
-                    <div style="width: 50px; height: 50px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 5px; color: #333;"><i class="fas fa-link"></i></div>
-                    <span style="font-size: 12px;">Copy Link</span>
-                </div>
-                <div onclick="doShareFeed()" style="text-align: center; cursor: pointer;">
-                    <div style="width: 50px; height: 50px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 5px; color: white;"><i class="fas fa-rss"></i></div>
-                    <span style="font-size: 12px;">Share Now</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Profile Modal (Reused Logic) -->
-    <div class="modal-wrap" id="editProfileModal">
-        <div class="full-sheet">
-            <div class="fs-header">Edit Profile <i class="fas fa-times fs-close" onclick="closeModal('editProfileModal')"></i></div>
-            <div class="fs-body" style="padding: 20px;">
-                <div style="text-align:center; margin-bottom:15px;">
-                    <img id="epPreviewPic" style="width:80px; height:80px; border-radius:50%; object-fit:cover;">
-                    <br><button onclick="document.getElementById('epFilePic').click()" class="prof-btn btn-sec" style="margin:5px auto;">Change Photo</button>
-                    <input type="file" id="epFilePic" hidden onchange="previewImg(this, 'epPreviewPic')">
-                </div>
-                <input type="text" id="epName" placeholder="Full Name" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:5px;">
-                <textarea id="epBio" placeholder="Bio" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ccc; border-radius:5px;"></textarea>
-                <button onclick="saveProfile()" class="prof-btn btn-primary" style="width:100%; justify-content:center;">Save</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- Bottom Nav -->
     <div class="bottom-nav">
         <div class="bn-item active" onclick="navTo('homeSection', this)"><i class="fas fa-home"></i></div>
-        <div class="bn-item" onclick="navTo('videoSection', this); loadVideoFeed()"><i class="fas fa-play-circle"></i></div>
         <div class="bn-item" onclick="navTo('friendsSection', this); loadReqs()"><i class="fas fa-user-friends"></i></div>
-        <div class="bn-item" onclick="navTo('profileSection', this); loadMyProfile()"><i class="fas fa-user"></i></div>
+        <div class="bn-item" onclick="visitProfile(currentUser.uid, this)"><i class="fas fa-user"></i></div>
     </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, getDocs, addDoc, query, where, orderBy, updateDoc, arrayUnion, arrayRemove, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, collection, getDocs, addDoc, query, where, orderBy, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = { apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs", authDomain: "new-all-f99f7.firebaseapp.com", projectId: "new-all-f99f7", storageBucket: "new-all-f99f7.appspot.com", messagingSenderId: "1069748173900", appId: "1:1069748173900:web:158d6336c0f4628133c8e9" };
     
@@ -282,22 +310,22 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     
-    let currentUser = null;
-    let selectedStoryFile = null;
-    let sharePostId = null;
-    let storyTimer = null;
-
+    window.currentUser = null;
+    let activePostId = null;
+    let tempStoryImg = null;
+    
     const defaultPic = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
     const defaultCover = "https://colorlib.com/wp/wp-content/uploads/sites/2/2014/02/bkg_06.jpg";
 
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            currentUser = user;
+            window.currentUser = user;
             const snap = await getDoc(doc(db, "users", user.uid));
             if(snap.exists()) {
                 const d = snap.data();
                 document.getElementById('navAvatar').src = d.profilePic || defaultPic;
                 document.getElementById('myStoryThumb').src = d.profilePic || defaultPic;
+                document.querySelector('.cp-input').placeholder = `What's on your mind, ${d.firstName}?`;
                 loadMainFeed();
                 loadStories();
             }
@@ -310,314 +338,265 @@
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.querySelectorAll('.bn-item').forEach(b => b.classList.remove('active'));
-        if(el) el.classList.add('active');
+        if(el) el.classList.add('active'); else if(id === 'homeSection') document.querySelector('.bn-item:first-child').classList.add('active');
         window.scrollTo(0,0);
     };
 
+    window.openSettings = () => {
+        document.getElementById('settingsModal').classList.add('active');
+        closeModal('editProfileModal'); 
+    };
+
     window.closeModal = (id) => document.getElementById(id).classList.remove('active');
-    window.openSettings = () => document.getElementById('settingsModal').classList.add('active');
     window.toggleTheme = () => document.body.classList.toggle('dark-mode');
     window.logout = () => signOut(auth);
-    window.toggleSearch = (show) => document.getElementById('searchModal').classList.toggle('active', show);
+    window.toggleSearch = (show) => {
+        document.getElementById('searchModal').classList.toggle('active', show);
+        if(show) document.getElementById('searchInput').focus();
+    };
 
-    /* --- FEED & POSTS --- */
+    // --- Feed Logic ---
     async function loadMainFeed() {
         const feed = document.getElementById('newsFeed');
-        feed.innerHTML = '<div class="loading-skel">Loading posts...</div>';
+        if(!feed.hasChildNodes()) feed.innerHTML = '<div style="padding:20px;text-align:center;">Loading...</div>';
+        
         try {
             const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
             const snaps = await getDocs(q);
             feed.innerHTML = "";
             snaps.forEach(doc => feed.innerHTML += buildPost(doc.data(), doc.id));
-        } catch(e) { console.log(e); }
+        } catch(e) { console.error(e); }
     }
-
-    window.loadVideoFeed = async () => {
-        const feed = document.getElementById('videoFeed');
-        feed.innerHTML = '<div class="loading-skel">Loading videos...</div>';
-        const q = query(collection(db, "posts"), where("type", "==", "video"));
-        const snaps = await getDocs(q);
-        feed.innerHTML = "";
-        if(snaps.empty) feed.innerHTML = '<div class="loading-skel">No videos found.</div>';
-        snaps.forEach(doc => feed.innerHTML += buildPost(doc.data(), doc.id));
-    };
 
     function buildPost(p, id) {
         const isLiked = p.likes && p.likes.includes(currentUser.uid) ? 'liked' : '';
         const likeNum = p.likes ? p.likes.length : 0;
+        const media = p.mediaUrl ? (p.type === 'video' ? `<video controls src="${p.mediaUrl}"></video>` : `<img src="${p.mediaUrl}" onclick="openLightbox('${p.mediaUrl}')">`) : '';
         const uPic = p.userPic || defaultPic;
-        const isMine = p.uid === currentUser.uid;
-        
-        // Media handling
-        let mediaHtml = "";
-        if(p.mediaUrl) {
-            mediaHtml = p.type === 'video' 
-                ? `<video src="${p.mediaUrl}" controls></video>` 
-                : `<img src="${p.mediaUrl}">`;
-        }
 
         return `
-        <div class="post-card" id="post-${id}">
+        <div class="post-card">
             <div class="post-header">
-                <div class="p-head-left" onclick="viewUserProfile('${p.uid}')">
+                <div class="p-head-left" onclick="visitProfile('${p.uid}')">
                     <img src="${uPic}" class="p-avatar">
                     <div>
                         <div class="p-name">${p.userName}</div>
-                        <div class="p-time">${new Date(p.timestamp).toLocaleDateString()}</div>
+                        <div class="p-time">${timeAgo(p.timestamp)}</div>
                     </div>
                 </div>
-                ${isMine ? `<i class="fas fa-trash delete-btn" onclick="deletePost('${id}')"></i>` : ''}
+                <i class="fas fa-ellipsis-h" style="color:var(--text-sub);"></i>
             </div>
             <div class="post-content">${p.text}</div>
-            ${mediaHtml ? `<div class="post-media">${mediaHtml}</div>` : ''}
+            ${media ? `<div class="post-media">${media}</div>` : ''}
             <div class="post-stats">
                 <span id="lc-${id}">${likeNum} Likes</span>
-                <span>${p.commentCount || 0} Comments</span>
+                <span onclick="openComments('${id}')">${p.commentCount || 0} Comments</span>
             </div>
             <div class="post-actions">
-                <div class="p-action-btn ${isLiked}" id="lb-${id}" onclick="doLike(this, '${id}')">
-                    <i class="fas fa-thumbs-up"></i> Like
+                <div class="p-action-btn ${isLiked}" id="lb-${id}" onclick="doLike('${id}')">
+                    <i class="far fa-thumbs-up"></i> Like
                 </div>
-                <div class="p-action-btn">
-                    <i class="fas fa-comment"></i> Comment
+                <div class="p-action-btn" onclick="openComments('${id}')">
+                    <i class="far fa-comment-alt"></i> Comment
                 </div>
-                <div class="p-action-btn" onclick="openShare('${id}')">
+                <div class="p-action-btn" onclick="sharePost('${id}', '${p.text}')">
                     <i class="fas fa-share"></i> Share
                 </div>
             </div>
         </div>`;
     }
 
-    /* --- INTERACTIONS --- */
-    window.doLike = async (el, pid) => {
-        const isLiked = el.classList.contains('liked');
+    window.openLightbox = (src) => {
+        document.getElementById('lightboxImg').src = src;
+        document.getElementById('lightbox').classList.add('active');
+    };
+
+    window.sharePost = (id, text) => {
+        if (navigator.share) {
+            navigator.share({
+                title: 'Check out this post on tio',
+                text: text,
+                url: window.location.href
+            }).catch(console.error);
+        } else {
+            alert("Sharing not supported on this browser. Link copied!");
+            // Clipboard logic here if needed
+        }
+    };
+
+    window.doLike = async (pid) => {
+        const btn = document.getElementById(`lb-${pid}`);
         const txt = document.getElementById(`lc-${pid}`);
         let num = parseInt(txt.innerText);
-
-        // Animation
-        if(!isLiked) {
-            const heart = document.createElement('i');
-            heart.className = 'fas fa-heart floating-heart';
-            heart.style.left = '50%';
-            heart.style.bottom = '20px';
-            el.appendChild(heart);
-            setTimeout(() => heart.remove(), 1000);
-            el.classList.add('liked');
-            txt.innerText = (num + 1) + " Likes";
-            await updateDoc(doc(db, "posts", pid), { likes: arrayUnion(currentUser.uid) });
+        const ref = doc(db, "posts", pid);
+        
+        if(btn.classList.contains('liked')) {
+            btn.classList.remove('liked');
+            txt.innerText = (num - 1) + " Likes";
+            await updateDoc(ref, { likes: arrayRemove(currentUser.uid) });
         } else {
-            el.classList.remove('liked');
-            txt.innerText = Math.max(0, num - 1) + " Likes";
-            await updateDoc(doc(db, "posts", pid), { likes: arrayRemove(currentUser.uid) });
+            btn.classList.add('liked');
+            txt.innerText = (num + 1) + " Likes";
+            await updateDoc(ref, { likes: arrayUnion(currentUser.uid) });
         }
     };
 
-    window.deletePost = async (pid) => {
-        if(confirm("Delete this post?")) {
-            await deleteDoc(doc(db, "posts", pid));
-            document.getElementById(`post-${pid}`).remove();
-        }
-    };
-
-    window.openShare = (pid) => {
-        sharePostId = pid;
-        document.getElementById('shareModal').classList.add('active');
-    };
-
-    window.doCopyLink = () => {
-        const url = `${window.location.origin}${window.location.pathname}?pid=${sharePostId}`;
-        navigator.clipboard.writeText(url);
-        alert("Link copied!");
-        closeModal('shareModal');
-    };
-
-    window.doShareFeed = async () => {
-        const original = await getDoc(doc(db, "posts", sharePostId));
-        if(original.exists()) {
-            const d = original.data();
-            const u = await getDoc(doc(db, "users", currentUser.uid));
-            await addDoc(collection(db, "posts"), {
-                uid: currentUser.uid,
-                userName: u.data().fullName,
-                userPic: u.data().profilePic,
-                text: `Shared a post from ${d.userName}:\n\n${d.text}`,
-                mediaUrl: d.mediaUrl,
-                type: d.type || 'image',
-                timestamp: Date.now(),
-                likes: []
-            });
-            alert("Shared to your feed!");
-            closeModal('shareModal');
-            loadMainFeed();
-        }
-    };
-
-    /* --- STORIES --- */
-    window.handleStorySelect = (input) => {
-        if(input.files && input.files[0]) {
-            selectedStoryFile = input.files[0];
+    // --- Story Logic ---
+    window.openStoryPreview = (inp) => {
+        if(inp.files && inp.files[0]){
             const reader = new FileReader();
             reader.onload = (e) => {
-                document.getElementById('previewStoryImg').src = e.target.result;
+                tempStoryImg = e.target.result;
+                document.getElementById('storyPreviewImg').src = tempStoryImg;
                 document.getElementById('storyPreviewModal').classList.add('active');
             };
-            reader.readAsDataURL(selectedStoryFile);
+            reader.readAsDataURL(inp.files[0]);
         }
     };
 
-    window.uploadStory = async () => {
-        const btn = document.querySelector('.story-post-btn');
-        btn.innerText = "Posting...";
-        // Use FileReader base64 for demo (use Storage in prod)
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            const u = await getDoc(doc(db, "users", currentUser.uid));
-            await addDoc(collection(db, "stories"), {
-                uid: currentUser.uid,
-                userName: u.data().firstName,
-                userPic: u.data().profilePic,
-                imgUrl: e.target.result,
-                timestamp: Date.now()
-            });
-            closeModal('storyPreviewModal');
-            btn.innerText = "Share to Story";
-            loadStories();
-        };
-        reader.readAsDataURL(selectedStoryFile);
-    };
-
-    async function loadStories() {
-        const list = document.getElementById('storyList');
-        // Keep add card
-        const addCard = list.firstElementChild;
-        list.innerHTML = "";
-        list.appendChild(addCard);
-
-        const q = query(collection(db, "stories"), orderBy("timestamp", "desc"));
-        const snaps = await getDocs(q);
-        snaps.forEach(doc => {
-            const d = doc.data();
-            const el = document.createElement('div');
-            el.className = 'story-card';
-            el.innerHTML = `
-                <img src="${d.imgUrl}">
-                <div class="story-overlay">${d.userName}</div>
-            `;
-            el.onclick = () => viewStory(d);
-            list.appendChild(el);
+    window.confirmStoryUpload = async () => {
+        if(!tempStoryImg) return;
+        document.getElementById('storyPreviewModal').classList.remove('active');
+        const u = await getDoc(doc(db, "users", currentUser.uid));
+        await addDoc(collection(db, "stories"), {
+            uid: currentUser.uid,
+            name: u.data().firstName,
+            img: tempStoryImg,
+            timestamp: Date.now()
         });
-    }
-
-    window.viewStory = (d) => {
-        document.getElementById('svImage').src = d.imgUrl;
-        document.getElementById('svAvatar').src = d.userPic || defaultPic;
-        document.getElementById('svName').innerText = d.userName;
-        document.getElementById('storyViewerModal').classList.add('active');
-        
-        // Timer
-        const fill = document.getElementById('storyProgress');
-        fill.style.width = '0%';
-        setTimeout(() => fill.style.width = '100%', 50);
-        
-        clearTimeout(storyTimer);
-        storyTimer = setTimeout(closeStoryViewer, 5000);
+        loadStories();
     };
 
-    window.closeStoryViewer = () => {
-        document.getElementById('storyViewerModal').classList.remove('active');
-        clearTimeout(storyTimer);
+    window.loadStories = async () => {
+        const list = document.getElementById('storyList');
+        list.innerHTML = "";
+        const q = query(collection(db, "stories"), orderBy("timestamp", "desc"));
+        const s = await getDocs(q);
+        s.forEach(doc => {
+            const d = doc.data();
+            // Filter stories older than 24h
+            if(Date.now() - d.timestamp < 86400000) {
+                const el = document.createElement('div');
+                el.className = 'story-circle';
+                el.innerHTML = `
+                <div class="story-ring"><img src="${d.img}"></div>
+                <div class="story-user">${d.name}</div>`;
+                el.onclick = () => openLightbox(d.img);
+                list.appendChild(el);
+            }
+        });
     };
 
-    /* --- PROFILES (MY & OTHERS) --- */
-    window.loadMyProfile = async () => {
-        const content = document.getElementById('myProfileContent');
-        const snap = await getDoc(doc(db, "users", currentUser.uid));
-        const d = snap.data();
+    // --- Profile Logic ---
+    window.visitProfile = async (uid, el = null) => {
+        toggleSearch(false);
+        navTo('profileSection', el);
         
-        content.innerHTML = buildProfileHTML(d, true);
-        loadProfilePosts(currentUser.uid, 'myProfileContent');
-    };
-
-    window.viewUserProfile = async (uid) => {
-        if(uid === currentUser.uid) {
-            navTo('profileSection');
-            loadMyProfile();
-            return;
-        }
-        
-        navTo('userProfileSection');
-        const content = document.getElementById('otherProfileContent');
-        content.innerHTML = '<div class="loading-skel">Loading Profile...</div>';
-        
+        const isMe = (uid === currentUser.uid);
         const snap = await getDoc(doc(db, "users", uid));
         if(!snap.exists()) return;
-        
         const d = snap.data();
         
-        // Check friend status
-        const myData = (await getDoc(doc(db, "users", currentUser.uid))).data();
-        let statusBtn = '';
+        document.getElementById('pCover').src = d.coverPic || defaultCover;
+        document.getElementById('pPic').src = d.profilePic || defaultPic;
+        document.getElementById('pName').innerText = d.fullName;
+        document.getElementById('pBio').innerText = d.bio || "No bio added.";
         
-        if (myData.friends && myData.friends.includes(uid)) {
-            statusBtn = `<button class="prof-btn btn-sec"><i class="fas fa-check"></i> Friends</button>`;
-        } else if (myData.friendRequests && myData.friendRequests.includes(uid)) {
-            // They sent me a request
-            statusBtn = `<button class="prof-btn btn-primary">Respond</button>`;
-        } else if (d.friendRequests && d.friendRequests.includes(currentUser.uid)) {
-            // I sent them a request
-            statusBtn = `<button class="prof-btn btn-sec">Requested</button>`;
+        // Buttons
+        const actDiv = document.getElementById('profActions');
+        actDiv.innerHTML = "";
+        
+        if(isMe) {
+            actDiv.innerHTML = `
+                <button class="btn btn-secondary" onclick="openEditProfile()">
+                    <i class="fas fa-pen"></i> Edit Profile
+                </button>`;
         } else {
-            statusBtn = `<button class="prof-btn btn-primary" onclick="sendReq('${uid}')"><i class="fas fa-user-plus"></i> Add Friend</button>`;
+            // Check friend status logic would go here
+            actDiv.innerHTML = `
+                <button class="btn btn-primary" onclick="addFriend('${uid}')">
+                    <i class="fas fa-user-plus"></i> Add Friend
+                </button>
+                <button class="btn btn-secondary">
+                    <i class="fas fa-comment"></i> Message
+                </button>`;
         }
 
-        content.innerHTML = buildProfileHTML(d, false, statusBtn);
-        loadProfilePosts(uid, 'otherProfileContent');
-    };
-
-    function buildProfileHTML(d, isMine, actionBtn = '') {
-        return `
-        <div class="profile-top">
-            <img class="cover-img" src="${d.coverPic || defaultCover}">
-            <div class="prof-info">
-                <img class="prof-pic-lg" src="${d.profilePic || defaultPic}">
-                <h2 class="prof-name">${d.fullName}</h2>
-                <p class="prof-bio">${d.bio || 'No bio available'}</p>
-                <div class="prof-actions">
-                    ${isMine ? `<button class="prof-btn btn-sec" onclick="openEditProfile()"><i class="fas fa-pen"></i> Edit Profile</button>` : actionBtn}
-                </div>
-            </div>
-        </div>
-        <div class="container" style="padding:10px;">
-            <h4>Posts</h4>
-            <div id="prof-posts-container"></div>
-        </div>`;
-    }
-
-    async function loadProfilePosts(uid, containerId) {
-        const container = document.querySelector(`#${containerId} #prof-posts-container`);
-        container.innerHTML = '<div class="loading-skel">Loading posts...</div>';
+        // Load Posts
+        const box = document.getElementById('profilePosts');
+        box.innerHTML = "<div style='text-align:center; padding:20px;'>Loading posts...</div>";
         
-        const q = query(collection(db, "posts"), where("uid", "==", uid), orderBy("timestamp", "desc"));
-        const snaps = await getDocs(q);
-        container.innerHTML = "";
-        
-        if(snaps.empty) {
-            container.innerHTML = '<div style="text-align:center; padding:20px; color:gray;">No posts available</div>';
-        } else {
-            snaps.forEach(doc => container.innerHTML += buildPost(doc.data(), doc.id));
+        try {
+            // Note: Firebase requires an index for 'uid' + 'timestamp' Descending.
+            // If this fails, go to Firebase Console > Firestore > Indexes.
+            const q = query(collection(db, "posts"), where("uid", "==", uid)); 
+            const posts = await getDocs(q);
+            
+            // Client side sorting to avoid immediate Index error for user
+            let postArr = [];
+            posts.forEach(d => postArr.push({id: d.id, ...d.data()}));
+            postArr.sort((a,b) => b.timestamp - a.timestamp);
+
+            box.innerHTML = "";
+            if(postArr.length === 0) box.innerHTML = "<div style='text-align:center; padding:20px; color:#777;'>No posts available</div>";
+            postArr.forEach(p => box.innerHTML += buildPost(p, p.id));
+
+        } catch(err) {
+            console.error(err);
+            box.innerHTML = "Error loading posts. Check console.";
         }
-    }
-
-    window.sendReq = async (uid) => {
-        await updateDoc(doc(db, "users", uid), { friendRequests: arrayUnion(currentUser.uid) });
-        alert("Request Sent!");
-        viewUserProfile(uid); // Reload UI
     };
 
-    /* --- SEARCH --- */
+    window.openEditProfile = async () => {
+        closeModal('settingsModal');
+        const snap = await getDoc(doc(db, "users", currentUser.uid));
+        const d = snap.data();
+        document.getElementById('editName').value = d.fullName;
+        document.getElementById('editBio').value = d.bio || "";
+        document.getElementById('previewPic').src = d.profilePic || defaultPic;
+        document.getElementById('previewCover').src = d.coverPic || defaultCover;
+        document.getElementById('editProfileModal').classList.add('active');
+    };
+
+    window.previewImage = (input, imgId) => {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => document.getElementById(imgId).src = e.target.result;
+            reader.readAsDataURL(input.files[0]);
+        }
+    };
+
+    window.saveProfileData = async () => {
+        const name = document.getElementById('editName').value;
+        const bio = document.getElementById('editBio').value;
+        const picSrc = document.getElementById('previewPic').src;
+        const coverSrc = document.getElementById('previewCover').src;
+
+        await updateDoc(doc(db, "users", currentUser.uid), {
+            fullName: name,
+            bio: bio,
+            profilePic: picSrc,
+            coverPic: coverSrc
+        });
+        
+        closeModal('editProfileModal');
+        visitProfile(currentUser.uid); // Reload profile
+    };
+
+    window.addFriend = async (targetUid) => {
+        await updateDoc(doc(db, "users", targetUid), {
+            friendRequests: arrayUnion(currentUser.uid)
+        });
+        alert("Friend request sent!");
+    };
+
+    // --- Search Logic ---
     window.runSearch = async (val) => {
         const res = document.getElementById('searchResults');
-        if(val.length < 3) { res.innerHTML=""; return; }
+        if(val.length < 2) { res.innerHTML=""; return; }
+        
+        // Simple client-side search simulation (since firebase full text search is limited without extensions)
+        // For production, use Algolia or ElasticSearch. Here we fetch a batch and filter.
         const q = query(collection(db, "users"), where("fullName", ">=", val), where("fullName", "<=", val + '\uf8ff'));
         const s = await getDocs(q);
         res.innerHTML = "";
@@ -627,64 +606,87 @@
             div.className = 'search-res-item';
             div.innerHTML = `
                 <img src="${u.profilePic || defaultPic}" style="width:40px; height:40px; border-radius:50%;">
-                <b>${u.fullName}</b>
-            `;
-            div.onclick = () => {
-                toggleSearch(false);
-                viewUserProfile(d.id);
-            };
+                <b>${u.fullName}</b>`;
+            div.onclick = () => visitProfile(d.id);
             res.appendChild(div);
         });
     };
 
-    // Edit Profile Helpers
-    window.openEditProfile = async () => {
-        const snap = await getDoc(doc(db, "users", currentUser.uid));
-        const d = snap.data();
-        document.getElementById('epName').value = d.fullName;
-        document.getElementById('epBio').value = d.bio || "";
-        document.getElementById('epPreviewPic').src = d.profilePic || defaultPic;
-        document.getElementById('editProfileModal').classList.add('active');
-        closeModal('settingsModal');
-    };
-
-    window.previewImg = (inp, imgId) => {
-        if(inp.files[0]) {
-            const r = new FileReader();
-            r.onload = e => document.getElementById(imgId).src = e.target.result;
-            r.readAsDataURL(inp.files[0]);
+    // --- Comments & Friend Requests ---
+    window.openComments = async (pid) => {
+        activePostId = pid;
+        document.getElementById('commentModal').classList.add('active');
+        const list = document.getElementById('commentList');
+        list.innerHTML = '<div style="text-align:center; padding:20px;">Loading comments...</div>';
+        
+        const q = query(collection(db, `posts/${pid}/comments`), orderBy("timestamp", "asc"));
+        const snaps = await getDocs(q);
+        list.innerHTML = "";
+        
+        if(snaps.empty) {
+            list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-sub);">No comments yet.</div>';
+        } else {
+            snaps.forEach(d => {
+                const c = d.data();
+                list.innerHTML += `
+                <div class="comment-box">
+                    <img src="${c.userPic || defaultPic}" class="c-avatar">
+                    <div class="c-content">
+                        <div class="c-bubble">
+                            <div class="c-name">${c.userName}</div>
+                            <div class="c-text">${c.text}</div>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            list.scrollTop = list.scrollHeight;
         }
     };
 
-    window.saveProfile = async () => {
-        const name = document.getElementById('epName').value;
-        const bio = document.getElementById('epBio').value;
-        const pic = document.getElementById('epPreviewPic').src;
-        await updateDoc(doc(db, "users", currentUser.uid), { fullName: name, bio: bio, profilePic: pic });
-        closeModal('editProfileModal');
-        loadMyProfile();
+    window.submitComment = async () => {
+        const inp = document.getElementById('commentInput');
+        const txt = inp.value.trim();
+        if(!txt || !activePostId) return;
+        
+        const uRef = await getDoc(doc(db, "users", currentUser.uid));
+        const u = uRef.data();
+        
+        await addDoc(collection(db, `posts/${activePostId}/comments`), {
+            text: txt,
+            uid: currentUser.uid,
+            userName: u.fullName,
+            userPic: u.profilePic || defaultPic,
+            timestamp: Date.now(),
+            likes: []
+        });
+        
+        const pRef = doc(db, "posts", activePostId);
+        const pSnap = await getDoc(pRef);
+        await updateDoc(pRef, { commentCount: (pSnap.data().commentCount || 0) + 1 });
+        
+        inp.value = "";
+        openComments(activePostId);
     };
 
-    /* --- REQUESTS --- */
     window.loadReqs = async () => {
         const div = document.getElementById('requestList');
-        div.innerHTML = '<div class="loading-skel">Loading...</div>';
+        div.innerHTML = "Loading...";
         const u = await getDoc(doc(db, "users", currentUser.uid));
         const reqs = u.data().friendRequests || [];
         div.innerHTML = "";
-        if(reqs.length === 0) div.innerHTML = "<div style='text-align:center; padding:10px;'>No requests</div>";
+        if(reqs.length === 0) div.innerHTML = "<div style='text-align:center; padding:10px;'>No pending requests</div>";
         
         for(const rid of reqs) {
             const f = await getDoc(doc(db, "users", rid));
             const fd = f.data();
             div.innerHTML += `
-            <div style="background:var(--bg-card); padding:10px; display:flex; gap:10px; border-radius:8px; margin-bottom:5px;">
-                <img src="${fd.profilePic || defaultPic}" style="width:50px; height:50px; border-radius:50%;">
+            <div style="background:var(--bg-card); padding:10px; display:flex; gap:10px; border-radius:8px; margin-bottom:10px; border:1px solid var(--divider);">
+                <img src="${fd.profilePic || defaultPic}" style="width:50px; height:50px; border-radius:50%; object-fit:cover;">
                 <div style="flex:1;">
-                    <b onclick="viewUserProfile('${rid}')">${fd.fullName}</b>
+                    <b onclick="visitProfile('${rid}')">${fd.fullName}</b>
                     <div style="display:flex; gap:10px; margin-top:5px;">
-                        <button onclick="ansReq('${rid}', true)" style="background:var(--primary); color:white; border:none; padding:5px 15px; border-radius:4px;">Confirm</button>
-                        <button onclick="ansReq('${rid}', false)" style="background:#ddd; border:none; padding:5px 15px; border-radius:4px;">Delete</button>
+                        <button class="btn btn-primary" onclick="ansReq('${rid}', true)">Confirm</button>
+                        <button class="btn btn-secondary" onclick="ansReq('${rid}', false)">Delete</button>
                     </div>
                 </div>
             </div>`;
@@ -702,6 +704,15 @@
         loadReqs();
     };
 
+    function timeAgo(ts) {
+        const s = Math.floor((Date.now() - ts) / 1000);
+        if(s < 60) return 'Just now';
+        const m = Math.floor(s/60);
+        if(m < 60) return m + 'm';
+        const h = Math.floor(m/60);
+        if(h < 24) return h + 'h';
+        return Math.floor(h/24) + 'd';
+    }
 </script>
 </body>
-    </html>
+</html>
