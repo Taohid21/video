@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tio - Join Us</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { 
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); 
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 20px;
+        }
+        .main-container {
+            width: 100%;
+            max-width: 420px;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            position: relative;
+            overflow: hidden;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+        .brand-header { text-align: center; margin-bottom: 30px; }
+        .brand-header h1 { font-size: 42px; font-weight: 700; background: linear-gradient(to right, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px; }
+        .brand-header p { color: #555; font-size: 15px; font-weight: 500; margin-top: 5px; }
+        
+        .step { display: none; width: 100%; animation: slideIn 0.5s ease forwards; }
+        .step.active { display: block; }
+        @keyframes slideIn { 
+            from { opacity: 0; transform: translateX(20px); } 
+            to { opacity: 1; transform: translateX(0); } 
+        }
+
+        .input-wrapper { margin-bottom: 20px; position: relative; }
+        .input-wrapper label { display: block; margin-bottom: 8px; color: #444; font-weight: 600; font-size: 14px; margin-left: 5px; }
+        input { 
+            width: 100%; 
+            padding: 16px 20px; 
+            border: none; 
+            border-radius: 12px; 
+            background: rgba(255, 255, 255, 0.6); 
+            font-size: 16px; 
+            color: #333; 
+            outline: none; 
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); 
+            transition: 0.3s; 
+        }
+        input:focus { background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transform: translateY(-2px); }
+        
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-skip { 
+            width: 100%; 
+            padding: 15px; 
+            background: transparent; 
+            border: 2px solid rgba(255,255,255,0.5); 
+            color: #555; 
+            font-weight: 600; 
+            border-radius: 12px; 
+            margin-top: 15px; 
+            cursor: pointer; 
+        }
+
+        .upload-box {
+            background: rgba(255,255,255,0.5);
+            border: 2px dashed #a3b1c6;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: 0.3s;
+            position: relative;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .upload-box:hover { background: rgba(255,255,255,0.8); border-color: #764ba2; }
+        .upload-box img { max-width: 100%; max-height: 180px; border-radius: 10px; display: none; object-fit: cover; width: 100%; }
+        .upload-box.has-img img { display: block; }
+        .upload-box.has-img .placeholder { display: none; }
+        .placeholder i { color: #764ba2; font-size: 28px; margin-bottom: 10px; }
+        .placeholder p { font-size: 13px; color: #666; }
+
+        .friend-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: rgba(255,255,255,0.6); 
+            padding: 12px; 
+            border-radius: 12px; 
+            margin-bottom: 10px; 
+        }
+        .friend-left { display: flex; align-items: center; gap: 12px; }
+        .friend-left img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
+        .friend-left h4 { font-size: 15px; color: #333; }
+        .friend-action { 
+            background: #667eea; 
+            color: white; 
+            border: none; 
+            padding: 8px 15px; 
+            border-radius: 8px; 
+            font-size: 12px; 
+            cursor: pointer; 
+        }
+        .friend-action.sent { background: #444; cursor: default; }
+
+        .loader-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.8); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 50;
+        }
+        .spinner {
+            width: 40px; height: 40px; border: 4px solid #f3f3f3;
+            border-top: 4px solid #764ba2; border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 10px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .loading-text { font-size: 14px; font-weight: 500; color: #764ba2; }
+        .error-text { color: #e74c3c; font-size: 13px; text-align: center; margin-top: 10px; display: none; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <div class="loader-overlay" id="fullLoader">
+        <div class="spinner"></div>
+        <p class="loading-text" id="loaderText">Processing...</p>
+    </div>
+
+    <div class="brand-header">
+        <h1>tio</h1>
+        <p>Connect with your world.</p>
+    </div>
+
+    <form id="authForm" onsubmit="event.preventDefault()">
+        
+        <!-- Step 1: Mobile -->
+        <div class="step active" id="step1">
+            <div class="input-wrapper">
+                <label>Mobile Number</label>
+                <input type="number" id="mobile" placeholder="01xxxxxxxx" required>
+            </div>
+            <button class="btn-primary" onclick="nextStep(1)">Continue <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <!-- Step 2: Name -->
+        <div class="step" id="step2">
+            <div class="input-wrapper">
+                <label>First Name</label>
+                <input type="text" id="firstName" placeholder="Your first name" required>
+            </div>
+            <div class="input-wrapper">
+                <label>Last Name</label>
+                <input type="text" id="lastName" placeholder="Your surname" required>
+            </div>
+            <button class="btn-primary" onclick="nextStep(2)">Next Step <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <!-- Step 3: Auth -->
+        <div class="step" id="step3">
+            <div class="input-wrapper">
+                <label>Email Address</label>
+                <input type="email" id="email" placeholder="email" required>
+            </div>
+            <div class="input-wrapper">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Min. 6 characters" required>
+            </div>
+            <button class="btn-primary" onclick="createAccount()">Create Account</button>
+            <p id="errorMsg" class="error-text"></p>
+        </div>
+
+        <!-- Step 4: Photos -->
+        <div class="step" id="step4">
+            <label style="font-weight:600; color:#444; margin-bottom:10px; display:block;">Profile Picture</label>
+            <div class="upload-box" id="profileBox" onclick="document.getElementById('profileInp').click()">
+                <div class="placeholder"><i class="fas fa-user-circle"></i><p>Tap to upload profile</p></div>
+                <img id="profilePrev">
+                <input type="file" id="profileInp" hidden accept="image/*" onchange="previewFile(this, 'profilePrev', 'profileBox')">
+            </div>
+
+            <label style="font-weight:600; color:#444; margin-bottom:10px; display:block;">Cover Photo</label>
+            <div class="upload-box" id="coverBox" onclick="document.getElementById('coverInp').click()">
+                <div class="placeholder"><i class="fas fa-image"></i><p>Tap to upload cover</p></div>
+                <img id="coverPrev">
+                <input type="file" id="coverInp" hidden accept="image/*" onchange="previewFile(this, 'coverPrev', 'coverBox')">
+            </div>
+            <button class="btn-primary" onclick="uploadData()">Save & Continue</button>
+        </div>
+
+        <!-- Step 5: Friends -->
+        <div class="step" id="step5">
+            <h3 style="color:#444; margin-bottom:15px; font-size:18px;">Add Friends</h3>
+            <div id="friendsList" style="max-height: 250px; overflow-y: auto; padding-right: 5px;">
+                <!-- Dynamic Content -->
+            </div>
+            <button class="btn-primary" onclick="finish()">Finish Setup</button>
+            <button class="btn-skip" onclick="finish()">Skip for now</button>
+        </div>
+
+    </form>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, collection, getDocs, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = { 
+        apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs", 
+        authDomain: "new-all-f99f7.firebaseapp.com", 
+        projectId: "new-all-f99f7", 
+        storageBucket: "new-all-f99f7.appspot.com", 
+        messagingSenderId: "1069748173900", 
+        appId: "1:1069748173900:web:158d6336c0f4628133c8e9" 
+    };
+
+    const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dwgvvzbvn/auto/upload";
+    const CLOUDINARY_PRESET = "storyapp";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let tempUser = {};
+    let userId = "";
+
+    window.previewFile = (input, imgId, boxId) => {
+        if(input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById(imgId).src = e.target.result;
+                document.getElementById(boxId).classList.add('has-img');
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    window.nextStep = (step) => {
+        const currentDiv = document.getElementById(`step${step}`);
+        const nextDiv = document.getElementById(`step${step+1}`);
+        
+        if(step === 1 && !document.getElementById('mobile').value) return showErr("Mobile number is required");
+        if(step === 2 && (!document.getElementById('firstName').value || !document.getElementById('lastName').value)) return showErr("Please enter full name");
+
+        if(step === 1) tempUser.mobile = document.getElementById('mobile').value;
+        if(step === 2) {
+            tempUser.fname = document.getElementById('firstName').value;
+            tempUser.lname = document.getElementById('lastName').value;
+        }
+
+        currentDiv.classList.remove('active');
+        nextDiv.classList.add('active');
+    }
+
+    window.createAccount = async () => {
+        const email = document.getElementById('email').value;
+        const pass = document.getElementById('password').value;
+        const loader = document.getElementById('fullLoader');
+        
+        if(!email || !pass) return showErr("Email and Password required");
+
+        loader.style.display = 'flex';
+        document.getElementById('loaderText').innerText = "Creating Account...";
+
+        try {
+            const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+            userId = userCred.user.uid;
+
+            await setDoc(doc(db, "users", userId), {
+                uid: userId,
+                mobile: tempUser.mobile,
+                firstName: tempUser.fname,
+                lastName: tempUser.lname,
+                fullName: `${tempUser.fname} ${tempUser.lname}`,
+                email: email,
+                profilePic: "https://via.placeholder.com/150",
+                coverPic: "https://via.placeholder.com/600x200",
+                friends: [],
+                friendRequests: [],
+                createdAt: new Date().toISOString()
+            });
+
+            loader.style.display = 'none';
+            document.getElementById('step3').classList.remove('active');
+            document.getElementById('step4').classList.add('active');
+        } catch (e) {
+            loader.style.display = 'none';
+            showErr(e.message);
+        }
+    }
+
+    window.uploadData = async () => {
+        const pFile = document.getElementById('profileInp').files[0];
+        const cFile = document.getElementById('coverInp').files[0];
+        const loader = document.getElementById('fullLoader');
+
+        loader.style.display = 'flex';
+        document.getElementById('loaderText').innerText = "Uploading Photos...";
+
+        try {
+            let pUrl = "https://via.placeholder.com/150";
+            let cUrl = "https://via.placeholder.com/600x200";
+
+            if(pFile) pUrl = await uploadCloud(pFile);
+            if(cFile) cUrl = await uploadCloud(cFile);
+
+            await updateDoc(doc(db, "users", userId), {
+                profilePic: pUrl,
+                coverPic: cUrl
+            });
+
+            await loadFriends();
+            loader.style.display = 'none';
+            document.getElementById('step4').classList.remove('active');
+            document.getElementById('step5').classList.add('active');
+
+        } catch (e) {
+            loader.style.display = 'none';
+            showErr("Upload Failed");
+        }
+    }
+
+    async function uploadCloud(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_PRESET);
+        const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+        const data = await res.json();
+        return data.secure_url;
+    }
+
+    async function loadFriends() {
+        const list = document.getElementById('friendsList');
+        list.innerHTML = "";
+        const snaps = await getDocs(collection(db, "users"));
+        
+        snaps.forEach(d => {
+            const u = d.data();
+            if(u.uid !== userId) {
+                const item = document.createElement('div');
+                item.className = 'friend-item';
+                item.innerHTML = `
+                    <div class="friend-left">
+                        <img src="${u.profilePic}">
+                        <h4>${u.firstName} ${u.lastName}</h4>
+                    </div>
+                    <button class="friend-action" onclick="sendReq('${u.uid}', this)">Add</button>
+                `;
+                list.appendChild(item);
+            }
+        });
+    }
+
+    window.sendReq = async (id, btn) => {
+        btn.innerText = "Sent";
+        btn.classList.add('sent');
+        btn.disabled = true;
+        await updateDoc(doc(db, "users", id), {
+            friendRequests: arrayUnion(userId)
+        });
+    }
+
+    window.finish = () => {
+        window.location.href = "main.html";
+    }
+
+    function showErr(msg) {
+        const el = document.getElementById('errorMsg');
+        el.innerText = msg;
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 3000);
+    }
+</script>
+
+</body>
+</html>
