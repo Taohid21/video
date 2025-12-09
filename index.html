@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>tio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #f0f2f5; padding-top: 100px; padding-bottom: 60px; min-height: 100vh; overscroll-behavior-y: none; }
+        
+        #splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.5s; }
+        .splash-logo { font-size: 48px; font-weight: 800; color: #1877f2; margin-bottom: 20px; letter-spacing: -1px; }
+        .splash-loader { width: 30px; height: 30px; border: 3px solid #f3f3f3; border-top: 3px solid #1877f2; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        
+        .navbar { position: fixed; top: 0; left: 0; width: 100%; height: 50px; background: white; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; z-index: 100; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .logo { font-size: 26px; font-weight: 800; color: #1877f2; }
+        .nav-icons i { font-size: 20px; background: #e4e6eb; padding: 8px; border-radius: 50%; color: black; margin-left: 8px; }
+        
+        .top-tabs { position: fixed; top: 50px; left: 0; width: 100%; height: 50px; background: white; display: flex; align-items: center; justify-content: space-around; z-index: 99; border-bottom: 1px solid #ddd; }
+        .tab-item { flex: 1; text-align: center; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #65676b; position: relative; }
+        .tab-item.active { color: #1877f2; }
+        .tab-item.active::after { content: ''; position: absolute; bottom: 0; left: 10%; width: 80%; height: 3px; background: #1877f2; border-radius: 2px 2px 0 0; }
+
+        .section { display: none; padding-bottom: 20px; }
+        .section.active { display: block; animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:translateY(0)} }
+
+        .story-reel { display: flex; gap: 8px; overflow-x: auto; padding: 15px 10px; background: white; margin-bottom: 10px; scrollbar-width: none; }
+        .story-card { min-width: 110px; height: 190px; border-radius: 12px; position: relative; overflow: hidden; border: 1px solid #eee; flex-shrink: 0; }
+        .story-card img { width: 100%; height: 100%; object-fit: cover; }
+        .story-create-btn { position: absolute; bottom: 0; width: 100%; background: white; height: 50px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 5px; font-weight: 600; font-size: 13px; }
+        .story-plus { position: absolute; top: -15px; background: #1877f2; color: white; border: 3px solid white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .story-user-name { position: absolute; bottom: 8px; left: 8px; color: white; font-weight: 600; font-size: 12px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+        .story-avatar { position: absolute; top: 8px; left: 8px; width: 35px; height: 35px; border-radius: 50%; border: 3px solid #1877f2; object-fit: cover; }
+
+        .create-post-box { background: white; padding: 12px 15px; display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .cp-avatar { width: 40px; height: 40px; border-radius: 50%; background: #ddd; object-fit: cover; }
+        .cp-input { flex: 1; background: white; border: 1px solid #ddd; border-radius: 20px; padding: 10px 15px; font-size: 14px; color: #333; }
+
+        .post-card { background: white; margin-bottom: 10px; padding-top: 10px; width: 100%; }
+        .post-header { padding: 0 15px 10px; display: flex; align-items: center; gap: 10px; }
+        .p-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .p-info h4 { font-size: 15px; font-weight: 600; color: #050505; }
+        .p-info span { font-size: 12px; color: #65676b; }
+        .p-text { padding: 0 15px 10px; font-size: 15px; color: #050505; line-height: 1.4; }
+        .p-media { width: 100%; background: #000; display: block; }
+        .p-media img, .p-media video { width: 100%; max-height: 500px; object-fit: contain; display: block; }
+        .p-stats { padding: 10px 15px; display: flex; justify-content: space-between; color: #65676b; font-size: 13px; border-bottom: 1px solid #f0f2f5; }
+        .p-actions { display: flex; padding: 5px 0; }
+        .action-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 8px; color: #65676b; font-weight: 600; font-size: 14px; cursor: pointer; }
+        .action-btn:active { background: #f0f2f5; }
+        .action-btn.liked { color: #1877f2; }
+        .action-btn.liked i { animation: bounce 0.3s; }
+        @keyframes bounce { 0%{transform:scale(1)} 50%{transform:scale(1.3)} 100%{transform:scale(1)} }
+
+        .video-card { background: black; margin-bottom: 5px; position: relative; height: 85vh; display: flex; align-items: center; justify-content: center; }
+        .video-card video { width: 100%; height: 100%; object-fit: cover; }
+        .v-overlay { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(transparent, rgba(0,0,0,0.8)); color: white; padding: 20px; }
+        
+        .profile-hero { background: white; padding-bottom: 15px; margin-bottom: 10px; text-align: center; }
+        .cover-img { width: 100%; height: 200px; object-fit: cover; }
+        .profile-img-lg { width: 120px; height: 120px; border-radius: 50%; border: 4px solid white; margin-top: -60px; position: relative; object-fit: cover; background: #ddd; }
+        .profile-name { font-size: 24px; font-weight: 700; margin-top: 10px; }
+        .friend-btn { background: #1877f2; color: white; padding: 8px 25px; border-radius: 6px; border: none; font-weight: 600; margin-top: 10px; }
+
+        .req-card { background: white; padding: 12px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #eee; }
+        .req-info { flex: 1; }
+        .req-btns { display: flex; gap: 5px; margin-top: 5px; }
+        .btn-confirm { flex: 1; background: #1877f2; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: 600; }
+        .btn-delete { flex: 1; background: #e4e6eb; color: black; border: none; padding: 8px; border-radius: 6px; font-weight: 600; }
+
+        .skeleton { background: #eee; height: 100px; margin: 10px; border-radius: 8px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%{opacity:0.6} 50%{opacity:1} 100%{opacity:0.6} }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="splashScreen">
+        <div class="splash-logo">tio</div>
+        <div class="splash-loader"></div>
+    </div>
+
+    <div class="navbar">
+        <div class="logo" onclick="goHome()">tio</div>
+        <div class="nav-icons">
+            <i class="fas fa-search"></i>
+            <i class="fas fa-bars" onclick="logout()"></i>
+        </div>
+    </div>
+
+    <div class="top-tabs">
+        <div class="tab-item active" onclick="navTo('home')"><i class="fas fa-home"></i></div>
+        <div class="tab-item" onclick="navTo('video')"><i class="fas fa-video"></i></div>
+        <div class="tab-item" onclick="navTo('friends')"><i class="fas fa-user-friends"></i></div>
+        <div class="tab-item" onclick="navTo('profile')"><i class="fas fa-user-circle"></i></div>
+    </div>
+
+    <!-- HOME SECTION -->
+    <div id="home" class="section active">
+        <div class="create-post-box" onclick="window.location.href='post.html'">
+            <img class="cp-avatar" id="myAvatarSmall">
+            <div class="cp-input">What's on your mind?</div>
+            <i class="fas fa-images" style="color:#45bd62; font-size:20px;"></i>
+        </div>
+
+        <div class="story-reel" id="storyReel">
+            <div class="story-card" onclick="document.getElementById('storyInput').click()">
+                <img id="myStoryPic" src="https://via.placeholder.com/150">
+                <div class="story-create-btn">
+                    <div class="story-plus">+</div>
+                    Create Story
+                </div>
+                <input type="file" id="storyInput" hidden accept="image/*" onchange="uploadStory(this)">
+            </div>
+            <!-- Stories will load here -->
+        </div>
+
+        <div id="feedContent">
+            <div class="skeleton" style="height:200px"></div>
+            <div class="skeleton" style="height:200px"></div>
+        </div>
+    </div>
+
+    <!-- VIDEO SECTION -->
+    <div id="video" class="section">
+        <div id="videoContent" style="background:#000; min-height:80vh;"></div>
+    </div>
+
+    <!-- FRIENDS SECTION -->
+    <div id="friends" class="section">
+        <h3 style="padding:15px; background:white;">Friend Requests</h3>
+        <div id="reqContent"></div>
+    </div>
+
+    <!-- PROFILE SECTION -->
+    <div id="profile" class="section">
+        <div class="profile-hero">
+            <img class="cover-img" id="pCover">
+            <img class="profile-img-lg" id="pPic">
+            <h2 class="profile-name" id="pName"></h2>
+            <p style="color:#65676b; margin-bottom:10px;">My Bio</p>
+            <div style="padding: 0 15px; display:flex; gap:10px;">
+                <button class="friend-btn" style="flex:1; background:#e4e6eb; color:black;"><i class="fas fa-pen"></i> Edit Profile</button>
+            </div>
+        </div>
+        <div id="myPosts"></div>
+    </div>
+
+    <!-- EXTERNAL PROFILE VIEW (Hidden by default) -->
+    <div id="viewProfile" class="section" style="display:none;">
+        <div class="profile-hero">
+            <div style="position:absolute; top:60px; left:15px; z-index:10; background:white; padding:8px; border-radius:50%;" onclick="history.back()"><i class="fas fa-arrow-left"></i></div>
+            <img class="cover-img" id="vCover">
+            <img class="profile-img-lg" id="vPic">
+            <h2 class="profile-name" id="vName"></h2>
+            <button class="friend-btn" id="vActionBtn" onclick="handleFriendAction()">Add Friend</button>
+        </div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs, updateDoc, arrayUnion, arrayRemove, setDoc, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = { apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs", authDomain: "new-all-f99f7.firebaseapp.com", projectId: "new-all-f99f7", storageBucket: "new-all-f99f7.appspot.com", messagingSenderId: "1069748173900", appId: "1:1069748173900:web:158d6336c0f4628133c8e9" };
+    const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dwgvvzbvn/auto/upload";
+    const CLOUDINARY_PRESET = "storyapp";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    
+    let currentUser = null;
+    let viewedUserId = null;
+
+    // --- NAVIGATION & HISTORY API ---
+    window.navTo = (id) => {
+        document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+        
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        if(id === 'home' || id === 'video' || id === 'friends' || id === 'profile') {
+            document.querySelector(`.tab-item[onclick="navTo('${id}')"]`).classList.add('active');
+        }
+
+        // Push state for back button handling
+        history.pushState({ section: id }, "", `#${id}`);
+        
+        if(id === 'home') loadFeed();
+        if(id === 'video') loadVideos();
+        if(id === 'friends') loadRequests();
+        if(id === 'profile') loadMyProfile();
+    };
+
+    window.onpopstate = (e) => {
+        if(e.state && e.state.section) {
+            document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+            document.getElementById(e.state.section).style.display = 'block';
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            // Reactivate tab icon if applicable
+            const tab = document.querySelector(`.tab-item[onclick="navTo('${e.state.section}')"]`);
+            if(tab) tab.classList.add('active');
+        } else {
+            // Default back to home logic or exit
+             document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+             document.getElementById('home').style.display = 'block';
+        }
+    };
+
+    // --- AUTH & SPLASH ---
+    onAuthStateChanged(auth, async (user) => {
+        const splash = document.getElementById('splashScreen');
+        if (user) {
+            currentUser = user;
+            const uSnap = await getDoc(doc(db, "users", user.uid));
+            if(uSnap.exists()) {
+                const d = uSnap.data();
+                document.getElementById('myAvatarSmall').src = d.profilePic;
+                document.getElementById('myStoryPic').src = d.profilePic;
+                
+                // Load Home Data immediately
+                await loadFeed();
+                await loadStories();
+                
+                splash.style.opacity = '0';
+                setTimeout(() => splash.style.display = 'none', 500);
+                
+                // Set initial history state
+                history.replaceState({ section: 'home' }, "", "#home");
+            }
+        } else {
+            window.location.href = "Account.html";
+        }
+    });
+
+    // --- FEED SYSTEM ---
+    async function loadFeed() {
+        const feed = document.getElementById('feedContent');
+        // Don't clear feed if already loaded to prevent flicker, just append new? 
+        // For simplicity, we clear only if empty or force refresh logic needed
+        if(feed.children.length > 2) return; 
+
+        const q = query(collection(db, "posts"), orderBy("timestamp", "desc"), limit(20));
+        const snaps = await getDocs(q);
+        feed.innerHTML = "";
+        
+        snaps.forEach(d => feed.innerHTML += makePost(d.data(), d.id));
+    }
+
+    function makePost(p, id) {
+        const liked = p.likes && p.likes.includes(currentUser.uid) ? 'liked' : '';
+        const likeCount = p.likes ? p.likes.length : 0;
+        let media = "";
+        
+        if(p.mediaUrl) {
+            if(p.type === 'video') media = `<div class="p-media"><video src="${p.mediaUrl}" controls></video></div>`;
+            else media = `<div class="p-media"><img src="${p.mediaUrl}"></div>`;
+        }
+
+        return `
+            <div class="post-card">
+                <div class="post-header" onclick="openUserProfile('${p.uid}')">
+                    <img src="${p.userPic}" class="p-avatar">
+                    <div class="p-info">
+                        <h4>${p.userName}</h4>
+                        <span>${timeAgo(new Date(p.timestamp))} · <i class="fas fa-globe-americas"></i></span>
+                    </div>
+                </div>
+                <div class="p-text">${p.text}</div>
+                ${media}
+                <div class="p-stats">
+                    <span id="l-count-${id}">${likeCount} Likes</span>
+                    <span>0 Comments</span>
+                </div>
+                <div class="p-actions">
+                    <div class="action-btn ${liked}" id="l-btn-${id}" onclick="toggleLike('${id}')">
+                        <i class="fas fa-thumbs-up"></i> Like
+                    </div>
+                    <div class="action-btn"><i class="fas fa-comment-alt"></i> Comment</div>
+                    <div class="action-btn"><i class="fas fa-share"></i> Share</div>
+                </div>
+            </div>
+        `;
+    }
+
+    // --- OPTIMISTIC LIKE SYSTEM ---
+    window.toggleLike = async (pid) => {
+        const btn = document.getElementById(`l-btn-${pid}`);
+        const countSpan = document.getElementById(`l-count-${pid}`);
+        let count = parseInt(countSpan.innerText);
+        const ref = doc(db, "posts", pid);
+
+        // Optimistic Update
+        if(btn.classList.contains('liked')) {
+            btn.classList.remove('liked');
+            count--;
+            countSpan.innerText = count + " Likes";
+            // Async DB Update
+            await updateDoc(ref, { likes: arrayRemove(currentUser.uid) });
+        } else {
+            btn.classList.add('liked');
+            count++;
+            countSpan.innerText = count + " Likes";
+            // Async DB Update
+            await updateDoc(ref, { likes: arrayUnion(currentUser.uid) });
+        }
+    };
+
+    // --- STORY SYSTEM ---
+    window.uploadStory = async (input) => {
+        if(!input.files[0]) return;
+        const file = input.files[0];
+        
+        // Show immediate local preview in reel (Optimistic)
+        const reel = document.getElementById('storyReel');
+        const tempDiv = document.createElement('div');
+        tempDiv.className = 'story-card';
+        tempDiv.innerHTML = `<img src="${URL.createObjectURL(file)}" style="opacity:0.5"><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:black;font-weight:bold;">Uploading...</div>`;
+        reel.insertBefore(tempDiv, reel.children[1]);
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_PRESET);
+        
+        try {
+            const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+            const data = await res.json();
+            
+            await addDoc(collection(db, "stories"), {
+                uid: currentUser.uid,
+                url: data.secure_url,
+                timestamp: new Date().toISOString(),
+                userName: (await getDoc(doc(db, "users", currentUser.uid))).data().fullName,
+                userPic: (await getDoc(doc(db, "users", currentUser.uid))).data().profilePic
+            });
+            loadStories(); // Refresh real data
+        } catch(e) {
+            alert("Story upload failed");
+            tempDiv.remove();
+        }
+    };
+
+    async function loadStories() {
+        const reel = document.getElementById('storyReel');
+        // Keep the first child (Create Story button)
+        const createBtn = reel.firstElementChild;
+        reel.innerHTML = "";
+        reel.appendChild(createBtn);
+
+        const q = query(collection(db, "stories"), orderBy("timestamp", "desc"), limit(10));
+        const snaps = await getDocs(q);
+        
+        snaps.forEach(d => {
+            const s = d.data();
+            const div = document.createElement('div');
+            div.className = 'story-card';
+            div.innerHTML = `
+                <img src="${s.url}">
+                <img src="${s.userPic}" class="story-avatar">
+                <div class="story-user-name">${s.userName}</div>
+            `;
+            reel.appendChild(div);
+        });
+    }
+
+    // --- FRIENDS & REQUESTS (Optimistic) ---
+    async function loadRequests() {
+        const div = document.getElementById('reqContent');
+        div.innerHTML = '<div class="skeleton"></div>';
+        const u = await getDoc(doc(db, "users", currentUser.uid));
+        const reqs = u.data().friendRequests || [];
+        
+        div.innerHTML = "";
+        if(reqs.length === 0) div.innerHTML = "<p style='text-align:center;padding:20px;color:#777'>No new requests.</p>";
+
+        reqs.forEach(async uid => {
+            const f = (await getDoc(doc(db, "users", uid))).data();
+            div.innerHTML += `
+                <div class="req-card" id="req-${uid}">
+                    <img src="${f.profilePic}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;">
+                    <div class="req-info">
+                        <h4>${f.fullName}</h4>
+                        <div class="req-btns">
+                            <button class="btn-confirm" onclick="confirmFriend('${uid}')">Confirm</button>
+                            <button class="btn-delete" onclick="deleteReq('${uid}')">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    window.confirmFriend = async (uid) => {
+        // UI remove immediately
+        document.getElementById(`req-${uid}`).remove();
+        
+        const me = doc(db, "users", currentUser.uid);
+        const them = doc(db, "users", uid);
+        
+        await updateDoc(me, { friendRequests: arrayRemove(uid), friends: arrayUnion(uid) });
+        await updateDoc(them, { friends: arrayUnion(currentUser.uid) });
+    };
+
+    // --- PROFILE SYSTEM ---
+    window.openUserProfile = async (uid) => {
+        if(uid === currentUser.uid) {
+            navTo('profile');
+            return;
+        }
+        
+        document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+        document.getElementById('viewProfile').style.display = 'block';
+        viewedUserId = uid;
+        history.pushState({ section: 'viewProfile' }, "", "#profile_view");
+
+        // Load cached data first if possible, else loading
+        document.getElementById('vName').innerText = "Loading...";
+        
+        const u = (await getDoc(doc(db, "users", uid))).data();
+        document.getElementById('vCover').src = u.coverPic;
+        document.getElementById('vPic').src = u.profilePic;
+        document.getElementById('vName').innerText = u.fullName;
+        
+        // Check friend status
+        const myData = (await getDoc(doc(db, "users", currentUser.uid))).data();
+        const btn = document.getElementById('vActionBtn');
+        
+        if(myData.friends && myData.friends.includes(uid)) {
+            btn.innerText = "Friends";
+            btn.style.background = "#e4e6eb";
+            btn.style.color = "black";
+        } else if (u.friendRequests && u.friendRequests.includes(currentUser.uid)) {
+            btn.innerText = "Request Sent";
+            btn.disabled = true;
+        } else {
+            btn.innerText = "Add Friend";
+            btn.style.background = "#1877f2";
+            btn.style.color = "white";
+            btn.disabled = false;
+        }
+    };
+
+    window.handleFriendAction = async () => {
+        const btn = document.getElementById('vActionBtn');
+        btn.innerText = "Request Sent";
+        btn.disabled = true;
+        
+        await updateDoc(doc(db, "users", viewedUserId), {
+            friendRequests: arrayUnion(currentUser.uid)
+        });
+    };
+
+    async function loadMyProfile() {
+        const d = (await getDoc(doc(db, "users", currentUser.uid))).data();
+        document.getElementById('pCover').src = d.coverPic;
+        document.getElementById('pPic').src = d.profilePic;
+        document.getElementById('pName').innerText = d.fullName;
+    }
+
+    // --- VIDEO REELS ---
+    async function loadVideos() {
+        const div = document.getElementById('videoContent');
+        if(div.children.length > 0) return;
+        
+        const q = query(collection(db, "posts"), where("type", "==", "video"), limit(5));
+        const snaps = await getDocs(q);
+        
+        snaps.forEach(d => {
+            const p = d.data();
+            div.innerHTML += `
+                <div class="video-card">
+                    <video src="${p.mediaUrl}" loop onclick="this.paused ? this.play() : this.pause()"></video>
+                    <div class="v-overlay">
+                        <h4>${p.userName}</h4>
+                        <p>${p.text}</p>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // Helper
+    function timeAgo(date) {
+        const seconds = Math.floor((new Date() - date) / 1000);
+        let interval = seconds / 31536000;
+        if (interval > 1) return Math.floor(interval) + "y";
+        interval = seconds / 2592000;
+        if (interval > 1) return Math.floor(interval) + "m";
+        interval = seconds / 86400;
+        if (interval > 1) return Math.floor(interval) + "d";
+        interval = seconds / 3600;
+        if (interval > 1) return Math.floor(interval) + "h";
+        interval = seconds / 60;
+        if (interval > 1) return Math.floor(interval) + " min";
+        return "Just now";
+    }
+
+    window.logout = () => signOut(auth);
+    window.goHome = () => navTo('home');
+
+</script>
+</body>
+</html>
