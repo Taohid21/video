@@ -88,7 +88,7 @@
                 <button class="btn-next" onclick="nextStep(2)">Next</button>
             </div>
 
-            <!-- Step 3: Password (ACCOUNT CREATION HAPPENS HERE) -->
+            <!-- Step 3: Password (ACCOUNT CREATION) -->
             <div class="step-content" id="step3">
                 <div class="step-title">Choose a password</div>
                 <div class="step-subtitle">Create a password with at least 6 characters.</div>
@@ -141,18 +141,23 @@
 
     let temp = {};
     let uid = "";
-    // Default placeholder image
+    // এই ভেরিয়েবলটি চেক করবে আমরা কি সাইন আপ করছি নাকি
+    let isSigningUp = false; 
+    
     const DEF_IMG = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
 
     onAuthStateChanged(auth, (user) => {
         const loader = document.getElementById('loading-screen');
-        if (user) {
-            // Already logged in
+        
+        // এখানে চেক করছি: যদি ইউজার থাকে এবং আমরা সাইন-আপ প্রসেসে না থাকি, তবেই রিডাইরেক্ট হবে
+        if (user && !isSigningUp) {
             window.location.href = "index.html";
-        } else {
-            // Not logged in, show login screen
+        } else if (!user) {
             loader.style.display = 'none';
             document.getElementById('loginView').style.display = 'flex';
+        } else {
+            // ইউজার লগইন হয়েছে কিন্তু আমরা সাইন আপ করছি, তাই লোডার সরিয়ে দেব যাতে পরবর্তী ধাপ দেখা যায়
+            loader.style.display = 'none';
         }
     });
 
@@ -169,7 +174,6 @@
         document.getElementById('loading-screen').style.display = 'flex';
         try { 
             await signInWithEmailAndPassword(auth, e, p);
-            // onAuthStateChanged will redirect
         } catch (err) { 
             document.getElementById('loading-screen').style.display = 'none';
             alert("Error: " + err.message); 
@@ -177,28 +181,23 @@
     }
 
     window.nextStep = (s) => {
-        // Validation
         if(s===1) {
             const f = document.getElementById('fname').value.trim();
             const l = document.getElementById('lname').value.trim();
             if(!f || !l) return alert("Please enter your name");
-            temp.f = f; 
-            temp.l = l;
+            temp.f = f; temp.l = l;
         }
         if(s===2) {
             const m = document.getElementById('mobile').value.trim();
             const e = document.getElementById('regEmail').value.trim();
             if(!e) return alert("Please enter your email");
-            temp.m = m; 
-            temp.e = e;
+            temp.m = m; temp.e = e;
         }
 
-        // Just switching tabs for step 1, 2 and 4
         document.getElementById(`step${s}`).classList.remove('active');
         document.getElementById(`step${s+1}`).classList.add('active');
     }
 
-    // Step 3: Register User AND Create Database Entry IMMEDIATELY
     window.registerUser = async () => {
         const p = document.getElementById('regPassword').value;
         if(p.length < 6) return alert("Password must be at least 6 characters");
@@ -206,17 +205,19 @@
         const btn = document.querySelector('#step3 button');
         const errP = document.getElementById('regError');
         
-        btn.innerText = "Creating Account...";
+        // ফ্ল্যাগ অন করা হলো: এখন লগইন হলেও পেজ চেঞ্জ হবে না
+        isSigningUp = true; 
+        
+        btn.innerText = "Processing...";
         btn.disabled = true;
         errP.innerText = "";
         
         try {
-            // 1. Create Auth
+            // ১. একাউন্ট তৈরি (লগইন হয়ে যাবে, কিন্তু রিডাইরেক্ট আটকানো আছে)
             const cred = await createUserWithEmailAndPassword(auth, temp.e, p);
             uid = cred.user.uid;
             
-            // 2. Create Database Entry (Critical Step)
-            // We do this BEFORE asking for photos, so data exists even if they quit.
+            // ২. ডাটাবেসে বেসিক তথ্য সেভ করা
             await setDoc(doc(db, "users", uid), {
                 uid: uid,
                 fullName: `${temp.f} ${temp.l}`,
@@ -224,7 +225,7 @@
                 lastName: temp.l,
                 mobile: temp.m, 
                 email: temp.e,
-                profilePic: DEF_IMG, // Set default image immediately
+                profilePic: DEF_IMG,
                 coverPic: "",
                 bio: "",
                 friends: [], 
@@ -232,15 +233,16 @@
                 createdAt: new Date().toISOString()
             });
 
-            // 3. Success - Move to Photo Upload
+            // ৩. সফল হলে পরের ধাপে (ছবি আপলোড) নিয়ে যাওয়া
             document.getElementById('step3').classList.remove('active');
             document.getElementById('step4').classList.add('active');
             
         } catch (e) {
+            // এরর হলে ফ্ল্যাগ বন্ধ এবং মেসেজ দেখানো
+            isSigningUp = false;
             btn.innerText = "Sign Up";
             btn.disabled = false;
             errP.innerText = e.message;
-            console.error(e);
         }
     }
 
@@ -266,12 +268,11 @@
         }
 
         const btn = document.getElementById('finalBtn');
-        btn.innerText = "Uploading Images...";
+        btn.innerText = "Uploading...";
         btn.disabled = true;
 
         try {
             const updateData = {};
-            
             if(pf) {
                 const url = await up(pf);
                 if(url) updateData.profilePic = url;
@@ -281,7 +282,6 @@
                 if(url) updateData.coverPic = url;
             }
 
-            // Update the existing document
             if(Object.keys(updateData).length > 0) {
                 await updateDoc(doc(db, "users", uid), updateData);
             }
@@ -301,7 +301,11 @@
         return data.secure_url;
     }
 
-    window.finish = () => window.location.href = "index.html";
+    window.finish = () => {
+        // সাইন আপ শেষ, এখন রিডাইরেক্ট করার অনুমতি দিচ্ছি
+        isSigningUp = false; 
+        window.location.href = "index.html";
+    }
 
 </script>
 </body>
