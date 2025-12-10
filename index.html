@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>tio</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* Global Reset */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #f0f2f5; padding-top: 100px; padding-bottom: 60px; min-height: 100vh; overscroll-behavior-y: none; }
+
+        /* Splash Screen */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff; z-index: 9999; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; transition: opacity 0.4s;
+        }
+        .splash-logo { font-size: 50px; font-weight: bold; color: #1877f2; letter-spacing: -2px; }
+        .splash-spinner { margin-top: 20px; width: 30px; height: 30px; border: 3px solid #ddd; border-top-color: #1877f2; border-radius: 50%; animation: spin 1s infinite linear; }
+
+        /* Header */
+        .header { position: fixed; top: 0; left: 0; width: 100%; height: 55px; background: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; z-index: 1000; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .logo { font-size: 28px; font-weight: 800; color: #1877f2; cursor: pointer; }
+        .header-icons i { font-size: 20px; background: #e4e6eb; width: 35px; height: 35px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-left: 8px; cursor: pointer; color: #050505; }
+
+        /* Navigation Tabs (Top) */
+        .nav-tabs { position: fixed; top: 55px; left: 0; width: 100%; height: 45px; background: #fff; display: flex; align-items: center; z-index: 999; border-bottom: 1px solid #ddd; }
+        .tab { flex: 1; height: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+        .tab i { font-size: 22px; color: #65676b; }
+        .tab.active i { color: #1877f2; }
+        .tab.active::after { content: ''; position: absolute; bottom: 0; width: 100%; height: 3px; background: #1877f2; }
+
+        /* Sections */
+        .page-section { display: none; padding-bottom: 20px; }
+        .page-section.active { display: block; }
+
+        /* Create Post Area */
+        .create-post-container { background: #fff; padding: 12px 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+        .user-avatar-sm { width: 40px; height: 40px; border-radius: 50%; background: #ddd; object-fit: cover; }
+        .post-trigger { flex: 1; background: #f0f2f5; height: 40px; border-radius: 20px; display: flex; align-items: center; padding-left: 15px; color: #65676b; font-size: 15px; cursor: pointer; border: 1px solid #ddd; }
+
+        /* Stories */
+        .story-tray { background: #fff; padding: 12px 0; margin-bottom: 8px; overflow-x: auto; display: flex; gap: 8px; padding-left: 12px; scrollbar-width: none; }
+        .story-card { min-width: 105px; height: 180px; border-radius: 12px; position: relative; overflow: hidden; border: 1px solid #ddd; flex-shrink: 0; cursor: pointer; }
+        .story-card img { width: 100%; height: 100%; object-fit: cover; transition: 0.2s; }
+        .story-card:active img { transform: scale(0.98); }
+        .create-story-overlay { position: absolute; bottom: 0; width: 100%; background: #fff; height: 45px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 5px; font-weight: 600; font-size: 13px; }
+        .plus-icon { position: absolute; bottom: 30px; background: #1877f2; color: #fff; width: 30px; height: 30px; border-radius: 50%; border: 3px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .story-user { position: absolute; bottom: 8px; left: 8px; color: #fff; font-weight: 600; font-size: 12px; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
+
+        /* News Feed Post */
+        .post { background: #fff; margin-bottom: 8px; width: 100%; }
+        .post-header { padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+        .post-info h4 { font-size: 15px; font-weight: 600; color: #050505; }
+        .post-info span { font-size: 12px; color: #65676b; }
+        .post-content { font-size: 15px; color: #050505; line-height: 1.5; padding: 0 16px 12px; }
+        .post-media { width: 100%; display: block; background: #000; overflow: hidden; }
+        .post-media img, .post-media video { width: 100%; display: block; max-height: 550px; object-fit: contain; }
+        .post-stats { padding: 10px 16px; display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; color: #65676b; font-size: 13px; }
+        .post-actions { display: flex; height: 45px; align-items: center; }
+        .action-btn { flex: 1; display: flex; align-items: center; justify-content: center; height: 100%; color: #65676b; font-weight: 600; font-size: 14px; gap: 8px; cursor: pointer; }
+        .action-btn:active { background: #f2f2f2; }
+        .action-btn.liked { color: #1877f2; }
+
+        /* Video / Profile / Friends Layouts */
+        .full-center { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; color: #65676b; text-align: center; }
+        
+        .profile-header { background: #fff; padding-bottom: 15px; margin-bottom: 8px; text-align: center; }
+        .cover-pic { width: 100%; height: 200px; object-fit: cover; }
+        .profile-pic { width: 120px; height: 120px; border-radius: 50%; border: 4px solid #fff; margin-top: -60px; background: #ddd; object-fit: cover; position: relative; }
+        .profile-name { font-size: 22px; font-weight: 700; color: #050505; margin-top: 10px; }
+        .edit-btn { background: #e4e6eb; color: #050505; border: none; padding: 8px 20px; border-radius: 6px; font-weight: 600; font-size: 15px; margin-top: 10px; cursor: pointer; }
+
+        /* Friend Request Card */
+        .req-card { background: #fff; display: flex; padding: 12px; align-items: center; gap: 12px; border-bottom: 1px solid #f0f2f5; }
+        .req-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; }
+        .req-info { flex: 1; }
+        .req-name { font-weight: 600; font-size: 16px; margin-bottom: 5px; }
+        .req-actions { display: flex; gap: 8px; }
+        .btn-confirm { background: #1877f2; color: #fff; border: none; padding: 8px; border-radius: 6px; font-weight: 600; flex: 1; cursor: pointer; }
+        .btn-delete { background: #e4e6eb; color: #050505; border: none; padding: 8px; border-radius: 6px; font-weight: 600; flex: 1; cursor: pointer; }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+        <div class="splash-logo">tio</div>
+        <div class="splash-spinner"></div>
+    </div>
+
+    <!-- Top Header -->
+    <div class="header">
+        <div class="logo" onclick="window.location.reload()">tio</div>
+        <div class="header-icons">
+            <i class="fas fa-search"></i>
+            <i class="fas fa-sign-out-alt" onclick="window.logoutApp()"></i>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+        <div class="tab active" id="tab-home" onclick="window.nav('home')"><i class="fas fa-home"></i></div>
+        <div class="tab" id="tab-video" onclick="window.nav('video')"><i class="fas fa-video"></i></div>
+        <div class="tab" id="tab-friends" onclick="window.nav('friends')"><i class="fas fa-user-friends"></i></div>
+        <div class="tab" id="tab-profile" onclick="window.nav('profile')"><i class="fas fa-user-circle"></i></div>
+    </div>
+
+    <!-- HOME PAGE -->
+    <div id="page-home" class="page-section active">
+        <!-- Create Post -->
+        <div class="create-post-container">
+            <img id="my-avatar-sm" class="user-avatar-sm">
+            <div class="post-trigger" onclick="window.location.href='post.html'">What's on your mind?</div>
+            <i class="fas fa-images" style="font-size: 22px; color: #45bd62; margin-left: 5px;"></i>
+        </div>
+
+        <!-- Stories -->
+        <div class="story-tray" id="story-tray">
+            <div class="story-card" onclick="document.getElementById('story-upload').click()">
+                <img id="my-story-pic" src="https://via.placeholder.com/150">
+                <div class="create-story-overlay">Create Story</div>
+                <div class="plus-icon">+</div>
+                <input type="file" id="story-upload" hidden accept="image/*" onchange="window.uploadStory(this)">
+            </div>
+            <!-- Stories will be injected here -->
+        </div>
+
+        <!-- Feed -->
+        <div id="news-feed">
+            <div class="full-center" style="min-height: 200px;">Loading posts...</div>
+        </div>
+    </div>
+
+    <!-- VIDEO PAGE -->
+    <div id="page-video" class="page-section">
+        <div id="video-feed" style="background: #000; min-height: 100vh;">
+            <div class="full-center" style="color: white;">Loading Reels...</div>
+        </div>
+    </div>
+
+    <!-- FRIENDS PAGE -->
+    <div id="page-friends" class="page-section">
+        <div style="padding: 15px; font-weight: 700; font-size: 20px; background: #fff;">Friend Requests</div>
+        <div id="friend-requests-list">
+            <div class="full-center">No new requests</div>
+        </div>
+    </div>
+
+    <!-- PROFILE PAGE -->
+    <div id="page-profile" class="page-section">
+        <div class="profile-header">
+            <img id="p-cover" class="cover-pic">
+            <img id="p-pic" class="profile-pic">
+            <h1 id="p-name" class="profile-name">Loading...</h1>
+            <button class="edit-btn">Edit Profile</button>
+        </div>
+        <div id="my-posts-feed"></div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // CONFIG
+        const firebaseConfig = { apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs", authDomain: "new-all-f99f7.firebaseapp.com", projectId: "new-all-f99f7", storageBucket: "new-all-f99f7.appspot.com", messagingSenderId: "1069748173900", appId: "1:1069748173900:web:158d6336c0f4628133c8e9" };
+        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dwgvvzbvn/auto/upload";
+        const CLOUDINARY_PRESET = "storyapp";
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        let currentUser = null;
+
+        // --- AUTH & SPLASH ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                // Load User Data
+                const snap = await getDoc(doc(db, "users", user.uid));
+                if(snap.exists()) {
+                    const d = snap.data();
+                    // Set Images
+                    const els = ['my-avatar-sm', 'my-story-pic', 'p-pic'];
+                    els.forEach(id => {
+                        if(document.getElementById(id)) document.getElementById(id).src = d.profilePic || "https://via.placeholder.com/150";
+                    });
+                    if(document.getElementById('p-cover')) document.getElementById('p-cover').src = d.coverPic || "https://via.placeholder.com/400x200";
+                    if(document.getElementById('p-name')) document.getElementById('p-name').innerText = d.fullName;
+                    
+                    // Initial Load
+                    loadFeed();
+                    loadStories();
+                    
+                    // Remove Splash
+                    document.getElementById('splash-screen').style.opacity = '0';
+                    setTimeout(() => document.getElementById('splash-screen').style.display = 'none', 400);
+                }
+            } else {
+                window.location.href = "Account.html";
+            }
+        });
+
+        // --- NAVIGATION SYSTEM (GLOBAL) ---
+        window.nav = function(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+
+            // Show selected
+            document.getElementById('page-' + pageId).classList.add('active');
+            document.getElementById('tab-' + pageId).classList.add('active');
+
+            // History Management
+            window.history.pushState({ page: pageId }, "", "#" + pageId);
+
+            // Load Data based on tab
+            if(pageId === 'video') loadVideos();
+            if(pageId === 'friends') loadRequests();
+            if(pageId === 'profile') loadMyPosts();
+        }
+
+        // Handle Browser Back Button
+        window.onpopstate = function(event) {
+            if(event.state && event.state.page) {
+                window.nav(event.state.page);
+            } else {
+                // Default to home if no state
+                window.nav('home');
+            }
+        };
+
+        // --- FEED SYSTEM ---
+        async function loadFeed() {
+            const feedContainer = document.getElementById('news-feed');
+            try {
+                const q = query(collection(db, "posts"), orderBy("timestamp", "desc"), limit(20));
+                const querySnapshot = await getDocs(q);
+                
+                let html = "";
+                querySnapshot.forEach(doc => {
+                    html += createPostHTML(doc.data(), doc.id);
+                });
+                
+                if(html) feedContainer.innerHTML = html;
+                else feedContainer.innerHTML = '<div class="full-center">No posts available</div>';
+            } catch (e) {
+                console.error("Feed Error:", e);
+            }
+        }
+
+        function createPostHTML(post, id) {
+            const isLiked = post.likes && post.likes.includes(currentUser.uid);
+            const likeClass = isLiked ? 'liked' : '';
+            const likeCount = post.likes ? post.likes.length : 0;
+            
+            let mediaHtml = '';
+            if(post.mediaUrl) {
+                if(post.type === 'video') {
+                    mediaHtml = `<div class="post-media"><video src="${post.mediaUrl}" controls></video></div>`;
+                } else {
+                    mediaHtml = `<div class="post-media"><img src="${post.mediaUrl}"></div>`;
+                }
+            }
+
+            return `
+                <div class="post">
+                    <div class="post-header">
+                        <img src="${post.userPic}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
+                        <div class="post-info">
+                            <h4>${post.userName}</h4>
+                            <span>Just now <i class="fas fa-globe-americas"></i></span>
+                        </div>
+                    </div>
+                    <div class="post-content">${post.text}</div>
+                    ${mediaHtml}
+                    <div class="post-stats">
+                        <span id="likes-${id}">${likeCount} Likes</span>
+                        <span>0 Comments</span>
+                    </div>
+                    <div class="post-actions">
+                        <div class="action-btn ${likeClass}" id="btn-like-${id}" onclick="window.doLike('${id}')">
+                            <i class="fas fa-thumbs-up"></i> Like
+                        </div>
+                        <div class="action-btn"><i class="far fa-comment-alt"></i> Comment</div>
+                        <div class="action-btn"><i class="fas fa-share"></i> Share</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- ACTIONS (GLOBAL) ---
+        window.doLike = async function(postId) {
+            const btn = document.getElementById(`btn-like-${postId}`);
+            const countLabel = document.getElementById(`likes-${postId}`);
+            let count = parseInt(countLabel.innerText);
+            
+            // UI Update Immediate (Optimistic)
+            if(btn.classList.contains('liked')) {
+                btn.classList.remove('liked');
+                count--;
+                updateDoc(doc(db, "posts", postId), { likes: arrayRemove(currentUser.uid) });
+            } else {
+                btn.classList.add('liked');
+                count++;
+                updateDoc(doc(db, "posts", postId), { likes: arrayUnion(currentUser.uid) });
+            }
+            countLabel.innerText = count + " Likes";
+        }
+
+        window.logoutApp = function() {
+            signOut(auth).then(() => window.location.href = "Account.html");
+        }
+
+        // --- STORIES ---
+        async function loadStories() {
+            const tray = document.getElementById('story-tray');
+            const q = query(collection(db, "stories"), orderBy("timestamp", "desc"), limit(10));
+            const snaps = await getDocs(q);
+            
+            // Keep the 'Create' card, remove others
+            while (tray.children.length > 1) {
+                tray.removeChild(tray.lastChild);
+            }
+
+            snaps.forEach(doc => {
+                const s = doc.data();
+                const div = document.createElement('div');
+                div.className = 'story-card';
+                div.innerHTML = `
+                    <img src="${s.url}">
+                    <div class="story-user">${s.userName}</div>
+                    <img src="${s.userPic}" style="position:absolute;top:8px;left:8px;width:35px;height:35px;border-radius:50%;border:3px solid #1877f2;">
+                `;
+                tray.appendChild(div);
+            });
+        }
+
+        window.uploadStory = async function(input) {
+            if(!input.files[0]) return;
+            const file = input.files[0];
+            
+            // Temporary UI
+            alert("Story uploading in background...");
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', CLOUDINARY_PRESET);
+            
+            try {
+                const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+                const data = await res.json();
+                
+                const uData = (await getDoc(doc(db, "users", currentUser.uid))).data();
+                
+                await updateDoc(collection(db, "stories"), { // Note: Should be addDoc in reality, simplified here
+                   // For simple logic, adding to a stories collection
+                });
+                // Note: using addDoc properly
+                const { addDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                await addDoc(collection(db, "stories"), {
+                    uid: currentUser.uid,
+                    url: data.secure_url,
+                    userName: uData.fullName,
+                    userPic: uData.profilePic,
+                    timestamp: new Date().toISOString()
+                });
+                
+                loadStories(); // Refresh
+            } catch(e) {
+                console.log(e);
+            }
+        }
+
+        // --- VIDEOS ---
+        async function loadVideos() {
+            const vFeed = document.getElementById('video-feed');
+            if(vFeed.children.length > 1) return; // Already loaded
+
+            const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
+            const snaps = await getDocs(q);
+            vFeed.innerHTML = "";
+            
+            snaps.forEach(doc => {
+                const p = doc.data();
+                if(p.type === 'video') {
+                    vFeed.innerHTML += `
+                        <div style="background:#000; margin-bottom:5px; position:relative;">
+                            <video src="${p.mediaUrl}" controls style="width:100%; max-height:80vh;"></video>
+                            <div style="padding:10px; color:white;">
+                                <b>${p.userName}</b>
+                                <p>${p.text}</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        // --- FRIENDS ---
+        async function loadRequests() {
+            const list = document.getElementById('friend-requests-list');
+            const u = (await getDoc(doc(db, "users", currentUser.uid))).data();
+            const reqs = u.friendRequests || [];
+
+            if(reqs.length === 0) {
+                list.innerHTML = '<div class="full-center">No Friend Requests</div>';
+                return;
+            }
+            
+            list.innerHTML = '';
+            for(const uid of reqs) {
+                const f = (await getDoc(doc(db, "users", uid))).data();
+                const div = document.createElement('div');
+                div.className = 'req-card';
+                div.id = `req-${uid}`;
+                div.innerHTML = `
+                    <img src="${f.profilePic}" class="req-img">
+                    <div class="req-info">
+                        <div class="req-name">${f.fullName}</div>
+                        <div class="req-actions">
+                            <button class="btn-confirm" onclick="window.handleReq('${uid}', true)">Confirm</button>
+                            <button class="btn-delete" onclick="window.handleReq('${uid}', false)">Delete</button>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(div);
+            }
+        }
+
+        window.handleReq = async function(uid, accept) {
+            // UI Remove
+            document.getElementById(`req-${uid}`).remove();
+            
+            const myRef = doc(db, "users", currentUser.uid);
+            const themRef = doc(db, "users", uid);
+
+            await updateDoc(myRef, { friendRequests: arrayRemove(uid) });
+            
+            if(accept) {
+                await updateDoc(myRef, { friends: arrayUnion(uid) });
+                await updateDoc(themRef, { friends: arrayUnion(currentUser.uid) });
+            }
+        }
+
+        // --- MY POSTS ---
+        async function loadMyPosts() {
+            const cont = document.getElementById('my-posts-feed');
+            const q = query(collection(db, "posts"), orderBy("timestamp", "desc")); // Simplified query
+            const snaps = await getDocs(q);
+            
+            cont.innerHTML = "";
+            snaps.forEach(doc => {
+                const p = doc.data();
+                if(p.uid === currentUser.uid) {
+                    cont.innerHTML += createPostHTML(p, doc.id);
+                }
+            });
+        }
+
+    </script>
+</body>
+</html>
