@@ -37,6 +37,7 @@
         .step-title { font-size: 22px; font-weight: 700; margin-bottom: 5px; }
         .step-subtitle { color: #65676b; margin-bottom: 20px; font-size: 14px; }
         .btn-next { background: #1877f2; color: white; width: 100%; padding: 12px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; margin-top: 20px; cursor: pointer; }
+        .btn-skip { background: #e4e6eb; color: black; width: 100%; padding: 12px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; margin-top: 10px; cursor: pointer; }
         
         .upload-circle { width: 140px; height: 140px; background: #f0f2f5; border-radius: 50%; margin: 10px auto; display: flex; justify-content: center; align-items: center; cursor: pointer; position: relative; overflow: hidden; border: 2px solid #ddd; }
         .upload-rect { width: 100%; height: 180px; background: #f0f2f5; border-radius: 8px; margin: 10px auto; display: flex; justify-content: center; align-items: center; cursor: pointer; position: relative; overflow: hidden; border: 2px solid #ddd; }
@@ -87,7 +88,7 @@
                 <button class="btn-next" onclick="nextStep(2)">Next</button>
             </div>
 
-            <!-- Step 3: Password -->
+            <!-- Step 3: Password (ACCOUNT CREATION HAPPENS HERE) -->
             <div class="step-content" id="step3">
                 <div class="step-title">Choose a password</div>
                 <div class="step-subtitle">Create a password with at least 6 characters.</div>
@@ -105,7 +106,8 @@
                     <img id="pPreview" class="preview">
                 </div>
                 <input type="file" id="profileInp" hidden accept="image/*" onchange="preview(this, 'pPreview')">
-                <button class="btn-next" onclick="nextStep(4)">Next</button>
+                <button class="btn-next" onclick="nextStep(4)">Add Picture</button>
+                <button class="btn-skip" onclick="nextStep(4)">Skip</button>
             </div>
 
             <!-- Step 5: Cover Photo -->
@@ -118,7 +120,7 @@
                 </div>
                 <input type="file" id="coverInp" hidden accept="image/*" onchange="preview(this, 'cPreview')">
                 <button class="btn-next" id="finalBtn" onclick="uploadAndFinish()">Save & Finish</button>
-                <button class="btn-next" style="background:#e4e6eb; color:black; margin-top:10px;" onclick="finish()">Skip</button>
+                <button class="btn-skip" onclick="finish()">Skip</button>
             </div>
 
         </form>
@@ -139,12 +141,16 @@
 
     let temp = {};
     let uid = "";
+    // Default placeholder image
+    const DEF_IMG = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
 
     onAuthStateChanged(auth, (user) => {
         const loader = document.getElementById('loading-screen');
         if (user) {
+            // Already logged in
             window.location.href = "index.html";
         } else {
+            // Not logged in, show login screen
             loader.style.display = 'none';
             document.getElementById('loginView').style.display = 'flex';
         }
@@ -159,52 +165,82 @@
         const e = document.getElementById('loginEmail').value;
         const p = document.getElementById('loginPassword').value;
         if(!e || !p) return alert("Missing fields");
+        
         document.getElementById('loading-screen').style.display = 'flex';
-        try { await signInWithEmailAndPassword(auth, e, p); } 
-        catch (err) { 
+        try { 
+            await signInWithEmailAndPassword(auth, e, p);
+            // onAuthStateChanged will redirect
+        } catch (err) { 
             document.getElementById('loading-screen').style.display = 'none';
             alert("Error: " + err.message); 
         }
     }
 
     window.nextStep = (s) => {
-        if(s===1 && (!document.getElementById('fname').value || !document.getElementById('lname').value)) return alert("Enter Name");
-        if(s===2 && !document.getElementById('regEmail').value) return alert("Enter Email");
-        
-        if(s===1) { temp.f = document.getElementById('fname').value; temp.l = document.getElementById('lname').value; }
-        if(s===2) { temp.m = document.getElementById('mobile').value; temp.e = document.getElementById('regEmail').value; }
+        // Validation
+        if(s===1) {
+            const f = document.getElementById('fname').value.trim();
+            const l = document.getElementById('lname').value.trim();
+            if(!f || !l) return alert("Please enter your name");
+            temp.f = f; 
+            temp.l = l;
+        }
+        if(s===2) {
+            const m = document.getElementById('mobile').value.trim();
+            const e = document.getElementById('regEmail').value.trim();
+            if(!e) return alert("Please enter your email");
+            temp.m = m; 
+            temp.e = e;
+        }
 
+        // Just switching tabs for step 1, 2 and 4
         document.getElementById(`step${s}`).classList.remove('active');
         document.getElementById(`step${s+1}`).classList.add('active');
     }
 
+    // Step 3: Register User AND Create Database Entry IMMEDIATELY
     window.registerUser = async () => {
         const p = document.getElementById('regPassword').value;
-        if(p.length < 6) return alert("Password too short");
+        if(p.length < 6) return alert("Password must be at least 6 characters");
         
         const btn = document.querySelector('#step3 button');
-        btn.innerText = "Creating...";
+        const errP = document.getElementById('regError');
+        
+        btn.innerText = "Creating Account...";
+        btn.disabled = true;
+        errP.innerText = "";
         
         try {
+            // 1. Create Auth
             const cred = await createUserWithEmailAndPassword(auth, temp.e, p);
             uid = cred.user.uid;
             
+            // 2. Create Database Entry (Critical Step)
+            // We do this BEFORE asking for photos, so data exists even if they quit.
             await setDoc(doc(db, "users", uid), {
                 uid: uid,
                 fullName: `${temp.f} ${temp.l}`,
-                firstName: temp.f, lastName: temp.l,
-                mobile: temp.m, email: temp.e,
-                profilePic: "https://via.placeholder.com/150",
-                coverPic: "https://via.placeholder.com/600x200",
-                friends: [], friendRequests: [],
+                firstName: temp.f, 
+                lastName: temp.l,
+                mobile: temp.m, 
+                email: temp.e,
+                profilePic: DEF_IMG, // Set default image immediately
+                coverPic: "",
+                bio: "",
+                friends: [], 
+                friendRequests: [],
                 createdAt: new Date().toISOString()
             });
 
+            // 3. Success - Move to Photo Upload
             document.getElementById('step3').classList.remove('active');
             document.getElementById('step4').classList.add('active');
+            
         } catch (e) {
             btn.innerText = "Sign Up";
-            document.getElementById('regError').innerText = e.message;
+            btn.disabled = false;
+            errP.innerText = e.message;
+            console.error(e);
         }
     }
 
@@ -223,25 +259,35 @@
     window.uploadAndFinish = async () => {
         const pf = document.getElementById('profileInp').files[0];
         const cf = document.getElementById('coverInp').files[0];
+        
+        if(!pf && !cf) {
+            finish();
+            return;
+        }
+
         const btn = document.getElementById('finalBtn');
-        btn.innerText = "Uploading...";
+        btn.innerText = "Uploading Images...";
         btn.disabled = true;
 
         try {
-            let pUrl = null, cUrl = null;
-            if(pf) pUrl = await up(pf);
-            if(cf) cUrl = await up(cf);
-
             const updateData = {};
-            if(pUrl) updateData.profilePic = pUrl;
-            if(cUrl) updateData.coverPic = cUrl;
+            
+            if(pf) {
+                const url = await up(pf);
+                if(url) updateData.profilePic = url;
+            }
+            if(cf) {
+                const url = await up(cf);
+                if(url) updateData.coverPic = url;
+            }
 
+            // Update the existing document
             if(Object.keys(updateData).length > 0) {
                 await updateDoc(doc(db, "users", uid), updateData);
             }
             finish();
         } catch (e) {
-            alert("Upload error");
+            alert("Image upload failed, but account created.");
             finish();
         }
     }
@@ -251,7 +297,8 @@
         fd.append('file', f);
         fd.append('upload_preset', CLOUDINARY_PRESET);
         const r = await fetch(CLOUDINARY_URL, {method:'POST', body:fd});
-        return (await r.json()).secure_url;
+        const data = await r.json();
+        return data.secure_url;
     }
 
     window.finish = () => window.location.href = "index.html";
