@@ -2,218 +2,155 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Post - tio</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Create Post</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: #fff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        .header { display: flex; align-items: center; justify-content: space-between; padding: 15px; border-bottom: 1px solid #f0f2f5; }
-        .header-title { font-size: 18px; font-weight: 600; color: #050505; }
-        .close-btn { font-size: 24px; color: #65676b; cursor: pointer; }
-        .post-btn { background: #e4e6eb; color: #bcc0c4; padding: 8px 20px; border-radius: 6px; border: none; font-weight: 600; cursor: not-allowed; transition: 0.3s; }
-        .post-btn.active { background: #1877f2; color: white; cursor: pointer; }
-
-        .user-area { padding: 15px; display: flex; align-items: center; gap: 10px; }
-        .user-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
-        .user-info h4 { font-size: 16px; font-weight: 600; }
-        .privacy-select { background: #f0f2f5; border: none; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; margin-top: 2px; cursor: pointer; color: #65676b; }
-
-        .editor-area { flex: 1; padding: 0 15px; overflow-y: auto; display: flex; flex-direction: column; }
-        .caption-input { width: 100%; border: none; outline: none; font-size: 20px; resize: none; min-height: 100px; margin-bottom: 20px; }
-        .caption-input::placeholder { color: #8a8d91; }
-
-        .media-preview { position: relative; width: 100%; margin-bottom: 20px; display: none; border-radius: 10px; overflow: hidden; border: 1px solid #ddd; }
-        .media-preview.show { display: block; }
-        .media-preview img, .media-preview video { width: 100%; max-height: 300px; object-fit: contain; background: black; display: block; }
-        .remove-media { position: absolute; top: 10px; right: 10px; background: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-
-        .bottom-sheet { padding: 15px; border-top: 1px solid #f0f2f5; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-        .sheet-option { display: flex; align-items: center; justify-content: space-between; padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
-        .sheet-option:hover { background: #f0f2f5; }
-        .option-label { display: flex; align-items: center; gap: 15px; font-weight: 500; color: #050505; }
-
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 100; display: none; flex-direction: column; justify-content: center; align-items: center; }
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #1877f2; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .status-text { color: #1877f2; font-weight: 600; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: #fff; height: 100vh; display: flex; flex-direction: column; }
+        .head { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #ddd; }
+        .head span { font-size: 18px; font-weight: 500; }
+        .btn-post { background: #1877f2; color: white; padding: 8px 20px; border-radius: 6px; border: none; font-weight: 600; font-size: 15px; disabled: true; opacity: 0.5; }
+        .btn-post.active { opacity: 1; cursor: pointer; }
+        .user-sec { padding: 15px; display: flex; gap: 10px; align-items: center; }
+        .u-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
+        .input-area { flex: 1; padding: 0 15px; overflow-y: auto; }
+        textarea { width: 100%; border: none; outline: none; font-size: 20px; resize: none; min-height: 100px; }
+        .preview-box { margin-top: 20px; position: relative; display: none; border-radius: 10px; overflow: hidden; border: 1px solid #ddd; }
+        .preview-box img, .preview-box video { width: 100%; max-height: 400px; object-fit: contain; background: black; }
+        .preview-box iframe { width: 100%; height: 300px; border: none; }
+        .del-media { position: absolute; top: 10px; right: 10px; background: white; padding: 5px 10px; border-radius: 50%; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .tools { border-top: 1px solid #eee; padding: 15px; }
+        .tool-btn { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; cursor: pointer; }
+        .tool-btn:active { background: #f0f2f5; }
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; justify-content: center; align-items: center; z-index: 99; }
     </style>
 </head>
 <body>
-
-<div class="overlay" id="loader">
-    <div class="spinner"></div>
-    <div class="status-text">Posting...</div>
-</div>
-
-<div class="header">
-    <i class="fas fa-times close-btn" onclick="window.location.href='main.html'"></i>
-    <div class="header-title">Create Post</div>
-    <button class="post-btn" id="submitBtn" onclick="uploadPost()">Post</button>
-</div>
-
-<div class="user-area">
-    <img id="uPic" src="https://via.placeholder.com/50" class="user-img">
-    <div class="user-info">
-        <h4 id="uName">Loading...</h4>
-        <select class="privacy-select" id="privacy">
-            <option value="public">Public</option>
-            <option value="friends">Friends</option>
-        </select>
+    <div id="loader"><i class="fas fa-spinner fa-spin" style="font-size:30px; color:#1877f2"></i></div>
+    <div class="head">
+        <i class="fas fa-arrow-left" style="font-size:20px;" onclick="window.history.back()"></i>
+        <span>Create Post</span>
+        <button class="btn-post" id="subBtn" onclick="pub()">Post</button>
     </div>
-</div>
-
-<div class="editor-area">
-    <textarea class="caption-input" id="caption" placeholder="What's on your mind?"></textarea>
-    
-    <div class="media-preview" id="previewBox">
-        <div class="remove-media" onclick="clearMedia()"><i class="fas fa-times"></i></div>
-        <img id="imgPrev" style="display:none;">
-        <video id="vidPrev" controls style="display:none;"></video>
+    <div class="user-sec">
+        <img id="myPic" class="u-img" src="https://via.placeholder.com/50">
+        <span id="myName" style="font-weight:600;">Loading...</span>
     </div>
-</div>
-
-<div class="bottom-sheet">
-    <div class="sheet-option" onclick="document.getElementById('fileInp').click()">
-        <div class="option-label">
-            <i class="fas fa-images" style="color: #45bd62; font-size: 24px;"></i>
-            Photo/Video
+    <div class="input-area">
+        <textarea id="txt" placeholder="What's on your mind? or Paste YouTube Link"></textarea>
+        <div class="preview-box" id="prevBox">
+            <div class="del-media" onclick="clr()"><i class="fas fa-times"></i></div>
+            <div id="contentHolder"></div>
         </div>
     </div>
-    <input type="file" id="fileInp" hidden accept="image/*,video/*" onchange="handleFile(this)">
-</div>
+    <div class="tools">
+        <div class="tool-btn" onclick="document.getElementById('fIn').click()">
+            <i class="fas fa-photo-video" style="color:#45bd62; font-size:24px;"></i>
+            <span>Photo/Video</span>
+        </div>
+        <input type="file" id="fIn" hidden accept="image/*,video/*" onchange="fileSel(this)">
+    </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = { apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs", authDomain: "new-all-f99f7.firebaseapp.com", projectId: "new-all-f99f7", storageBucket: "new-all-f99f7.appspot.com", messagingSenderId: "1069748173900", appId: "1:1069748173900:web:158d6336c0f4628133c8e9" };
-    const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dwgvvzbvn/auto/upload";
-    const CLOUDINARY_PRESET = "storyapp";
+        const cfg = { apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs", authDomain: "new-all-f99f7.firebaseapp.com", projectId: "new-all-f99f7", storageBucket: "new-all-f99f7.appspot.com", messagingSenderId: "1069748173900", appId: "1:1069748173900:web:158d6336c0f4628133c8e9" };
+        const C_URL = "https://api.cloudinary.com/v1_1/dwgvvzbvn/auto/upload";
+        const C_PRESET = "storyapp";
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    
-    let currentUser = null;
-    let selectedFile = null;
-    let fileType = null; 
-
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            currentUser = user;
-            const snap = await getDoc(doc(db, "users", user.uid));
-            if(snap.exists()) {
-                document.getElementById('uPic').src = snap.data().profilePic;
-                document.getElementById('uName').innerText = snap.data().fullName;
-            }
-        } else {
-            window.location.href = "Account.html";
-        }
-    });
-
-    const captionArea = document.getElementById('caption');
-    const submitBtn = document.getElementById('submitBtn');
-
-    captionArea.addEventListener('input', () => {
-        checkInput();
-        captionArea.style.height = 'auto';
-        captionArea.style.height = captionArea.scrollHeight + 'px';
-    });
-
-    window.handleFile = (input) => {
-        if (input.files && input.files[0]) {
-            selectedFile = input.files[0];
-            const url = URL.createObjectURL(selectedFile);
-            const previewBox = document.getElementById('previewBox');
-            const imgP = document.getElementById('imgPrev');
-            const vidP = document.getElementById('vidPrev');
-
-            previewBox.classList.add('show');
-            
-            if (selectedFile.type.startsWith('video')) {
-                fileType = 'video';
-                vidP.src = url;
-                vidP.style.display = 'block';
-                imgP.style.display = 'none';
-            } else {
-                fileType = 'image';
-                imgP.src = url;
-                imgP.style.display = 'block';
-                vidP.style.display = 'none';
-            }
-            checkInput();
-        }
-    };
-
-    window.clearMedia = () => {
-        selectedFile = null;
-        fileType = null;
-        document.getElementById('previewBox').classList.remove('show');
-        document.getElementById('fileInp').value = "";
-        checkInput();
-    };
-
-    function checkInput() {
-        if(captionArea.value.trim().length > 0 || selectedFile) {
-            submitBtn.classList.add('active');
-            submitBtn.disabled = false;
-        } else {
-            submitBtn.classList.remove('active');
-            submitBtn.disabled = true;
-        }
-    }
-
-    window.uploadPost = async () => {
-        const text = captionArea.value;
-        const privacy = document.getElementById('privacy').value;
-        const loader = document.getElementById('loader');
-
-        if (!text && !selectedFile) return;
-
-        loader.style.display = 'flex';
+        const app = initializeApp(cfg);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
         
-        try {
-            let mediaUrl = "";
-            let type = "text";
+        let user = null;
+        let file = null;
+        let ytId = null;
 
-            if (selectedFile) {
-                const formData = new FormData();
-                formData.append('file', selectedFile);
-                formData.append('upload_preset', CLOUDINARY_PRESET);
-                
-                const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
-                const data = await res.json();
-                mediaUrl = data.secure_url;
-                type = fileType; 
+        onAuthStateChanged(auth, async (u) => {
+            if(u) {
+                user = u;
+                const d = (await getDoc(doc(db,"users",u.uid))).data();
+                document.getElementById('myPic').src = d.profilePic;
+                document.getElementById('myName').innerText = d.fullName;
+            } else window.location.href="Account.html";
+        });
+
+        const txt = document.getElementById('txt');
+        const btn = document.getElementById('subBtn');
+
+        txt.addEventListener('input', () => {
+            const val = txt.value;
+            const ytMatch = val.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+            
+            if(ytMatch && !file) {
+                ytId = ytMatch[1];
+                document.getElementById('contentHolder').innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>`;
+                document.getElementById('prevBox').style.display = 'block';
             }
+            chk();
+        });
 
-            const userData = (await getDoc(doc(db, "users", currentUser.uid))).data();
-
-            await addDoc(collection(db, "posts"), {
-                uid: currentUser.uid,
-                userName: userData.fullName,
-                userPic: userData.profilePic,
-                text: text,
-                mediaUrl: mediaUrl,
-                type: type,
-                privacy: privacy,
-                likes: [],
-                timestamp: new Date().toISOString()
-            });
-
-            window.location.href = "main.html";
-
-        } catch (error) {
-            console.error(error);
-            loader.style.display = 'none';
-            alert("Error posting. Check console.");
+        window.fileSel = (inp) => {
+            if(inp.files[0]) {
+                file = inp.files[0];
+                ytId = null;
+                const url = URL.createObjectURL(file);
+                const isVid = file.type.startsWith('video');
+                const h = document.getElementById('contentHolder');
+                h.innerHTML = isVid ? `<video src="${url}" controls style="width:100%"></video>` : `<img src="${url}" style="width:100%">`;
+                document.getElementById('prevBox').style.display = 'block';
+                chk();
+            }
         }
-    };
-</script>
 
+        window.clr = () => {
+            file = null;
+            ytId = null;
+            document.getElementById('fIn').value = "";
+            document.getElementById('prevBox').style.display = 'none';
+            document.getElementById('contentHolder').innerHTML = "";
+            chk();
+        }
+
+        function chk() {
+            if(txt.value.trim() || file || ytId) {
+                btn.classList.add('active'); btn.disabled = false;
+            } else {
+                btn.classList.remove('active'); btn.disabled = true;
+            }
+        }
+
+        window.pub = async () => {
+            document.getElementById('loader').style.display = 'flex';
+            try {
+                let mUrl = null, type = 'text';
+                
+                if(ytId) {
+                    mUrl = `https://www.youtube.com/embed/${ytId}`;
+                    type = 'youtube';
+                } else if (file) {
+                    const fd = new FormData(); fd.append('file', file); fd.append('upload_preset', C_PRESET);
+                    const res = await fetch(C_URL, {method:'POST', body:fd});
+                    const data = await res.json();
+                    mUrl = data.secure_url;
+                    type = file.type.startsWith('video') ? 'video' : 'image';
+                }
+
+                const ud = (await getDoc(doc(db,"users",user.uid))).data();
+                
+                await addDoc(collection(db,"posts"), {
+                    uid: user.uid, userName: ud.fullName, userPic: ud.profilePic,
+                    text: txt.value, mediaUrl: mUrl, type: type, likes: [], timestamp: new Date().toISOString()
+                });
+                window.location.href = "index.html";
+            } catch(e) {
+                alert("Error"); document.getElementById('loader').style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>
