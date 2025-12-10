@@ -31,26 +31,32 @@
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
         body { background-color: var(--card); color: var(--text); height: 100vh; display: flex; flex-direction: column; transition: 0.3s; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); background: var(--card); }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); background: var(--card); z-index: 10; }
         .h-title { font-size: 18px; font-weight: 700; color: var(--text); }
         .btn-post { background: var(--accent); color: white; padding: 8px 20px; border-radius: 6px; border: none; font-weight: 600; font-size: 15px; opacity: 0.5; transition: 0.2s; cursor: default; }
         .btn-post.active { opacity: 1; cursor: pointer; }
-        .user-sec { padding: 15px; display: flex; gap: 10px; align-items: center; }
+        .user-sec { padding: 15px; display: flex; gap: 10px; align-items: center; background: var(--card); }
         .u-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: var(--input); }
         .u-name { font-weight: 600; font-size: 16px; color: var(--text); }
-        .main-area { flex: 1; overflow-y: auto; padding: 0 15px 15px; }
-        #txt { width: 100%; border: none; outline: none; font-size: 20px; resize: none; min-height: 80px; background: transparent; color: var(--text); margin-bottom: 15px; }
+        .main-area { flex: 1; overflow-y: auto; display: flex; flex-direction: column; position: relative; }
+        #txt { width: 100%; border: none; outline: none; font-size: 20px; resize: none; min-height: 120px; background: transparent; color: var(--text); padding: 15px; transition: 0.3s; }
         #txt::placeholder { color: var(--text-sec); }
-        .preview-box { position: relative; width: 100%; border-radius: 10px; overflow: hidden; display: none; background: #000; border: 1px solid var(--border); }
-        .preview-box img, .preview-box video { width: 100%; max-height: 400px; object-fit: contain; display: block; }
+        #txt.bg-active { text-align: center; font-weight: 700; font-size: 24px; color: white; display: flex; align-items: center; justify-content: center; min-height: 300px; padding: 40px 20px; }
+        .bg-scroll { display: flex; gap: 10px; padding: 10px 15px; overflow-x: auto; scrollbar-width: none; background: var(--card); border-bottom: 1px solid var(--border); }
+        .bg-btn { width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0; cursor: pointer; border: 2px solid transparent; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        .bg-btn.selected { border-color: var(--accent); transform: scale(1.1); }
+        .bg-reset { background: var(--input); display: flex; align-items: center; justify-content: center; color: var(--text); font-size: 12px; }
+        .preview-box { position: relative; width: 100%; background: #000; display: none; margin-bottom: 10px; }
+        .preview-box img, .preview-box video { width: 100%; max-height: 400px; object-fit: contain; display: block; margin: 0 auto; }
         .preview-box iframe { width: 100%; aspect-ratio: 16/9; border: none; display: block; }
         .del-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; backdrop-filter: blur(4px); }
-        .bottom-tools { padding: 15px; border-top: 1px solid var(--border); background: var(--card); }
+        .bottom-tools { padding: 15px; border-top: 1px solid var(--border); background: var(--card); margin-top: auto; }
         .tool-row { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
         .tool-opt { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; cursor: pointer; border-bottom: 1px solid var(--border); background: var(--card); transition: 0.2s; }
         .tool-opt:last-child { border-bottom: none; }
         .tool-opt:active { background: var(--hover); }
         .tool-opt span { font-weight: 500; font-size: 15px; color: var(--text); }
+        .tool-opt.disabled { opacity: 0.5; pointer-events: none; background: var(--input); }
         .yt-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index: 2000; display:none; align-items:center; justify-content:center; padding: 20px; backdrop-filter: blur(5px); }
         .ym-box { background: var(--card); width: 100%; max-width: 400px; padding: 20px; border-radius: 12px; box-shadow: var(--shadow); }
         .ym-head { font-weight: 700; font-size: 18px; margin-bottom: 15px; color: var(--text); }
@@ -80,6 +86,19 @@
 
     <div class="main-area">
         <textarea id="txt" placeholder="What's on your mind?"></textarea>
+        
+        <div class="bg-scroll" id="bgScroll">
+            <div class="bg-btn bg-reset selected" onclick="setBg(0)"><i class="fas fa-ban"></i></div>
+            <div class="bg-btn" style="background: linear-gradient(to bottom right, #ff512f, #dd2476);" onclick="setBg(1)"></div>
+            <div class="bg-btn" style="background: linear-gradient(to bottom right, #fd746c, #ff9068);" onclick="setBg(2)"></div>
+            <div class="bg-btn" style="background: linear-gradient(to bottom right, #1fa2ff, #12d8fa, #a6ffcb);" onclick="setBg(3)"></div>
+            <div class="bg-btn" style="background: linear-gradient(to bottom right, #8e2de2, #4a00e0);" onclick="setBg(4)"></div>
+            <div class="bg-btn" style="background: linear-gradient(to bottom right, #00b09b, #96c93d);" onclick="setBg(5)"></div>
+            <div class="bg-btn" style="background: linear-gradient(to bottom right, #fc4a1a, #f7b733);" onclick="setBg(6)"></div>
+            <div class="bg-btn" style="background: #222;" onclick="setBg(7)"></div>
+            <div class="bg-btn" style="background: url('https://img.freepik.com/free-vector/gradient-heart-background_23-2149323608.jpg') center/cover;" onclick="setBg(8)"></div>
+        </div>
+
         <div id="prevBox" class="preview-box">
             <div class="del-btn" onclick="clearMedia()"><i class="fas fa-times"></i></div>
             <div id="mediaCont"></div>
@@ -88,11 +107,11 @@
 
     <div class="bottom-tools">
         <div class="tool-row">
-            <div class="tool-opt" onclick="document.getElementById('fIn').click()">
+            <div class="tool-opt" id="opt-media" onclick="document.getElementById('fIn').click()">
                 <span>Photo / Video</span>
                 <i class="fas fa-images" style="color:#45bd62; font-size:22px;"></i>
             </div>
-            <div class="tool-opt" onclick="openYT()">
+            <div class="tool-opt" id="opt-yt" onclick="openYT()">
                 <span>YouTube Video</span>
                 <i class="fab fa-youtube" style="color:#ff0000; font-size:22px;"></i>
             </div>
@@ -104,10 +123,10 @@
     <div id="ytMod" class="yt-modal">
         <div class="ym-box">
             <div class="ym-head">Add YouTube Video</div>
-            <input id="ytInp" class="ym-inp" placeholder="Paste YouTube Link here...">
+            <input id="ytInp" class="ym-inp" placeholder="Paste link (Video, Live, Shorts)...">
             <div class="ym-act">
                 <button class="ym-btn" style="background:transparent; color:var(--text);" onclick="closeYT()">Cancel</button>
-                <button class="ym-btn" style="background:var(--accent); color:white;" onclick="addYT()">Add</button>
+                <button id="ytAddBtn" class="ym-btn" style="background:var(--accent); color:white;" onclick="addYT()">Add</button>
             </div>
         </div>
     </div>
@@ -120,6 +139,7 @@
         const cfg = { apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs", authDomain: "new-all-f99f7.firebaseapp.com", projectId: "new-all-f99f7", storageBucket: "new-all-f99f7.appspot.com", messagingSenderId: "1069748173900", appId: "1:1069748173900:web:158d6336c0f4628133c8e9" };
         const C_URL = "https://api.cloudinary.com/v1_1/dwgvvzbvn/auto/upload";
         const C_PRE = "storyapp";
+        const YT_API_KEY = "AIzaSyBFxF8kRg7VdxYKsQdFO-WQkdxS9vF-B6M";
 
         const app = initializeApp(cfg);
         const auth = getAuth(app);
@@ -128,6 +148,18 @@
         let me = null;
         let mediaFile = null;
         let ytId = null;
+        let activeBg = 0;
+        const bgs = [
+            '',
+            'linear-gradient(to bottom right, #ff512f, #dd2476)',
+            'linear-gradient(to bottom right, #fd746c, #ff9068)',
+            'linear-gradient(to bottom right, #1fa2ff, #12d8fa, #a6ffcb)',
+            'linear-gradient(to bottom right, #8e2de2, #4a00e0)',
+            'linear-gradient(to bottom right, #00b09b, #96c93d)',
+            'linear-gradient(to bottom right, #fc4a1a, #f7b733)',
+            '#222',
+            'url(https://img.freepik.com/free-vector/gradient-heart-background_23-2149323608.jpg) center/cover'
+        ];
 
         const initTheme = () => {
             if(localStorage.getItem('theme') === 'light') document.body.classList.remove('dark-mode');
@@ -149,8 +181,30 @@
 
         txt.addEventListener('input', checkState);
 
+        window.setBg = (idx) => {
+            activeBg = idx;
+            const btns = document.querySelectorAll('.bg-btn');
+            btns.forEach(b => b.classList.remove('selected'));
+            btns[idx].classList.add('selected');
+
+            if(idx > 0) {
+                clearMedia(); 
+                txt.style.background = bgs[idx];
+                txt.classList.add('bg-active');
+                document.getElementById('opt-media').classList.add('disabled');
+                document.getElementById('opt-yt').classList.add('disabled');
+            } else {
+                txt.style.background = 'transparent';
+                txt.classList.remove('bg-active');
+                document.getElementById('opt-media').classList.remove('disabled');
+                document.getElementById('opt-yt').classList.remove('disabled');
+            }
+            checkState();
+        }
+
         window.handleFile = (inp) => {
             if(inp.files[0]) {
+                setBg(0);
                 mediaFile = inp.files[0];
                 ytId = null;
                 const url = URL.createObjectURL(mediaFile);
@@ -169,22 +223,40 @@
             document.getElementById('ytInp').value = '';
         }
 
-        window.addYT = () => {
-            const v = document.getElementById('ytInp').value;
-            const match = v.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+        window.addYT = async () => {
+            const v = document.getElementById('ytInp').value.trim();
+            const addBtn = document.getElementById('ytAddBtn');
+            
+            const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+            const match = v.match(regex);
+
             if(match) {
+                addBtn.innerText = "Fetching...";
                 ytId = match[1];
+                
+                try {
+                    const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${ytId}&key=${YT_API_KEY}`);
+                    const data = await res.json();
+                    if(data.items && data.items.length > 0) {
+                        const title = data.items[0].snippet.title;
+                        if(!txt.value) txt.value = title;
+                    }
+                } catch(e) { console.log("API Error", e); }
+
+                setBg(0); 
                 mediaFile = null;
                 renderPreview(`<iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>`);
+                addBtn.innerText = "Add";
                 closeYT();
             } else {
-                alert("Invalid YouTube Link");
+                alert("Invalid YouTube Link. Supports Live, Shorts, and Videos.");
             }
         }
 
         function renderPreview(html) {
             document.getElementById('mediaCont').innerHTML = html;
             document.getElementById('prevBox').style.display = 'block';
+            document.getElementById('bgScroll').style.display = 'none';
             checkState();
         }
 
@@ -194,11 +266,12 @@
             document.getElementById('fIn').value = '';
             document.getElementById('prevBox').style.display = 'none';
             document.getElementById('mediaCont').innerHTML = '';
+            document.getElementById('bgScroll').style.display = 'flex';
             checkState();
         }
 
         function checkState() {
-            if(txt.value.trim() || mediaFile || ytId) {
+            if(txt.value.trim() || mediaFile || ytId || activeBg > 0) {
                 btn.classList.add('active');
             } else {
                 btn.classList.remove('active');
@@ -212,7 +285,10 @@
             try {
                 let mUrl = null, type = 'text';
 
-                if(ytId) {
+                if(activeBg > 0) {
+                    type = 'bg_text';
+                    mUrl = bgs[activeBg]; 
+                } else if(ytId) {
                     mUrl = `https://www.youtube.com/embed/${ytId}`;
                     type = 'youtube';
                 } else if(mediaFile) {
@@ -238,7 +314,7 @@
                 
                 location.href = "index.html";
             } catch(e) {
-                alert("Upload failed");
+                alert("Upload failed: " + e.message);
                 document.getElementById('loader').style.display = 'none';
             }
         }
