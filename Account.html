@@ -2,246 +2,145 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>tio - Create Your Account</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>tio - Log In or Sign Up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { 
-            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); 
-            min-height: 100vh; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            padding: 20px;
-        }
-        .main-container {
-            width: 100%;
-            max-width: 420px;
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-            position: relative;
-            overflow: hidden;
-            min-height: 500px;
-            display: flex;
-            flex-direction: column;
-        }
-        .brand-header { text-align: center; margin-bottom: 30px; }
-        .brand-header h1 { font-size: 42px; font-weight: 700; background: linear-gradient(to right, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px; }
-        .brand-header p { color: #555; font-size: 15px; font-weight: 500; margin-top: 5px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        body { background-color: #f0f2f5; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* Loader Overlay (To hide screen while checking login) */
+        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #1877f2; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* --- LOGIN VIEW --- */
+        .login-container { padding: 20px; text-align: center; display: flex; flex-direction: column; justify-content: center; height: 100%; display: none; }
+        .fb-logo { width: 60px; height: 60px; margin-bottom: 20px; }
+        .app-name { font-size: 28px; color: #1877f2; font-weight: 800; margin-bottom: 40px; letter-spacing: -1px; }
         
-        .step { display: none; width: 100%; animation: slideIn 0.5s ease forwards; }
-        .step.active { display: block; }
-        @keyframes slideIn { 
-            from { opacity: 0; transform: translateX(20px); } 
-            to { opacity: 1; transform: translateX(0); } 
-        }
-
-        .input-wrapper { margin-bottom: 20px; position: relative; }
-        .input-wrapper label { display: block; margin-bottom: 8px; color: #444; font-weight: 600; font-size: 14px; margin-left: 5px; }
-        input { 
-            width: 100%; 
-            padding: 16px 20px; 
-            border: none; 
-            border-radius: 12px; 
-            background: rgba(255, 255, 255, 0.6); 
-            font-size: 16px; 
-            color: #333; 
-            outline: none; 
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); 
-            transition: 0.3s; 
-        }
-        input:focus { background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transform: translateY(-2px); }
+        .form-group { width: 100%; max-width: 400px; margin: 0 auto; }
+        .input-field { width: 100%; padding: 14px 16px; border: 1px solid #dddfe2; border-radius: 6px; font-size: 16px; margin-bottom: 12px; outline: none; }
+        .input-field:focus { border-color: #1877f2; box-shadow: 0 0 0 2px #e7f3ff; }
         
-        .btn-primary {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            background: linear-gradient(to right, #667eea, #764ba2);
-            color: white;
-            font-size: 17px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-            transition: 0.3s;
-            margin-top: 10px;
-        }
-        .btn-primary:active { transform: scale(0.98); }
-        .btn-skip { 
-            width: 100%; 
-            padding: 15px; 
-            background: transparent; 
-            border: 2px solid rgba(255,255,255,0.5); 
-            color: #555; 
-            font-weight: 600; 
-            border-radius: 12px; 
-            margin-top: 15px; 
-            cursor: pointer; 
-        }
+        .btn-login { width: 100%; background-color: #1877f2; color: white; padding: 12px; font-size: 20px; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 15px; }
+        .forgot-pass { color: #1877f2; font-size: 14px; font-weight: 500; text-decoration: none; display: block; margin-bottom: 30px; }
+        
+        .divider { display: flex; align-items: center; margin-bottom: 30px; }
+        .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: #ccd0d5; }
+        .divider span { padding: 0 10px; color: #65676b; font-size: 13px; }
 
-        .upload-box {
-            background: rgba(255,255,255,0.5);
-            border: 2px dashed #a3b1c6;
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: 0.3s;
-            position: relative;
-            min-height: 120px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .upload-box:hover { background: rgba(255,255,255,0.8); border-color: #764ba2; }
-        .upload-box img { max-width: 100%; max-height: 180px; border-radius: 10px; display: none; object-fit: cover; width: 100%; }
-        .upload-box.has-img img { display: block; }
-        .upload-box.has-img .placeholder { display: none; }
-        .placeholder i { color: #764ba2; font-size: 28px; margin-bottom: 10px; }
-        .placeholder p { font-size: 13px; color: #666; }
+        .btn-create { background-color: #42b72a; color: white; padding: 10px 20px; font-size: 16px; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; display: inline-block; }
 
-        .friend-item { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            background: rgba(255,255,255,0.6); 
-            padding: 12px; 
-            border-radius: 12px; 
-            margin-bottom: 10px; 
-        }
-        .friend-left { display: flex; align-items: center; gap: 12px; }
-        .friend-left img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
-        .friend-left h4 { font-size: 15px; color: #333; }
-        .friend-action { 
-            background: #667eea; 
-            color: white; 
-            border: none; 
-            padding: 8px 15px; 
-            border-radius: 8px; 
-            font-size: 12px; 
-            cursor: pointer; 
-        }
-        .friend-action.sent { background: #444; cursor: default; }
+        /* --- SIGNUP WIZARD VIEW --- */
+        .signup-container { background: #fff; height: 100%; display: none; flex-direction: column; }
+        .signup-header { padding: 15px; border-bottom: 1px solid #ddd; display: flex; align-items: center; justify-content: space-between; background: #fff; }
+        .back-btn { font-size: 20px; cursor: pointer; color: #333; }
+        .header-title { font-size: 18px; font-weight: 600; }
+        
+        .step-content { padding: 20px; flex: 1; display: none; flex-direction: column; }
+        .step-content.active { display: flex; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
 
-        .loader-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.8); backdrop-filter: blur(5px);
-            display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 50;
-        }
-        .spinner {
-            width: 40px; height: 40px; border: 4px solid #f3f3f3;
-            border-top: 4px solid #764ba2; border-radius: 50%;
-            animation: spin 1s linear infinite; margin-bottom: 10px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .loading-text { font-size: 14px; font-weight: 500; color: #764ba2; }
-        .error-text { color: #e74c3c; font-size: 13px; text-align: center; margin-top: 10px; display: none; font-weight: 500; }
+        .step-title { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+        .step-subtitle { color: #65676b; margin-bottom: 20px; font-size: 14px; }
+        
+        .row { display: flex; gap: 10px; }
+        .btn-next { background: #1877f2; color: white; width: 100%; padding: 12px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; margin-top: 20px; cursor: pointer; }
+        
+        /* Upload Area */
+        .upload-circle { width: 120px; height: 120px; background: #f0f2f5; border-radius: 50%; margin: 20px auto; display: flex; justify-content: center; align-items: center; cursor: pointer; position: relative; overflow: hidden; border: 2px solid #ddd; }
+        .upload-circle img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .upload-circle i { font-size: 40px; color: #bcc0c4; }
+
     </style>
 </head>
 <body>
 
-<div class="main-container">
-    <div class="loader-overlay" id="fullLoader">
+    <!-- Loading Screen (Checks Login) -->
+    <div id="loading-screen">
         <div class="spinner"></div>
-        <p class="loading-text" id="loaderText">Processing...</p>
     </div>
 
-    <div class="brand-header">
-        <h1>tio</h1>
-        <p>Connect with your world.</p>
-    </div>
-
-    <form id="authForm" onsubmit="event.preventDefault()">
+    <!-- Login View (Default) -->
+    <div class="login-container" id="loginView">
+        <div class="app-name">facebook</div> <!-- Replace with tio if you want -->
         
-        <!-- Step 1: Mobile -->
-        <div class="step active" id="step1">
-            <div class="input-wrapper">
-                <label>Mobile Number</label>
-                <input type="number" id="mobile" placeholder="01xxxxxxxx" required>
-            </div>
-            <button class="btn-primary" onclick="nextStep(1)">Continue <i class="fas fa-arrow-right"></i></button>
+        <div class="form-group">
+            <input type="email" id="loginEmail" class="input-field" placeholder="Mobile number or email">
+            <input type="password" id="loginPassword" class="input-field" placeholder="Password">
+            <button class="btn-login" onclick="handleLogin()">Log In</button>
+            <a href="#" class="forgot-pass">Forgotten Password?</a>
+            
+            <div class="divider"><span>OR</span></div>
+            
+            <button class="btn-create" onclick="toggleView('signup')">Create new account</button>
+        </div>
+    </div>
+
+    <!-- Signup View (Hidden) -->
+    <div class="signup-container" id="signupView">
+        <div class="signup-header">
+            <i class="fas fa-arrow-left back-btn" onclick="toggleView('login')"></i>
+            <span class="header-title">Create account</span>
+            <div style="width:20px"></div>
         </div>
 
-        <!-- Step 2: Name -->
-        <div class="step" id="step2">
-            <div class="input-wrapper">
-                <label>First Name</label>
-                <input type="text" id="firstName" placeholder="Your first name" required>
-            </div>
-            <div class="input-wrapper">
-                <label>Last Name</label>
-                <input type="text" id="lastName" placeholder="Your surname" required>
-            </div>
-            <button class="btn-primary" onclick="nextStep(2)">Next Step <i class="fas fa-arrow-right"></i></button>
-        </div>
-
-        <!-- Step 3: Auth -->
-        <div class="step" id="step3">
-            <div class="input-wrapper">
-                <label>Email Address</label>
-                <input type="email" id="email" placeholder="email" required>
-            </div>
-            <div class="input-wrapper">
-                <label>Password</label>
-                <input type="password" id="password" placeholder="Min. 6 characters" required>
-            </div>
-            <button class="btn-primary" onclick="createAccount()">Create Account</button>
-            <p id="errorMsg" class="error-text"></p>
-        </div>
-
-        <!-- Step 4: Photos -->
-        <div class="step" id="step4">
-            <label style="font-weight:600; color:#444; margin-bottom:10px; display:block;">Profile Picture</label>
-            <div class="upload-box" id="profileBox" onclick="document.getElementById('profileInp').click()">
-                <div class="placeholder"><i class="fas fa-user-circle"></i><p>Tap to upload profile</p></div>
-                <img id="profilePrev">
-                <input type="file" id="profileInp" hidden accept="image/*" onchange="previewFile(this, 'profilePrev', 'profileBox')">
+        <form onsubmit="event.preventDefault()">
+            <!-- Step 1: Name -->
+            <div class="step-content active" id="step1">
+                <div class="step-title">What's your name?</div>
+                <div class="step-subtitle">Enter the name you use in real life.</div>
+                <div class="row">
+                    <input type="text" id="fname" class="input-field" placeholder="First name" required>
+                    <input type="text" id="lname" class="input-field" placeholder="Surname" required>
+                </div>
+                <button class="btn-next" onclick="nextStep(1)">Next</button>
             </div>
 
-            <label style="font-weight:600; color:#444; margin-bottom:10px; display:block;">Cover Photo</label>
-            <div class="upload-box" id="coverBox" onclick="document.getElementById('coverInp').click()">
-                <div class="placeholder"><i class="fas fa-image"></i><p>Tap to upload cover</p></div>
-                <img id="coverPrev">
-                <input type="file" id="coverInp" hidden accept="image/*" onchange="previewFile(this, 'coverPrev', 'coverBox')">
+            <!-- Step 2: Contact -->
+            <div class="step-content" id="step2">
+                <div class="step-title">What's your mobile number?</div>
+                <div class="step-subtitle">Enter the mobile number where you can be contacted.</div>
+                <input type="text" id="mobile" class="input-field" placeholder="Mobile number" required>
+                <div style="margin-top:10px; font-size:12px; color:#65676b">You'll also use this email to login.</div>
+                <input type="email" id="regEmail" class="input-field" placeholder="Email address" style="margin-top:10px;">
+                <button class="btn-next" onclick="nextStep(2)">Next</button>
             </div>
-            <button class="btn-primary" onclick="uploadData()">Save & Continue</button>
-        </div>
 
-        <!-- Step 5: Friends -->
-        <div class="step" id="step5">
-            <h3 style="color:#444; margin-bottom:15px; font-size:18px;">Add Friends</h3>
-            <div id="friendsList" style="max-height: 250px; overflow-y: auto; padding-right: 5px;">
-                <!-- Dynamic Content -->
+            <!-- Step 3: Password -->
+            <div class="step-content" id="step3">
+                <div class="step-title">Choose a password</div>
+                <div class="step-subtitle">Create a password with at least 6 characters. It should be something others couldn't guess.</div>
+                <input type="password" id="regPassword" class="input-field" placeholder="New password" required>
+                <button class="btn-next" onclick="registerUser()">Sign Up</button>
+                <p id="regError" style="color:red; font-size:12px; margin-top:10px; text-align:center;"></p>
             </div>
-            <button class="btn-primary" onclick="finish()">Finish Setup</button>
-            <button class="btn-skip" onclick="finish()">Skip for now</button>
-        </div>
 
-    </form>
-</div>
+            <!-- Step 4: Profile Pic -->
+            <div class="step-content" id="step4">
+                <div class="step-title">Add a profile picture</div>
+                <div class="step-subtitle">Add a photo so friends can find you.</div>
+                
+                <div class="upload-circle" onclick="document.getElementById('fileInp').click()">
+                    <i class="fas fa-camera"></i>
+                    <img id="previewImg">
+                </div>
+                <input type="file" id="fileInp" hidden accept="image/*" onchange="showPreview(this)">
+                
+                <button class="btn-next" id="finalBtn" onclick="uploadAndFinish()">Save</button>
+                <button class="btn-next" style="background:#e4e6eb; color:black;" onclick="finish()">Skip</button>
+            </div>
+        </form>
+    </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, collection, getDocs, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const firebaseConfig = { 
-        apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs", 
-        authDomain: "new-all-f99f7.firebaseapp.com", 
-        projectId: "new-all-f99f7", 
-        storageBucket: "new-all-f99f7.appspot.com", 
-        messagingSenderId: "1069748173900", 
-        appId: "1:1069748173900:web:158d6336c0f4628133c8e9" 
-    };
-
+    const firebaseConfig = { apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs", authDomain: "new-all-f99f7.firebaseapp.com", projectId: "new-all-f99f7", storageBucket: "new-all-f99f7.appspot.com", messagingSenderId: "1069748173900", appId: "1:1069748173900:web:158d6336c0f4628133c8e9" };
     const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dwgvvzbvn/auto/upload";
     const CLOUDINARY_PRESET = "storyapp";
 
@@ -249,58 +148,98 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    let tempUser = {};
-    let userId = "";
+    let tempUserData = {};
+    let newUserId = "";
 
-    window.previewFile = (input, imgId, boxId) => {
-        if(input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                document.getElementById(imgId).src = e.target.result;
-                document.getElementById(boxId).classList.add('has-img');
-            }
-            reader.readAsDataURL(input.files[0]);
+    // 1. AUTO LOGIN CHECK
+    onAuthStateChanged(auth, (user) => {
+        const loader = document.getElementById('loading-screen');
+        if (user) {
+            // User is already logged in, redirect immediately
+            window.location.href = "index.html";
+        } else {
+            // No user, show login screen
+            loader.style.display = 'none';
+            document.querySelector('.login-container').style.display = 'flex';
+        }
+    });
+
+    // 2. VIEW TOGGLE (Login <-> Signup)
+    window.toggleView = (view) => {
+        if(view === 'signup') {
+            document.getElementById('loginView').style.display = 'none';
+            document.getElementById('signupView').style.display = 'flex';
+        } else {
+            document.getElementById('signupView').style.display = 'none';
+            document.getElementById('loginView').style.display = 'flex';
         }
     }
 
-    window.nextStep = (step) => {
-        const currentDiv = document.getElementById(`step${step}`);
-        const nextDiv = document.getElementById(`step${step+1}`);
+    // 3. LOGIN LOGIC
+    window.handleLogin = async () => {
+        const email = document.getElementById('loginEmail').value;
+        const pass = document.getElementById('loginPassword').value;
         
-        if(step === 1 && !document.getElementById('mobile').value) return showErr("Mobile number is required");
-        if(step === 2 && (!document.getElementById('firstName').value || !document.getElementById('lastName').value)) return showErr("Please enter full name");
-
-        if(step === 1) tempUser.mobile = document.getElementById('mobile').value;
-        if(step === 2) {
-            tempUser.fname = document.getElementById('firstName').value;
-            tempUser.lname = document.getElementById('lastName').value;
-        }
-
-        currentDiv.classList.remove('active');
-        nextDiv.classList.add('active');
-    }
-
-    window.createAccount = async () => {
-        const email = document.getElementById('email').value;
-        const pass = document.getElementById('password').value;
-        const loader = document.getElementById('fullLoader');
+        if(!email || !pass) return alert("Please enter email and password");
         
-        if(!email || !pass) return showErr("Email and Password required");
-
-        loader.style.display = 'flex';
-        document.getElementById('loaderText').innerText = "Creating Account...";
+        document.getElementById('loading-screen').style.display = 'flex'; // Show loader
 
         try {
-            const userCred = await createUserWithEmailAndPassword(auth, email, pass);
-            userId = userCred.user.uid;
+            await signInWithEmailAndPassword(auth, email, pass);
+            // onAuthStateChanged will handle redirect
+        } catch (error) {
+            document.getElementById('loading-screen').style.display = 'none';
+            alert("Login Failed: " + error.message);
+        }
+    };
 
-            await setDoc(doc(db, "users", userId), {
-                uid: userId,
-                mobile: tempUser.mobile,
-                firstName: tempUser.fname,
-                lastName: tempUser.lname,
-                fullName: `${tempUser.fname} ${tempUser.lname}`,
-                email: email,
+    // 4. SIGNUP LOGIC
+    window.nextStep = (current) => {
+        const stepDiv = document.getElementById(`step${current}`);
+        const nextDiv = document.getElementById(`step${current+1}`);
+
+        // Validation
+        if(current === 1) {
+            const f = document.getElementById('fname').value;
+            const l = document.getElementById('lname').value;
+            if(!f || !l) return alert("Name required");
+            tempUserData.fname = f;
+            tempUserData.lname = l;
+        }
+        if(current === 2) {
+            const m = document.getElementById('mobile').value;
+            const e = document.getElementById('regEmail').value;
+            if(!e) return alert("Email required for login");
+            tempUserData.mobile = m;
+            tempUserData.email = e;
+        }
+
+        stepDiv.classList.remove('active');
+        nextDiv.classList.add('active');
+    };
+
+    window.registerUser = async () => {
+        const pass = document.getElementById('regPassword').value;
+        const btn = document.querySelector('#step3 button');
+        const err = document.getElementById('regError');
+        
+        if(pass.length < 6) return alert("Password must be 6+ chars");
+        
+        btn.innerText = "Creating...";
+        btn.disabled = true;
+
+        try {
+            const userCred = await createUserWithEmailAndPassword(auth, tempUserData.email, pass);
+            newUserId = userCred.user.uid;
+
+            // Save Initial Data
+            await setDoc(doc(db, "users", newUserId), {
+                uid: newUserId,
+                firstName: tempUserData.fname,
+                lastName: tempUserData.lname,
+                fullName: `${tempUserData.fname} ${tempUserData.lname}`,
+                mobile: tempUserData.mobile,
+                email: tempUserData.email,
                 profilePic: "https://via.placeholder.com/150",
                 coverPic: "https://via.placeholder.com/600x200",
                 friends: [],
@@ -308,96 +247,61 @@
                 createdAt: new Date().toISOString()
             });
 
-            loader.style.display = 'none';
             document.getElementById('step3').classList.remove('active');
             document.getElementById('step4').classList.add('active');
-        } catch (e) {
-            loader.style.display = 'none';
-            showErr(e.message);
+
+        } catch (error) {
+            btn.innerText = "Sign Up";
+            btn.disabled = false;
+            err.innerText = error.message;
         }
-    }
+    };
 
-    window.uploadData = async () => {
-        const pFile = document.getElementById('profileInp').files[0];
-        const cFile = document.getElementById('coverInp').files[0];
-        const loader = document.getElementById('fullLoader');
-
-        loader.style.display = 'flex';
-        document.getElementById('loaderText').innerText = "Uploading Photos...";
-
-        try {
-            let pUrl = "https://via.placeholder.com/150";
-            let cUrl = "https://via.placeholder.com/600x200";
-
-            if(pFile) pUrl = await uploadCloud(pFile);
-            if(cFile) cUrl = await uploadCloud(cFile);
-
-            await updateDoc(doc(db, "users", userId), {
-                profilePic: pUrl,
-                coverPic: cUrl
-            });
-
-            await loadFriends();
-            loader.style.display = 'none';
-            document.getElementById('step4').classList.remove('active');
-            document.getElementById('step5').classList.add('active');
-
-        } catch (e) {
-            loader.style.display = 'none';
-            showErr("Upload Failed");
+    // 5. IMAGE UPLOAD
+    window.showPreview = (input) => {
+        if(input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.getElementById('previewImg');
+                img.src = e.target.result;
+                img.style.display = 'block';
+                document.querySelector('.upload-circle i').style.display = 'none';
+            }
+            reader.readAsDataURL(input.files[0]);
         }
-    }
+    };
 
-    async function uploadCloud(file) {
+    window.uploadAndFinish = async () => {
+        const file = document.getElementById('fileInp').files[0];
+        const btn = document.getElementById('finalBtn');
+        
+        if(!file) return finish();
+
+        btn.innerText = "Uploading...";
+        btn.disabled = true;
+
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', CLOUDINARY_PRESET);
-        const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
-        const data = await res.json();
-        return data.secure_url;
-    }
 
-    async function loadFriends() {
-        const list = document.getElementById('friendsList');
-        list.innerHTML = "";
-        const snaps = await getDocs(collection(db, "users"));
-        
-        snaps.forEach(d => {
-            const u = d.data();
-            if(u.uid !== userId) {
-                const item = document.createElement('div');
-                item.className = 'friend-item';
-                item.innerHTML = `
-                    <div class="friend-left">
-                        <img src="${u.profilePic}">
-                        <h4>${u.firstName} ${u.lastName}</h4>
-                    </div>
-                    <button class="friend-action" onclick="sendReq('${u.uid}', this)">Add</button>
-                `;
-                list.appendChild(item);
-            }
-        });
-    }
-
-    window.sendReq = async (id, btn) => {
-        btn.innerText = "Sent";
-        btn.classList.add('sent');
-        btn.disabled = true;
-        await updateDoc(doc(db, "users", id), {
-            friendRequests: arrayUnion(userId)
-        });
-    }
+        try {
+            const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+            const data = await res.json();
+            
+            await updateDoc(doc(db, "users", newUserId), {
+                profilePic: data.secure_url
+            });
+            finish();
+        } catch (e) {
+            alert("Image upload failed");
+            finish();
+        }
+    };
 
     window.finish = () => {
-        window.location.href = "main.html";
+        window.location.href = "index.html";
     }
 
-    function showErr(msg) {
-        const el = document.getElementById('errorMsg');
-        el.innerText = msg;
-        el.style.display = 'block';
-        setTimeout(() => el.style.display = 'none', 3000);
-    }
 </script>
 
 </body>
