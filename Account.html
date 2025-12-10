@@ -10,101 +10,79 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
         body { background-color: #f0f2f5; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* Loader Overlay (To hide screen while checking login) */
         #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; display: flex; justify-content: center; align-items: center; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #1877f2; border-radius: 50%; animation: spin 1s linear infinite; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #1877f2; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* --- LOGIN VIEW --- */
-        .login-container { padding: 20px; text-align: center; display: flex; flex-direction: column; justify-content: center; height: 100%; display: none; }
-        .fb-logo { width: 60px; height: 60px; margin-bottom: 20px; }
-        .app-name { font-size: 28px; color: #1877f2; font-weight: 800; margin-bottom: 40px; letter-spacing: -1px; }
-        
+        .login-container { padding: 20px; text-align: center; display: none; flex-direction: column; justify-content: center; height: 100%; }
+        .app-name { font-size: 32px; color: #1877f2; font-weight: 800; margin-bottom: 40px; letter-spacing: -1px; }
         .form-group { width: 100%; max-width: 400px; margin: 0 auto; }
         .input-field { width: 100%; padding: 14px 16px; border: 1px solid #dddfe2; border-radius: 6px; font-size: 16px; margin-bottom: 12px; outline: none; }
-        .input-field:focus { border-color: #1877f2; box-shadow: 0 0 0 2px #e7f3ff; }
-        
+        .input-field:focus { border-color: #1877f2; }
         .btn-login { width: 100%; background-color: #1877f2; color: white; padding: 12px; font-size: 20px; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 15px; }
-        .forgot-pass { color: #1877f2; font-size: 14px; font-weight: 500; text-decoration: none; display: block; margin-bottom: 30px; }
-        
+        .btn-create { background-color: #42b72a; color: white; padding: 10px 20px; font-size: 16px; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; display: inline-block; }
         .divider { display: flex; align-items: center; margin-bottom: 30px; }
         .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: #ccd0d5; }
         .divider span { padding: 0 10px; color: #65676b; font-size: 13px; }
 
-        .btn-create { background-color: #42b72a; color: white; padding: 10px 20px; font-size: 16px; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; display: inline-block; }
-
-        /* --- SIGNUP WIZARD VIEW --- */
         .signup-container { background: #fff; height: 100%; display: none; flex-direction: column; }
-        .signup-header { padding: 15px; border-bottom: 1px solid #ddd; display: flex; align-items: center; justify-content: space-between; background: #fff; }
-        .back-btn { font-size: 20px; cursor: pointer; color: #333; }
+        .signup-header { padding: 15px; border-bottom: 1px solid #ddd; display: flex; align-items: center; background: #fff; }
+        .back-btn { font-size: 20px; cursor: pointer; color: #333; margin-right: 15px; }
         .header-title { font-size: 18px; font-weight: 600; }
         
         .step-content { padding: 20px; flex: 1; display: none; flex-direction: column; }
         .step-content.active { display: flex; animation: slideIn 0.3s ease; }
         @keyframes slideIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
 
-        .step-title { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+        .step-title { font-size: 22px; font-weight: 700; margin-bottom: 5px; }
         .step-subtitle { color: #65676b; margin-bottom: 20px; font-size: 14px; }
-        
-        .row { display: flex; gap: 10px; }
         .btn-next { background: #1877f2; color: white; width: 100%; padding: 12px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; margin-top: 20px; cursor: pointer; }
         
-        /* Upload Area */
-        .upload-circle { width: 120px; height: 120px; background: #f0f2f5; border-radius: 50%; margin: 20px auto; display: flex; justify-content: center; align-items: center; cursor: pointer; position: relative; overflow: hidden; border: 2px solid #ddd; }
-        .upload-circle img { width: 100%; height: 100%; object-fit: cover; display: none; }
-        .upload-circle i { font-size: 40px; color: #bcc0c4; }
-
+        .upload-circle { width: 140px; height: 140px; background: #f0f2f5; border-radius: 50%; margin: 10px auto; display: flex; justify-content: center; align-items: center; cursor: pointer; position: relative; overflow: hidden; border: 2px solid #ddd; }
+        .upload-rect { width: 100%; height: 180px; background: #f0f2f5; border-radius: 8px; margin: 10px auto; display: flex; justify-content: center; align-items: center; cursor: pointer; position: relative; overflow: hidden; border: 2px solid #ddd; }
+        img.preview { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .icon-area i { font-size: 40px; color: #bcc0c4; }
     </style>
 </head>
 <body>
 
-    <!-- Loading Screen (Checks Login) -->
-    <div id="loading-screen">
-        <div class="spinner"></div>
-    </div>
+    <div id="loading-screen"><div class="spinner"></div></div>
 
-    <!-- Login View (Default) -->
+    <!-- Login View -->
     <div class="login-container" id="loginView">
-        <div class="app-name">facebook</div> <!-- Replace with tio if you want -->
-        
+        <div class="app-name">tio</div>
         <div class="form-group">
             <input type="email" id="loginEmail" class="input-field" placeholder="Mobile number or email">
             <input type="password" id="loginPassword" class="input-field" placeholder="Password">
             <button class="btn-login" onclick="handleLogin()">Log In</button>
-            <a href="#" class="forgot-pass">Forgotten Password?</a>
-            
             <div class="divider"><span>OR</span></div>
-            
             <button class="btn-create" onclick="toggleView('signup')">Create new account</button>
         </div>
     </div>
 
-    <!-- Signup View (Hidden) -->
+    <!-- Signup Wizard -->
     <div class="signup-container" id="signupView">
         <div class="signup-header">
             <i class="fas fa-arrow-left back-btn" onclick="toggleView('login')"></i>
             <span class="header-title">Create account</span>
-            <div style="width:20px"></div>
         </div>
 
         <form onsubmit="event.preventDefault()">
+            
             <!-- Step 1: Name -->
             <div class="step-content active" id="step1">
                 <div class="step-title">What's your name?</div>
                 <div class="step-subtitle">Enter the name you use in real life.</div>
-                <div class="row">
-                    <input type="text" id="fname" class="input-field" placeholder="First name" required>
-                    <input type="text" id="lname" class="input-field" placeholder="Surname" required>
-                </div>
+                <input type="text" id="fname" class="input-field" placeholder="First name">
+                <input type="text" id="lname" class="input-field" placeholder="Surname" style="margin-top:10px;">
                 <button class="btn-next" onclick="nextStep(1)">Next</button>
             </div>
 
             <!-- Step 2: Contact -->
             <div class="step-content" id="step2">
-                <div class="step-title">What's your mobile number?</div>
-                <div class="step-subtitle">Enter the mobile number where you can be contacted.</div>
-                <input type="text" id="mobile" class="input-field" placeholder="Mobile number" required>
-                <div style="margin-top:10px; font-size:12px; color:#65676b">You'll also use this email to login.</div>
+                <div class="step-title">Contact info</div>
+                <div class="step-subtitle">Enter your mobile and email.</div>
+                <input type="text" id="mobile" class="input-field" placeholder="Mobile number">
                 <input type="email" id="regEmail" class="input-field" placeholder="Email address" style="margin-top:10px;">
                 <button class="btn-next" onclick="nextStep(2)">Next</button>
             </div>
@@ -112,26 +90,37 @@
             <!-- Step 3: Password -->
             <div class="step-content" id="step3">
                 <div class="step-title">Choose a password</div>
-                <div class="step-subtitle">Create a password with at least 6 characters. It should be something others couldn't guess.</div>
-                <input type="password" id="regPassword" class="input-field" placeholder="New password" required>
+                <div class="step-subtitle">Create a password with at least 6 characters.</div>
+                <input type="password" id="regPassword" class="input-field" placeholder="New password">
                 <button class="btn-next" onclick="registerUser()">Sign Up</button>
                 <p id="regError" style="color:red; font-size:12px; margin-top:10px; text-align:center;"></p>
             </div>
 
             <!-- Step 4: Profile Pic -->
             <div class="step-content" id="step4">
-                <div class="step-title">Add a profile picture</div>
-                <div class="step-subtitle">Add a photo so friends can find you.</div>
-                
-                <div class="upload-circle" onclick="document.getElementById('fileInp').click()">
-                    <i class="fas fa-camera"></i>
-                    <img id="previewImg">
+                <div class="step-title">Profile Picture</div>
+                <div class="step-subtitle">Add a photo so friends can recognize you.</div>
+                <div class="upload-circle" onclick="document.getElementById('profileInp').click()">
+                    <div class="icon-area"><i class="fas fa-camera"></i></div>
+                    <img id="pPreview" class="preview">
                 </div>
-                <input type="file" id="fileInp" hidden accept="image/*" onchange="showPreview(this)">
-                
-                <button class="btn-next" id="finalBtn" onclick="uploadAndFinish()">Save</button>
-                <button class="btn-next" style="background:#e4e6eb; color:black;" onclick="finish()">Skip</button>
+                <input type="file" id="profileInp" hidden accept="image/*" onchange="preview(this, 'pPreview')">
+                <button class="btn-next" onclick="nextStep(4)">Next</button>
             </div>
+
+            <!-- Step 5: Cover Photo -->
+            <div class="step-content" id="step5">
+                <div class="step-title">Cover Photo</div>
+                <div class="step-subtitle">Add a cover photo to your profile.</div>
+                <div class="upload-rect" onclick="document.getElementById('coverInp').click()">
+                    <div class="icon-area"><i class="fas fa-image"></i></div>
+                    <img id="cPreview" class="preview">
+                </div>
+                <input type="file" id="coverInp" hidden accept="image/*" onchange="preview(this, 'cPreview')">
+                <button class="btn-next" id="finalBtn" onclick="uploadAndFinish()">Save & Finish</button>
+                <button class="btn-next" style="background:#e4e6eb; color:black; margin-top:10px;" onclick="finish()">Skip</button>
+            </div>
+
         </form>
     </div>
 
@@ -148,161 +137,125 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    let tempUserData = {};
-    let newUserId = "";
+    let temp = {};
+    let uid = "";
 
-    // 1. AUTO LOGIN CHECK
     onAuthStateChanged(auth, (user) => {
         const loader = document.getElementById('loading-screen');
         if (user) {
-            // User is already logged in, redirect immediately
             window.location.href = "index.html";
         } else {
-            // No user, show login screen
             loader.style.display = 'none';
-            document.querySelector('.login-container').style.display = 'flex';
+            document.getElementById('loginView').style.display = 'flex';
         }
     });
 
-    // 2. VIEW TOGGLE (Login <-> Signup)
-    window.toggleView = (view) => {
-        if(view === 'signup') {
-            document.getElementById('loginView').style.display = 'none';
-            document.getElementById('signupView').style.display = 'flex';
-        } else {
-            document.getElementById('signupView').style.display = 'none';
-            document.getElementById('loginView').style.display = 'flex';
+    window.toggleView = (v) => {
+        document.getElementById('loginView').style.display = v === 'login' ? 'flex' : 'none';
+        document.getElementById('signupView').style.display = v === 'signup' ? 'flex' : 'none';
+    }
+
+    window.handleLogin = async () => {
+        const e = document.getElementById('loginEmail').value;
+        const p = document.getElementById('loginPassword').value;
+        if(!e || !p) return alert("Missing fields");
+        document.getElementById('loading-screen').style.display = 'flex';
+        try { await signInWithEmailAndPassword(auth, e, p); } 
+        catch (err) { 
+            document.getElementById('loading-screen').style.display = 'none';
+            alert("Error: " + err.message); 
         }
     }
 
-    // 3. LOGIN LOGIC
-    window.handleLogin = async () => {
-        const email = document.getElementById('loginEmail').value;
-        const pass = document.getElementById('loginPassword').value;
+    window.nextStep = (s) => {
+        if(s===1 && (!document.getElementById('fname').value || !document.getElementById('lname').value)) return alert("Enter Name");
+        if(s===2 && !document.getElementById('regEmail').value) return alert("Enter Email");
         
-        if(!email || !pass) return alert("Please enter email and password");
-        
-        document.getElementById('loading-screen').style.display = 'flex'; // Show loader
+        if(s===1) { temp.f = document.getElementById('fname').value; temp.l = document.getElementById('lname').value; }
+        if(s===2) { temp.m = document.getElementById('mobile').value; temp.e = document.getElementById('regEmail').value; }
 
-        try {
-            await signInWithEmailAndPassword(auth, email, pass);
-            // onAuthStateChanged will handle redirect
-        } catch (error) {
-            document.getElementById('loading-screen').style.display = 'none';
-            alert("Login Failed: " + error.message);
-        }
-    };
-
-    // 4. SIGNUP LOGIC
-    window.nextStep = (current) => {
-        const stepDiv = document.getElementById(`step${current}`);
-        const nextDiv = document.getElementById(`step${current+1}`);
-
-        // Validation
-        if(current === 1) {
-            const f = document.getElementById('fname').value;
-            const l = document.getElementById('lname').value;
-            if(!f || !l) return alert("Name required");
-            tempUserData.fname = f;
-            tempUserData.lname = l;
-        }
-        if(current === 2) {
-            const m = document.getElementById('mobile').value;
-            const e = document.getElementById('regEmail').value;
-            if(!e) return alert("Email required for login");
-            tempUserData.mobile = m;
-            tempUserData.email = e;
-        }
-
-        stepDiv.classList.remove('active');
-        nextDiv.classList.add('active');
-    };
+        document.getElementById(`step${s}`).classList.remove('active');
+        document.getElementById(`step${s+1}`).classList.add('active');
+    }
 
     window.registerUser = async () => {
-        const pass = document.getElementById('regPassword').value;
+        const p = document.getElementById('regPassword').value;
+        if(p.length < 6) return alert("Password too short");
+        
         const btn = document.querySelector('#step3 button');
-        const err = document.getElementById('regError');
-        
-        if(pass.length < 6) return alert("Password must be 6+ chars");
-        
         btn.innerText = "Creating...";
-        btn.disabled = true;
-
+        
         try {
-            const userCred = await createUserWithEmailAndPassword(auth, tempUserData.email, pass);
-            newUserId = userCred.user.uid;
-
-            // Save Initial Data
-            await setDoc(doc(db, "users", newUserId), {
-                uid: newUserId,
-                firstName: tempUserData.fname,
-                lastName: tempUserData.lname,
-                fullName: `${tempUserData.fname} ${tempUserData.lname}`,
-                mobile: tempUserData.mobile,
-                email: tempUserData.email,
+            const cred = await createUserWithEmailAndPassword(auth, temp.e, p);
+            uid = cred.user.uid;
+            
+            await setDoc(doc(db, "users", uid), {
+                uid: uid,
+                fullName: `${temp.f} ${temp.l}`,
+                firstName: temp.f, lastName: temp.l,
+                mobile: temp.m, email: temp.e,
                 profilePic: "https://via.placeholder.com/150",
                 coverPic: "https://via.placeholder.com/600x200",
-                friends: [],
-                friendRequests: [],
+                friends: [], friendRequests: [],
                 createdAt: new Date().toISOString()
             });
 
             document.getElementById('step3').classList.remove('active');
             document.getElementById('step4').classList.add('active');
-
-        } catch (error) {
+        } catch (e) {
             btn.innerText = "Sign Up";
-            btn.disabled = false;
-            err.innerText = error.message;
+            document.getElementById('regError').innerText = e.message;
         }
-    };
+    }
 
-    // 5. IMAGE UPLOAD
-    window.showPreview = (input) => {
-        if(input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = document.getElementById('previewImg');
-                img.src = e.target.result;
-                img.style.display = 'block';
-                document.querySelector('.upload-circle i').style.display = 'none';
+    window.preview = (inp, id) => {
+        if(inp.files[0]) {
+            const r = new FileReader();
+            r.onload = (e) => {
+                document.getElementById(id).src = e.target.result;
+                document.getElementById(id).style.display = "block";
+                document.getElementById(id).previousElementSibling.style.display = "none";
             }
-            reader.readAsDataURL(input.files[0]);
+            r.readAsDataURL(inp.files[0]);
         }
-    };
+    }
 
     window.uploadAndFinish = async () => {
-        const file = document.getElementById('fileInp').files[0];
+        const pf = document.getElementById('profileInp').files[0];
+        const cf = document.getElementById('coverInp').files[0];
         const btn = document.getElementById('finalBtn');
-        
-        if(!file) return finish();
-
         btn.innerText = "Uploading...";
         btn.disabled = true;
 
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', CLOUDINARY_PRESET);
-
         try {
-            const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
-            const data = await res.json();
-            
-            await updateDoc(doc(db, "users", newUserId), {
-                profilePic: data.secure_url
-            });
+            let pUrl = null, cUrl = null;
+            if(pf) pUrl = await up(pf);
+            if(cf) cUrl = await up(cf);
+
+            const updateData = {};
+            if(pUrl) updateData.profilePic = pUrl;
+            if(cUrl) updateData.coverPic = cUrl;
+
+            if(Object.keys(updateData).length > 0) {
+                await updateDoc(doc(db, "users", uid), updateData);
+            }
             finish();
         } catch (e) {
-            alert("Image upload failed");
+            alert("Upload error");
             finish();
         }
-    };
-
-    window.finish = () => {
-        window.location.href = "index.html";
     }
 
-</script>
+    async function up(f) {
+        const fd = new FormData();
+        fd.append('file', f);
+        fd.append('upload_preset', CLOUDINARY_PRESET);
+        const r = await fetch(CLOUDINARY_URL, {method:'POST', body:fd});
+        return (await r.json()).secure_url;
+    }
 
+    window.finish = () => window.location.href = "index.html";
+
+</script>
 </body>
 </html>
