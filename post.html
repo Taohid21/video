@@ -7,50 +7,109 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: #fff; height: 100vh; display: flex; flex-direction: column; }
-        .head { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #ddd; }
-        .head span { font-size: 18px; font-weight: 500; }
-        .btn-post { background: #1877f2; color: white; padding: 8px 20px; border-radius: 6px; border: none; font-weight: 600; font-size: 15px; disabled: true; opacity: 0.5; }
+        :root {
+            --bg: #f0f2f5;
+            --card: #ffffff;
+            --text: #050505;
+            --text-sec: #65676b;
+            --accent: #1877f2;
+            --border: #e4e6eb;
+            --hover: #f0f2f5;
+            --input: #f0f2f5;
+            --shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        body.dark-mode {
+            --bg: #18191a;
+            --card: #242526;
+            --text: #e4e6eb;
+            --text-sec: #b0b3b8;
+            --accent: #2d88ff;
+            --border: #3e4042;
+            --hover: #3a3b3c;
+            --input: #3a3b3c;
+            --shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { background-color: var(--card); color: var(--text); height: 100vh; display: flex; flex-direction: column; transition: 0.3s; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); background: var(--card); }
+        .h-title { font-size: 18px; font-weight: 700; color: var(--text); }
+        .btn-post { background: var(--accent); color: white; padding: 8px 20px; border-radius: 6px; border: none; font-weight: 600; font-size: 15px; opacity: 0.5; transition: 0.2s; cursor: default; }
         .btn-post.active { opacity: 1; cursor: pointer; }
         .user-sec { padding: 15px; display: flex; gap: 10px; align-items: center; }
-        .u-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
-        .input-area { flex: 1; padding: 0 15px; overflow-y: auto; }
-        textarea { width: 100%; border: none; outline: none; font-size: 20px; resize: none; min-height: 100px; }
-        .preview-box { margin-top: 20px; position: relative; display: none; border-radius: 10px; overflow: hidden; border: 1px solid #ddd; }
-        .preview-box img, .preview-box video { width: 100%; max-height: 400px; object-fit: contain; background: black; }
-        .preview-box iframe { width: 100%; height: 300px; border: none; }
-        .del-media { position: absolute; top: 10px; right: 10px; background: white; padding: 5px 10px; border-radius: 50%; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .tools { border-top: 1px solid #eee; padding: 15px; }
-        .tool-btn { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; cursor: pointer; }
-        .tool-btn:active { background: #f0f2f5; }
-        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; justify-content: center; align-items: center; z-index: 99; }
+        .u-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: var(--input); }
+        .u-name { font-weight: 600; font-size: 16px; color: var(--text); }
+        .main-area { flex: 1; overflow-y: auto; padding: 0 15px 15px; }
+        #txt { width: 100%; border: none; outline: none; font-size: 20px; resize: none; min-height: 80px; background: transparent; color: var(--text); margin-bottom: 15px; }
+        #txt::placeholder { color: var(--text-sec); }
+        .preview-box { position: relative; width: 100%; border-radius: 10px; overflow: hidden; display: none; background: #000; border: 1px solid var(--border); }
+        .preview-box img, .preview-box video { width: 100%; max-height: 400px; object-fit: contain; display: block; }
+        .preview-box iframe { width: 100%; aspect-ratio: 16/9; border: none; display: block; }
+        .del-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; backdrop-filter: blur(4px); }
+        .bottom-tools { padding: 15px; border-top: 1px solid var(--border); background: var(--card); }
+        .tool-row { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+        .tool-opt { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; cursor: pointer; border-bottom: 1px solid var(--border); background: var(--card); transition: 0.2s; }
+        .tool-opt:last-child { border-bottom: none; }
+        .tool-opt:active { background: var(--hover); }
+        .tool-opt span { font-weight: 500; font-size: 15px; color: var(--text); }
+        .yt-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index: 2000; display:none; align-items:center; justify-content:center; padding: 20px; backdrop-filter: blur(5px); }
+        .ym-box { background: var(--card); width: 100%; max-width: 400px; padding: 20px; border-radius: 12px; box-shadow: var(--shadow); }
+        .ym-head { font-weight: 700; font-size: 18px; margin-bottom: 15px; color: var(--text); }
+        .ym-inp { width: 100%; padding: 12px; background: var(--input); border: 1px solid var(--border); border-radius: 8px; color: var(--text); outline: none; margin-bottom: 15px; }
+        .ym-act { display: flex; gap: 10px; justify-content: flex-end; }
+        .ym-btn { padding: 8px 15px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; font-size: 14px; }
+        .loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: none; justify-content: center; align-items: center; z-index: 3000; flex-direction: column; }
     </style>
 </head>
-<body>
-    <div id="loader"><i class="fas fa-spinner fa-spin" style="font-size:30px; color:#1877f2"></i></div>
-    <div class="head">
-        <i class="fas fa-arrow-left" style="font-size:20px;" onclick="window.history.back()"></i>
-        <span>Create Post</span>
-        <button class="btn-post" id="subBtn" onclick="pub()">Post</button>
+<body class="dark-mode">
+
+    <div id="loader" class="loader">
+        <i class="fas fa-circle-notch fa-spin" style="font-size:35px; color:var(--accent); margin-bottom:10px;"></i>
+        <div style="font-weight:600; color:var(--text-sec);">Posting...</div>
     </div>
+
+    <div class="header">
+        <i class="fas fa-arrow-left" style="font-size:22px; color:var(--text); cursor:pointer;" onclick="location.href='index.html'"></i>
+        <span class="h-title">Create Post</span>
+        <button id="postBtn" class="btn-post" onclick="publish()">Post</button>
+    </div>
+
     <div class="user-sec">
-        <img id="myPic" class="u-img" src="https://via.placeholder.com/50">
-        <span id="myName" style="font-weight:600;">Loading...</span>
+        <img id="uPic" class="u-img">
+        <span id="uName" class="u-name">Loading...</span>
     </div>
-    <div class="input-area">
-        <textarea id="txt" placeholder="What's on your mind? or Paste YouTube Link"></textarea>
-        <div class="preview-box" id="prevBox">
-            <div class="del-media" onclick="clr()"><i class="fas fa-times"></i></div>
-            <div id="contentHolder"></div>
+
+    <div class="main-area">
+        <textarea id="txt" placeholder="What's on your mind?"></textarea>
+        <div id="prevBox" class="preview-box">
+            <div class="del-btn" onclick="clearMedia()"><i class="fas fa-times"></i></div>
+            <div id="mediaCont"></div>
         </div>
     </div>
-    <div class="tools">
-        <div class="tool-btn" onclick="document.getElementById('fIn').click()">
-            <i class="fas fa-photo-video" style="color:#45bd62; font-size:24px;"></i>
-            <span>Photo/Video</span>
+
+    <div class="bottom-tools">
+        <div class="tool-row">
+            <div class="tool-opt" onclick="document.getElementById('fIn').click()">
+                <span>Photo / Video</span>
+                <i class="fas fa-images" style="color:#45bd62; font-size:22px;"></i>
+            </div>
+            <div class="tool-opt" onclick="openYT()">
+                <span>YouTube Video</span>
+                <i class="fab fa-youtube" style="color:#ff0000; font-size:22px;"></i>
+            </div>
         </div>
-        <input type="file" id="fIn" hidden accept="image/*,video/*" onchange="fileSel(this)">
+    </div>
+
+    <input type="file" id="fIn" hidden accept="image/*,video/*" onchange="handleFile(this)">
+
+    <div id="ytMod" class="yt-modal">
+        <div class="ym-box">
+            <div class="ym-head">Add YouTube Video</div>
+            <input id="ytInp" class="ym-inp" placeholder="Paste YouTube Link here...">
+            <div class="ym-act">
+                <button class="ym-btn" style="background:transparent; color:var(--text);" onclick="closeYT()">Cancel</button>
+                <button class="ym-btn" style="background:var(--accent); color:white;" onclick="addYT()">Add</button>
+            </div>
+        </div>
     </div>
 
     <script type="module">
@@ -60,95 +119,127 @@
 
         const cfg = { apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs", authDomain: "new-all-f99f7.firebaseapp.com", projectId: "new-all-f99f7", storageBucket: "new-all-f99f7.appspot.com", messagingSenderId: "1069748173900", appId: "1:1069748173900:web:158d6336c0f4628133c8e9" };
         const C_URL = "https://api.cloudinary.com/v1_1/dwgvvzbvn/auto/upload";
-        const C_PRESET = "storyapp";
+        const C_PRE = "storyapp";
 
         const app = initializeApp(cfg);
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        let user = null;
-        let file = null;
+        let me = null;
+        let mediaFile = null;
         let ytId = null;
+
+        const initTheme = () => {
+            if(localStorage.getItem('theme') === 'light') document.body.classList.remove('dark-mode');
+            else document.body.classList.add('dark-mode');
+        };
+        initTheme();
 
         onAuthStateChanged(auth, async (u) => {
             if(u) {
-                user = u;
+                me = u;
                 const d = (await getDoc(doc(db,"users",u.uid))).data();
-                document.getElementById('myPic').src = d.profilePic;
-                document.getElementById('myName').innerText = d.fullName;
-            } else window.location.href="Account.html";
+                document.getElementById('uPic').src = d.profilePic;
+                document.getElementById('uName').innerText = d.fullName;
+            } else location.href = "Account.html";
         });
 
         const txt = document.getElementById('txt');
-        const btn = document.getElementById('subBtn');
+        const btn = document.getElementById('postBtn');
 
-        txt.addEventListener('input', () => {
-            const val = txt.value;
-            const ytMatch = val.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
-            
-            if(ytMatch && !file) {
-                ytId = ytMatch[1];
-                document.getElementById('contentHolder').innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>`;
-                document.getElementById('prevBox').style.display = 'block';
-            }
-            chk();
-        });
+        txt.addEventListener('input', checkState);
 
-        window.fileSel = (inp) => {
+        window.handleFile = (inp) => {
             if(inp.files[0]) {
-                file = inp.files[0];
+                mediaFile = inp.files[0];
                 ytId = null;
-                const url = URL.createObjectURL(file);
-                const isVid = file.type.startsWith('video');
-                const h = document.getElementById('contentHolder');
-                h.innerHTML = isVid ? `<video src="${url}" controls style="width:100%"></video>` : `<img src="${url}" style="width:100%">`;
-                document.getElementById('prevBox').style.display = 'block';
-                chk();
+                const url = URL.createObjectURL(mediaFile);
+                const isVid = mediaFile.type.startsWith('video');
+                renderPreview(isVid ? `<video src="${url}" controls></video>` : `<img src="${url}">`);
             }
         }
 
-        window.clr = () => {
-            file = null;
-            ytId = null;
-            document.getElementById('fIn').value = "";
-            document.getElementById('prevBox').style.display = 'none';
-            document.getElementById('contentHolder').innerHTML = "";
-            chk();
+        window.openYT = () => {
+            document.getElementById('ytMod').style.display = 'flex';
+            document.getElementById('ytInp').focus();
         }
 
-        function chk() {
-            if(txt.value.trim() || file || ytId) {
-                btn.classList.add('active'); btn.disabled = false;
+        window.closeYT = () => {
+            document.getElementById('ytMod').style.display = 'none';
+            document.getElementById('ytInp').value = '';
+        }
+
+        window.addYT = () => {
+            const v = document.getElementById('ytInp').value;
+            const match = v.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+            if(match) {
+                ytId = match[1];
+                mediaFile = null;
+                renderPreview(`<iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>`);
+                closeYT();
             } else {
-                btn.classList.remove('active'); btn.disabled = true;
+                alert("Invalid YouTube Link");
             }
         }
 
-        window.pub = async () => {
+        function renderPreview(html) {
+            document.getElementById('mediaCont').innerHTML = html;
+            document.getElementById('prevBox').style.display = 'block';
+            checkState();
+        }
+
+        window.clearMedia = () => {
+            mediaFile = null;
+            ytId = null;
+            document.getElementById('fIn').value = '';
+            document.getElementById('prevBox').style.display = 'none';
+            document.getElementById('mediaCont').innerHTML = '';
+            checkState();
+        }
+
+        function checkState() {
+            if(txt.value.trim() || mediaFile || ytId) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        }
+
+        window.publish = async () => {
+            if(!btn.classList.contains('active')) return;
             document.getElementById('loader').style.display = 'flex';
+            
             try {
                 let mUrl = null, type = 'text';
-                
+
                 if(ytId) {
                     mUrl = `https://www.youtube.com/embed/${ytId}`;
                     type = 'youtube';
-                } else if (file) {
-                    const fd = new FormData(); fd.append('file', file); fd.append('upload_preset', C_PRESET);
-                    const res = await fetch(C_URL, {method:'POST', body:fd});
-                    const data = await res.json();
-                    mUrl = data.secure_url;
-                    type = file.type.startsWith('video') ? 'video' : 'image';
+                } else if(mediaFile) {
+                    const fd = new FormData(); fd.append('file', mediaFile); fd.append('upload_preset', C_PRE);
+                    const r = await fetch(C_URL, {method:'POST', body:fd});
+                    const d = await r.json();
+                    mUrl = d.secure_url;
+                    type = mediaFile.type.startsWith('video') ? 'video' : 'image';
                 }
 
-                const ud = (await getDoc(doc(db,"users",user.uid))).data();
+                const uData = (await getDoc(doc(db,"users",me.uid))).data();
                 
                 await addDoc(collection(db,"posts"), {
-                    uid: user.uid, userName: ud.fullName, userPic: ud.profilePic,
-                    text: txt.value, mediaUrl: mUrl, type: type, likes: [], timestamp: new Date().toISOString()
+                    uid: me.uid,
+                    userName: uData.fullName,
+                    userPic: uData.profilePic,
+                    text: txt.value,
+                    mediaUrl: mUrl,
+                    type: type,
+                    likes: [],
+                    timestamp: new Date().toISOString()
                 });
-                window.location.href = "index.html";
+                
+                location.href = "index.html";
             } catch(e) {
-                alert("Error"); document.getElementById('loader').style.display = 'none';
+                alert("Upload failed");
+                document.getElementById('loader').style.display = 'none';
             }
         }
     </script>
