@@ -19,7 +19,8 @@
         .back-btn { font-size: 24px; color: var(--bubble-sent); cursor: pointer; padding: 5px; }
         .u-ava { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #ccc; }
         .u-nm { font-weight: 700; font-size: 17px; }
-        .head-act i { font-size: 22px; color: var(--bubble-sent); margin-left: 20px; cursor: pointer; }
+        .head-act i { font-size: 20px; color: var(--bubble-sent); margin-left: 20px; cursor: pointer; padding: 8px; border-radius: 50%; transition: 0.2s; }
+        .head-act i:active { background: rgba(0,132,255,0.1); }
 
         /* INBOX LIST */
         #inbox-view { width: 100%; height: 100%; display: flex; flex-direction: column; position: absolute; background: var(--bg); z-index: 10; }
@@ -32,12 +33,10 @@
         .ib-m { font-size: 13px; color: #65676b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px; }
         .dark-mode .ib-m { color: #b0b3b8; }
         
-        /* Floating Button for New Chat */
         .fab { position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; background: var(--bubble-sent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 4px 10px rgba(0,132,255,0.3); cursor: pointer; z-index: 20; }
 
-        /* FRIENDS LIST MODAL */
+        /* FRIEND SELECTOR */
         #fr-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 30; display: none; flex-direction: column; animation: slideUp 0.3s ease; }
-        @keyframes slideUp { from {transform: translateY(100%);} to {transform: translateY(0);} }
 
         /* CHAT AREA */
         #chat-interface { width: 100%; height: 100%; display: none; flex-direction: column; background: var(--bg); position: absolute; z-index: 15; }
@@ -46,14 +45,28 @@
         .msg-row { display: flex; flex-direction: column; max-width: 70%; position: relative; }
         .msg-row.sent { align-self: flex-end; align-items: flex-end; }
         .msg-row.rec { align-self: flex-start; align-items: flex-start; }
-        
         .msg-bub { padding: 10px 14px; border-radius: 18px; font-size: 15px; line-height: 1.4; word-wrap: break-word; position: relative; }
         .sent .msg-bub { background: var(--bubble-sent); color: white; border-bottom-right-radius: 4px; }
         .rec .msg-bub { background: var(--bubble-rec); color: var(--text); border-bottom-left-radius: 4px; }
-        
-        /* Media in Chat */
         .msg-img, .msg-vid { width: 100%; max-width: 200px; border-radius: 15px; margin-bottom: 5px; border: 1px solid rgba(0,0,0,0.1); }
         .msg-aud { height: 40px; max-width: 220px; border-radius: 20px; }
+
+        /* FULL SCREEN CALL OVERLAY (MESSENGER STYLE) */
+        #call-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; animation: fadeIn 0.3s; }
+        .call-avatar-box { position: relative; margin-bottom: 20px; }
+        .call-avatar { width: 120px; height: 120px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); object-fit: cover; }
+        .pulse-ring { position: absolute; top:0; left:0; width:100%; height:100%; border-radius: 50%; animation: pulseRing 1.5s infinite; border: 4px solid rgba(255,255,255,0.5); }
+        .call-name { font-size: 28px; font-weight: 700; margin-bottom: 5px; text-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        .call-status { font-size: 16px; opacity: 0.8; margin-bottom: 80px; }
+        .call-actions { display: flex; gap: 50px; align-items: center; }
+        .c-btn { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .c-btn:active { transform: scale(0.9); }
+        .bg-red { background: #ff3b30; color: white; }
+        .bg-green { background: #34c759; color: white; animation: bounce 1s infinite; }
+
+        @keyframes pulseRing { 0% {transform: scale(1); opacity: 0.8;} 100% {transform: scale(1.5); opacity: 0;} }
+        @keyframes bounce { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-10px);} }
+        @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
 
         /* INPUT BAR */
         .chat-foot { padding: 8px 10px; display: flex; align-items: center; gap: 10px; border-top: 1px solid rgba(0,0,0,0.1); background: var(--bg); }
@@ -61,7 +74,6 @@
         .cf-in-box { flex: 1; background: var(--input-bg); border-radius: 20px; display: flex; align-items: center; padding: 8px 12px; }
         .cf-in { background: transparent; border: none; flex: 1; outline: none; color: var(--text); font-size: 15px; }
         .mic-active { color: red !important; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% {transform: scale(1);} 50% {transform: scale(1.2);} 100% {transform: scale(1);} }
 
         #loader { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg); z-index: 100; display:flex; justify-content:center; align-items:center; }
     </style>
@@ -98,35 +110,50 @@
                 <div id="c-name" class="u-nm">User</div>
             </div>
             <div class="head-act">
-                <i class="fas fa-phone-alt"></i>
-                <i class="fas fa-video"></i>
+                <i class="fas fa-phone-alt" onclick="initiateCall()"></i>
                 <i class="fas fa-info-circle"></i>
             </div>
         </div>
-
         <div id="msg-area"></div>
-
         <div class="chat-foot">
             <i class="fas fa-image cf-icon" onclick="document.getElementById('media-in').click()"></i>
             <input type="file" id="media-in" hidden accept="image/*,video/*" onchange="uploadMedia(this)">
-            
-            <div class="cf-in-box">
-                <input id="msg-in" class="cf-in" placeholder="Message..." onkeyup="chkTyping(this)">
-            </div>
-            
+            <div class="cf-in-box"><input id="msg-in" class="cf-in" placeholder="Message..." onkeyup="chkTyping(this)"></div>
             <i class="fas fa-microphone cf-icon" id="mic-btn" onclick="toggleMic()"></i>
             <i class="fas fa-paper-plane cf-icon" id="send-btn" style="display:none;" onclick="sendTxt()"></i>
         </div>
     </div>
 
+    <!-- CALL OVERLAY -->
+    <div id="call-modal">
+        <div class="call-avatar-box">
+            <div class="pulse-ring"></div>
+            <img id="call-img" class="call-avatar" src="">
+        </div>
+        <div id="call-nm" class="call-name">Unknown</div>
+        <div id="call-st" class="call-status">Calling...</div>
+        
+        <div class="call-actions">
+            <!-- Decline -->
+            <div class="c-btn bg-red" onclick="endCall()">
+                <i class="fas fa-phone-slash"></i>
+            </div>
+            <!-- Accept (Only shows for receiver) -->
+            <div class="c-btn bg-green" id="ans-btn" style="display:none;" onclick="answerCall()">
+                <i class="fas fa-phone"></i>
+            </div>
+        </div>
+        <audio id="remote-audio" autoplay></audio>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, query, orderBy, addDoc, onSnapshot, where, setDoc, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, query, orderBy, addDoc, onSnapshot, where, setDoc, serverTimestamp, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const cfg = { apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs", authDomain: "new-all-f99f7.firebaseapp.com", projectId: "new-all-f99f7", storageBucket: "new-all-f99f7.appspot.com", messagingSenderId: "1069748173900", appId: "1:1069748173900:web:158d6336c0f4628133c8e9" };
         const C_URL = "https://api.cloudinary.com/v1_1/dwgvvzbvn/auto/upload";
-        const C_PRE = "storyapp"; // Using same preset for simplicity
+        const C_PRE = "storyapp"; 
 
         const app = initializeApp(cfg);
         const auth = getAuth(app);
@@ -134,131 +161,88 @@
 
         let me = null;
         let chatId = null;
-        let otherUser = null;
+        let otherUser = null; // For current chat context
+        let incomingCallData = null; // For global call context
+        
         let unsubMsg = null;
         let mediaRecorder = null;
         let audioChunks = [];
+        let pc = null;
+        let localStream = null;
+        const servers = { iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
 
-        // Dark Mode Check
         if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
 
         onAuthStateChanged(auth, async (u) => {
             if(u) {
                 me = u;
                 document.getElementById('loader').style.display = 'none';
-                
-                // Load Inbox List First
                 loadInbox();
+                
+                // **** GLOBAL CALL LISTENER ****
+                listenIncomingCalls();
 
-                // Check URL for Direct Chat
-                const urlParams = new URLSearchParams(window.location.search);
-                const targetUid = urlParams.get('uid');
+                const targetUid = new URLSearchParams(window.location.search).get('uid');
                 if(targetUid) startChat(targetUid);
             } else {
                 location.href = "Account.html";
             }
         });
 
-        // 1. INBOX LOGIC
+        // 1. INBOX
         function loadInbox() {
-            const q = query(collection(db, "chats"), where("users", "array-contains", me.uid), orderBy("lastMsgTime", "desc"));
+            const q = query(collection(db, "chats"), where("users", "array-contains", me.uid));
             onSnapshot(q, (snap) => {
                 const list = document.getElementById('chat-list');
                 list.innerHTML = "";
-                
                 if(snap.empty) {
-                    list.innerHTML = `
-                        <div style="text-align:center; padding:40px 20px;">
-                            <div style="font-size:60px; color:#ddd; margin-bottom:10px;"><i class="fab fa-facebook-messenger"></i></div>
-                            <h3 style="color:var(--text)">No messages yet</h3>
-                            <p style="color:#888; margin-top:5px;">Tap the pencil icon to start chatting with friends.</p>
-                        </div>`;
+                    list.innerHTML = `<div style="text-align:center; padding:40px 20px;"><div style="font-size:60px; color:#ddd; margin-bottom:10px;"><i class="fab fa-facebook-messenger"></i></div><h3 style="color:var(--text)">No messages yet</h3></div>`;
                     return;
                 }
-
-                snap.forEach(d => {
-                    const data = d.data();
-                    const otherId = data.users.find(id => id !== me.uid);
-                    // Safeguard if userInfo is missing
-                    const info = data.userInfo && data.userInfo[otherId] ? data.userInfo[otherId] : { name: "User", pic: "" };
-                    
-                    // Format Time
-                    let timeStr = "";
-                    if(data.lastMsgTime) {
-                        const date = data.lastMsgTime.toDate();
-                        timeStr = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    }
-
-                    list.innerHTML += `
-                        <div class="ib-item" onclick="startChat('${otherId}')">
-                            <img src="${info.pic}" class="u-ava">
-                            <div class="ib-det">
-                                <div style="display:flex; justify-content:space-between;">
-                                    <div class="ib-n">${info.name}</div>
-                                    <div style="font-size:12px; color:#888;">${timeStr}</div>
-                                </div>
-                                <div class="ib-m">${data.lastMsg || "Media sent"}</div>
-                            </div>
-                        </div>
-                    `;
+                let chats = [];
+                snap.forEach(d => chats.push({id: d.id, ...d.data()}));
+                chats.sort((a, b) => (b.lastMsgTime?.toMillis() || 0) - (a.lastMsgTime?.toMillis() || 0));
+                
+                chats.forEach(d => {
+                    const oid = d.users.find(id => id !== me.uid);
+                    const info = d.userInfo && d.userInfo[oid] ? d.userInfo[oid] : {name: "Unknown", pic: ""};
+                    list.innerHTML += `<div class="ib-item" onclick="startChat('${oid}')"><img src="${info.pic}" class="u-ava"><div class="ib-det"><div class="ib-n">${info.name}</div><div class="ib-m">${d.lastMsg}</div></div></div>`;
                 });
             });
         }
 
-        // 2. FRIEND LIST LOGIC (FOR NEW CHAT)
         window.openFriends = async () => {
             document.getElementById('fr-modal').style.display = 'flex';
             const list = document.getElementById('fr-list');
-            list.innerHTML = '<div style="padding:20px; text-align:center;">Loading friends...</div>';
-
-            const myDoc = await getDoc(doc(db, "users", me.uid));
-            const friends = myDoc.data().friends || [];
-
+            list.innerHTML = 'Loading...';
+            const d = await getDoc(doc(db,"users",me.uid));
+            const fr = d.data().friends || [];
             list.innerHTML = "";
-            if(friends.length === 0) {
-                list.innerHTML = '<div style="padding:20px; text-align:center;">You have no friends yet. Add friends from the main app!</div>';
-                return;
-            }
-
-            friends.forEach(async fid => {
-                const fDoc = await getDoc(doc(db, "users", fid));
-                const f = fDoc.data();
-                const div = document.createElement('div');
-                div.className = 'ib-item';
-                div.innerHTML = `<img src="${f.profilePic}" class="u-ava"><div class="ib-n">${f.fullName}</div>`;
-                div.onclick = () => {
-                    document.getElementById('fr-modal').style.display = 'none';
-                    startChat(fid);
-                };
-                list.appendChild(div);
+            fr.forEach(async id => {
+                const f = (await getDoc(doc(db,"users",id))).data();
+                list.innerHTML += `<div class="ib-item" onclick="startChat('${id}');document.getElementById('fr-modal').style.display='none'"><img src="${f.profilePic}" class="u-ava"><div class="ib-n">${f.fullName}</div></div>`;
             });
         }
 
-        // 3. START CHAT LOGIC
+        // 2. CHAT
         window.startChat = async (uid) => {
             document.getElementById('inbox-view').style.display = 'none';
             document.getElementById('chat-interface').style.display = 'flex';
             document.getElementById('msg-area').innerHTML = '';
-
-            // Fetch info
-            const uDoc = await getDoc(doc(db, "users", uid));
-            const uData = uDoc.data();
-            otherUser = { uid: uid, name: uData.fullName, pic: uData.profilePic };
             
-            document.getElementById('c-name').innerText = otherUser.name;
-            document.getElementById('c-ava').src = otherUser.pic;
-
-            // Chat ID: Always smaller_bigger
+            const u = (await getDoc(doc(db,"users",uid))).data();
+            otherUser = { uid: uid, name: u.fullName, pic: u.profilePic };
+            document.getElementById('c-name').innerText = u.fullName;
+            document.getElementById('c-ava').src = u.profilePic;
+            
             chatId = me.uid < uid ? `${me.uid}_${uid}` : `${uid}_${me.uid}`;
-
-            // Listen Messages
+            
+            if(unsubMsg) unsubMsg();
             const q = query(collection(db, "chats", chatId, "messages"), orderBy("time", "asc"));
             unsubMsg = onSnapshot(q, (snap) => {
                 const area = document.getElementById('msg-area');
                 area.innerHTML = "";
-                snap.forEach(d => {
-                    renderMsg(d.data(), area);
-                });
+                snap.forEach(d => renderMsg(d.data(), area));
                 area.scrollTop = area.scrollHeight;
             });
         }
@@ -266,26 +250,16 @@
         function renderMsg(m, area) {
             const isMe = m.sender === me.uid;
             const cls = isMe ? 'sent' : 'rec';
-            let content = `<div class="msg-bub">${m.txt}</div>`;
-            
-            if(m.type === 'image') content = `<img src="${m.url}" class="msg-img">`;
-            if(m.type === 'video') content = `<video src="${m.url}" controls class="msg-vid"></video>`;
-            if(m.type === 'audio') content = `<audio src="${m.url}" controls class="msg-aud"></audio>`;
-
-            area.innerHTML += `<div class="msg-row ${cls}">${content}</div>`;
+            let c = `<div class="msg-bub">${m.txt}</div>`;
+            if(m.type === 'image') c = `<img src="${m.url}" class="msg-img">`;
+            if(m.type === 'video') c = `<video src="${m.url}" controls class="msg-vid"></video>`;
+            if(m.type === 'audio') c = `<audio src="${m.url}" controls class="msg-aud"></audio>`;
+            area.innerHTML += `<div class="msg-row ${cls}">${c}</div>`;
         }
 
-        // 4. SENDING LOGIC (Text, Media, Voice)
         window.chkTyping = (el) => {
-            const sendBtn = document.getElementById('send-btn');
-            const micBtn = document.getElementById('mic-btn');
-            if(el.value.trim().length > 0) {
-                sendBtn.style.display = 'block';
-                micBtn.style.display = 'none';
-            } else {
-                sendBtn.style.display = 'none';
-                micBtn.style.display = 'block';
-            }
+            document.getElementById('send-btn').style.display = el.value.trim().length > 0 ? 'block' : 'none';
+            document.getElementById('mic-btn').style.display = el.value.trim().length > 0 ? 'none' : 'block';
         }
 
         window.sendTxt = async () => {
@@ -297,100 +271,159 @@
             await pushMsg(txt, 'text', null);
         }
 
-        // Upload Image/Video
         window.uploadMedia = async (inp) => {
             if(inp.files && inp.files[0]) {
-                const file = inp.files[0];
-                const type = file.type.startsWith('video') ? 'video' : 'image';
-                
-                // Show loading placeholder
-                const area = document.getElementById('msg-area');
-                area.innerHTML += `<div class="msg-row sent"><div class="msg-bub"><i class="fas fa-spinner fa-spin"></i> Sending ${type}...</div></div>`;
-                area.scrollTop = area.scrollHeight;
-
-                const fd = new FormData();
-                fd.append('file', file);
-                fd.append('upload_preset', C_PRE);
-                
-                try {
-                    const r = await fetch(C_URL, {method:'POST', body:fd});
-                    const d = await r.json();
-                    await pushMsg(type + ' sent', type, d.secure_url);
-                } catch(e) { alert('Upload failed'); }
+                const f = inp.files[0];
+                const type = f.type.startsWith('video') ? 'video' : 'image';
+                const fd = new FormData(); fd.append('file', f); fd.append('upload_preset', C_PRE);
+                const r = await fetch(C_URL, {method:'POST', body:fd});
+                const d = await r.json();
+                await pushMsg(type, type, d.secure_url);
             }
         }
 
-        // Voice Message
         window.toggleMic = async () => {
             const btn = document.getElementById('mic-btn');
             if(!mediaRecorder || mediaRecorder.state === 'inactive') {
-                // Start Recording
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
-                    audioChunks = [];
-                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                    mediaRecorder.onstop = uploadVoice;
-                    mediaRecorder.start();
-                    btn.classList.add('mic-active');
-                } catch(e) { alert('Microphone access denied'); }
-            } else {
-                // Stop Recording
-                mediaRecorder.stop();
-                btn.classList.remove('mic-active');
-            }
+                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(s);
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = async () => {
+                    const b = new Blob(audioChunks, { type: 'audio/webm' });
+                    const fd = new FormData(); fd.append('file', b); fd.append('upload_preset', C_PRE);
+                    const r = await fetch(C_URL, {method:'POST', body:fd});
+                    const d = await r.json();
+                    await pushMsg('Voice', 'audio', d.secure_url);
+                };
+                mediaRecorder.start();
+                btn.classList.add('mic-active');
+            } else { mediaRecorder.stop(); btn.classList.remove('mic-active'); }
         }
 
-        async function uploadVoice() {
-            const blob = new Blob(audioChunks, { type: 'audio/webm' });
-            const area = document.getElementById('msg-area');
-            area.innerHTML += `<div class="msg-row sent"><div class="msg-bub"><i class="fas fa-spinner fa-spin"></i> Sending voice...</div></div>`;
-            area.scrollTop = area.scrollHeight;
-
-            const fd = new FormData();
-            fd.append('file', blob);
-            fd.append('upload_preset', C_PRE); // Using same preset, cloud will detect as video/raw usually which is fine for audio playback in HTML5
-            
-            try {
-                const r = await fetch(C_URL, {method:'POST', body:fd});
-                const d = await r.json();
-                await pushMsg('Voice message', 'audio', d.secure_url);
-            } catch(e) { alert('Voice upload failed'); }
-        }
-
-        // Core Push Message Function
         async function pushMsg(txt, type, url) {
-            // 1. Add to Subcollection
-            await addDoc(collection(db, "chats", chatId, "messages"), {
-                sender: me.uid,
-                txt: txt,
-                type: type,
-                url: url || null,
-                time: serverTimestamp()
-            });
-
-            // 2. Update Main Chat Doc (Important for Inbox)
+            await addDoc(collection(db, "chats", chatId, "messages"), { sender: me.uid, txt: txt, type: type, url: url || null, time: serverTimestamp() });
             const myInfo = (await getDoc(doc(db, "users", me.uid))).data();
-            
-            const chatData = {
-                users: [me.uid, otherUser.uid],
-                lastMsg: txt,
-                lastMsgTime: serverTimestamp(),
-                userInfo: {
-                    [me.uid]: { name: myInfo.fullName, pic: myInfo.profilePic },
-                    [otherUser.uid]: { name: otherUser.name, pic: otherUser.pic }
-                }
-            };
-
-            await setDoc(doc(db, "chats", chatId), chatData, { merge: true });
+            await setDoc(doc(db, "chats", chatId), {
+                users: [me.uid, otherUser.uid], lastMsg: txt, lastMsgTime: serverTimestamp(),
+                userInfo: { [me.uid]: { name: myInfo.fullName, pic: myInfo.profilePic }, [otherUser.uid]: { name: otherUser.name, pic: otherUser.pic } }
+            }, { merge: true });
         }
 
         window.closeChat = () => {
             if(unsubMsg) unsubMsg();
             document.getElementById('chat-interface').style.display = 'none';
             document.getElementById('inbox-view').style.display = 'flex';
-            history.pushState(null, "", "chat.html"); // Clean URL
+            history.pushState(null, "", "chat.html");
         }
+
+        // --- GLOBAL AUDIO CALL LOGIC ---
+
+        window.initiateCall = async () => {
+            // Show UI
+            showCallUI(otherUser.name, otherUser.pic, "Calling...", false);
+            
+            // WebRTC Setup
+            pc = new RTCPeerConnection(servers);
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+            pc.ontrack = (event) => { document.getElementById('remote-audio').srcObject = event.streams[0]; }
+
+            // Offer
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+
+            // Save call doc with RECEIVER ID so they can listen globally
+            const callDoc = doc(db, "calls", chatId);
+            await setDoc(callDoc, { 
+                type: 'offer', 
+                sdp: JSON.stringify(offer), 
+                caller: me.uid,
+                receiver: otherUser.uid 
+            });
+
+            // Listen for answer
+            onSnapshot(callDoc, (snap) => {
+                const d = snap.data();
+                if(!d) { endCallUI(); return; }
+                if(d.type === 'answer' && !pc.currentRemoteDescription) {
+                    pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(d.sdp)));
+                    document.getElementById('call-st').innerText = "Connected";
+                }
+            });
+        }
+
+        function listenIncomingCalls() {
+            // Listen to all calls where I am the receiver
+            const q = query(collection(db, "calls"), where("receiver", "==", me.uid));
+            onSnapshot(q, async (snap) => {
+                snap.docChanges().forEach(async (change) => {
+                    if (change.type === "added") {
+                        const d = change.doc.data();
+                        if (d.type === 'offer') {
+                            incomingCallData = { id: change.doc.id, ...d };
+                            // Fetch Caller Info
+                            const callerDoc = await getDoc(doc(db, "users", d.caller));
+                            const caller = callerDoc.data();
+                            
+                            // Show Incoming Call Screen (Global)
+                            showCallUI(caller.fullName, caller.profilePic, "Incoming Audio Call...", true);
+                        }
+                    }
+                    if (change.type === "removed") {
+                        endCallUI();
+                    }
+                });
+            });
+        }
+
+        window.answerCall = async () => {
+            document.getElementById('ans-btn').style.display = 'none';
+            document.getElementById('call-st').innerText = "Connecting...";
+
+            pc = new RTCPeerConnection(servers);
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+            pc.ontrack = (event) => { document.getElementById('remote-audio').srcObject = event.streams[0]; };
+
+            // Set Remote Desc (Offer)
+            await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(incomingCallData.sdp)));
+            
+            // Create Answer
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+
+            // Update Doc
+            await updateDoc(doc(db, "calls", incomingCallData.id), { type: 'answer', sdp: JSON.stringify(answer) });
+            document.getElementById('call-st').innerText = "Connected";
+        }
+
+        window.endCall = async () => {
+            // If I am caller, delete my chat call doc. If receiver, delete incoming doc ID.
+            const cId = chatId || (incomingCallData ? incomingCallData.id : null);
+            if(cId) await deleteDoc(doc(db, "calls", cId));
+            endCallUI();
+        }
+
+        function showCallUI(name, pic, status, isIncoming) {
+            document.getElementById('call-modal').style.display = 'flex';
+            document.getElementById('call-img').src = pic;
+            document.getElementById('call-nm').innerText = name;
+            document.getElementById('call-st').innerText = status;
+            document.getElementById('ans-btn').style.display = isIncoming ? 'flex' : 'none';
+        }
+
+        function endCallUI() {
+            document.getElementById('call-modal').style.display = 'none';
+            if(localStream) localStream.getTracks().forEach(t => t.stop());
+            if(pc) pc.close();
+            pc = null;
+            localStream = null;
+            incomingCallData = null;
+        }
+
     </script>
 </body>
 </html>
