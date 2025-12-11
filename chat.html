@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Messenger</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root { --bg: #f0f2f5; --card: #ffffff; --text: #050505; --accent: #1877f2; --input: #f0f2f5; --border: #e4e6eb; }
+        body.dark-mode { --bg: #18191a; --card: #242526; --text: #e4e6eb; --accent: #2d88ff; --input: #3a3b3c; --border: #3e4042; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { background-color: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        .chat-head { height: 60px; background: var(--card); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 15px; gap: 15px; flex-shrink: 0; z-index: 10; }
+        .back-btn { font-size: 22px; color: var(--text); cursor: pointer; }
+        .u-info { flex: 1; display: flex; align-items: center; gap: 10px; }
+        .u-ava { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #555; }
+        .u-name { font-weight: 700; font-size: 16px; }
+        
+        #msg-area { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: var(--bg); }
+        .msg { max-width: 75%; padding: 10px 15px; border-radius: 20px; font-size: 15px; word-wrap: break-word; position: relative; }
+        .msg.sent { align-self: flex-end; background: var(--accent); color: white; border-bottom-right-radius: 5px; }
+        .msg.received { align-self: flex-start; background: var(--card); color: var(--text); border: 1px solid var(--border); border-bottom-left-radius: 5px; }
+        
+        .chat-input-box { padding: 10px; background: var(--card); border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+        .c-in { flex: 1; background: var(--input); border: none; padding: 12px 15px; border-radius: 25px; outline: none; color: var(--text); font-size: 15px; }
+        .send-btn { color: var(--accent); font-size: 24px; cursor: pointer; padding: 5px; }
+        
+        #inbox-view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 20; display: flex; flex-direction: column; }
+        .ib-head { padding: 15px; background: var(--card); font-size: 24px; font-weight: 800; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; height: 60px; }
+        .ib-list { flex: 1; overflow-y: auto; }
+        .ib-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; background: var(--card); cursor: pointer; transition: 0.2s; border-bottom: 1px solid var(--border); }
+        .ib-item:active { background: var(--input); }
+        .ib-nm { font-weight: 600; font-size: 16px; color: var(--text); }
+        .ib-txt { font-size: 13px; color: var(--text-sec, #888); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 3px; }
+
+        #loader { position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg);z-index:9999;display:flex;justify-content:center;align-items:center; }
+    </style>
+</head>
+<body>
+    <div id="loader"><i class="fas fa-circle-notch fa-spin" style="color:var(--accent);font-size:30px;"></i></div>
+
+    <div id="inbox-view">
+        <div class="ib-head">Chats <i class="fas fa-times" style="font-size:20px; cursor:pointer;" onclick="location.href='index.html'"></i></div>
+        <div class="ib-list" id="chat-list"></div>
+    </div>
+
+    <div id="chat-interface" style="display:none; flex-direction:column; height:100%;">
+        <div class="chat-head">
+            <i class="fas fa-arrow-left back-btn" onclick="backToInbox()"></i>
+            <div class="u-info">
+                <img id="c-ava" class="u-ava">
+                <div id="c-name" class="u-name">User</div>
+            </div>
+        </div>
+        <div id="msg-area"></div>
+        <div class="chat-input-box">
+            <input id="msg-in" class="c-in" placeholder="Type a message...">
+            <i class="fas fa-paper-plane send-btn" onclick="sendMsg()"></i>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, query, orderBy, addDoc, onSnapshot, where, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const cfg = { apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs", authDomain: "new-all-f99f7.firebaseapp.com", projectId: "new-all-f99f7", storageBucket: "new-all-f99f7.appspot.com", messagingSenderId: "1069748173900", appId: "1:1069748173900:web:158d6336c0f4628133c8e9" };
+        
+        const app = initializeApp(cfg);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        let me = null;
+        let chatId = null;
+        let otherUser = null;
+        let unsubMsg = null;
+
+        if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+
+        onAuthStateChanged(auth, async (u) => {
+            if(u) {
+                me = u;
+                document.getElementById('loader').style.display = 'none';
+                const urlParams = new URLSearchParams(window.location.search);
+                const targetUid = urlParams.get('uid');
+                
+                if(targetUid) startChat(targetUid);
+                else loadInbox();
+            } else {
+                location.href = "Account.html";
+            }
+        });
+
+        function loadInbox() {
+            const q = query(collection(db, "chats"), where("users", "array-contains", me.uid), orderBy("lastMsgTime", "desc"));
+            onSnapshot(q, (snap) => {
+                const list = document.getElementById('chat-list');
+                list.innerHTML = "";
+                snap.forEach(d => {
+                    const data = d.data();
+                    const otherId = data.users.find(id => id !== me.uid);
+                    const info = data.userInfo?.[otherId] || { name: "User", pic: "" };
+                    list.innerHTML += `<div class="ib-item" onclick="startChat('${otherId}')"><img src="${info.pic}" class="u-ava"><div style="flex:1"><div class="ib-nm">${info.name}</div><div class="ib-txt">${data.lastMsg || "Start conversation"}</div></div></div>`;
+                });
+                if(list.innerHTML === "") list.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">No chats yet.</div>';
+            });
+        }
+
+        window.startChat = async (uid) => {
+            document.getElementById('inbox-view').style.display = 'none';
+            document.getElementById('chat-interface').style.display = 'flex';
+            document.getElementById('msg-area').innerHTML = '<div style="text-align:center;padding:10px;color:#888;">Loading...</div>';
+            
+            const uDoc = await getDoc(doc(db, "users", uid));
+            const uData = uDoc.data();
+            otherUser = { uid: uid, name: uData.fullName, pic: uData.profilePic };
+            
+            document.getElementById('c-name').innerText = otherUser.name;
+            document.getElementById('c-ava').src = otherUser.pic;
+            
+            chatId = me.uid < uid ? `${me.uid}_${uid}` : `${uid}_${me.uid}`;
+            
+            const q = query(collection(db, "chats", chatId, "messages"), orderBy("time", "asc"));
+            unsubMsg = onSnapshot(q, (snap) => {
+                const area = document.getElementById('msg-area');
+                area.innerHTML = "";
+                snap.forEach(d => {
+                    const m = d.data();
+                    const type = m.sender === me.uid ? 'sent' : 'received';
+                    area.innerHTML += `<div class="msg ${type}">${m.txt}</div>`;
+                });
+                area.scrollTop = area.scrollHeight;
+            });
+        }
+
+        window.sendMsg = async () => {
+            const inp = document.getElementById('msg-in');
+            const txt = inp.value.trim();
+            if(!txt) return;
+            inp.value = "";
+            
+            await addDoc(collection(db, "chats", chatId, "messages"), { sender: me.uid, txt: txt, time: serverTimestamp() });
+            
+            const myData = (await getDoc(doc(db, "users", me.uid))).data();
+            await setDoc(doc(db, "chats", chatId), {
+                users: [me.uid, otherUser.uid],
+                lastMsg: txt,
+                lastMsgTime: serverTimestamp(),
+                userInfo: {
+                    [me.uid]: { name: myData.fullName, pic: myData.profilePic },
+                    [otherUser.uid]: { name: otherUser.name, pic: otherUser.pic }
+                }
+            }, { merge: true });
+        }
+
+        window.backToInbox = () => {
+            if(unsubMsg) unsubMsg();
+            document.getElementById('chat-interface').style.display = 'none';
+            document.getElementById('inbox-view').style.display = 'flex';
+            history.pushState(null, "", "chat.html");
+            loadInbox();
+        }
+    </script>
+</body>
+</html>
