@@ -3,78 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Messenger</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <title>Messenger Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        :root { --bg: #ffffff; --text: #050505; --bubble-sent: #0084ff; --bubble-rec: #e4e6eb; --input-bg: #f0f2f5; }
-        body.dark-mode { --bg: #000000; --text: #e4e6eb; --bubble-sent: #0084ff; --bubble-rec: #303030; --input-bg: #1f1f1f; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
+        :root { --primary: #0084ff; --bg: #ffffff; --text: #050505; --bubble-sent: #0084ff; --bubble-rec: #f0f0f0; --input-bg: #f0f2f5; --gray: #65676b; }
+        body.dark-mode { --primary: #0084ff; --bg: #000000; --text: #e4e6eb; --bubble-sent: #0084ff; --bubble-rec: #303030; --input-bg: #1f1f1f; --gray: #b0b3b8; }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
         body { background-color: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
         /* HEADER */
-        .chat-head { height: 60px; display: flex; align-items: center; padding: 0 15px; border-bottom: 1px solid rgba(0,0,0,0.1); flex-shrink: 0; justify-content: space-between; }
-        .dark-mode .chat-head { border-color: rgba(255,255,255,0.1); }
-        .head-left { display: flex; align-items: center; gap: 10px; }
-        .back-btn { font-size: 24px; color: var(--bubble-sent); cursor: pointer; padding: 5px; }
-        .u-ava { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #ccc; }
-        .u-nm { font-weight: 700; font-size: 17px; }
-        .head-act i { font-size: 20px; color: var(--bubble-sent); margin-left: 20px; cursor: pointer; padding: 8px; border-radius: 50%; transition: 0.2s; }
-        .head-act i:active { background: rgba(0,132,255,0.1); }
+        .chat-head { height: 60px; display: flex; align-items: center; padding: 0 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); flex-shrink: 0; justify-content: space-between; background: var(--bg); z-index: 20; }
+        .head-left { display: flex; align-items: center; gap: 8px; }
+        .back-btn { font-size: 24px; color: var(--primary); padding: 8px; cursor: pointer; }
+        .u-ava { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #ddd; border: 1px solid rgba(0,0,0,0.1); }
+        .u-info { display: flex; flex-direction: column; }
+        .u-nm { font-weight: 600; font-size: 16px; }
+        .u-st { font-size: 12px; color: var(--gray); }
+        .head-act i { font-size: 22px; color: var(--primary); padding: 10px; cursor: pointer; }
 
-        /* INBOX LIST */
-        #inbox-view { width: 100%; height: 100%; display: flex; flex-direction: column; position: absolute; background: var(--bg); z-index: 10; }
-        .ib-title { font-size: 26px; font-weight: 800; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        /* INBOX */
+        #inbox-view { width: 100%; height: 100%; position: absolute; background: var(--bg); z-index: 10; display: flex; flex-direction: column; }
+        .ib-header { padding: 15px; font-size: 24px; font-weight: 800; }
         .ib-list { flex: 1; overflow-y: auto; }
-        .ib-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; cursor: pointer; transition: 0.2s; }
+        .ib-item { display: flex; gap: 12px; padding: 10px 15px; cursor: pointer; border-radius: 10px; margin: 0 5px; }
         .ib-item:active { background: rgba(0,0,0,0.05); }
-        .ib-det { flex: 1; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 12px; }
-        .ib-n { font-weight: 600; font-size: 16px; margin-bottom: 3px; }
-        .ib-m { font-size: 13px; color: #65676b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px; }
-        .dark-mode .ib-m { color: #b0b3b8; }
-        
-        .fab { position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px; background: var(--bubble-sent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 4px 10px rgba(0,132,255,0.3); cursor: pointer; z-index: 20; }
-
-        /* FRIEND SELECTOR */
-        #fr-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 30; display: none; flex-direction: column; animation: slideUp 0.3s ease; }
+        .ib-det { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .ib-n { font-weight: 600; font-size: 16px; }
+        .ib-m { font-size: 14px; color: var(--gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px; }
 
         /* CHAT AREA */
         #chat-interface { width: 100%; height: 100%; display: none; flex-direction: column; background: var(--bg); position: absolute; z-index: 15; }
-        #msg-area { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
+        #msg-area { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 4px; padding-bottom: 10px; }
         
-        .msg-row { display: flex; flex-direction: column; max-width: 70%; position: relative; }
+        .msg-row { display: flex; flex-direction: column; max-width: 75%; position: relative; margin-bottom: 2px; }
         .msg-row.sent { align-self: flex-end; align-items: flex-end; }
         .msg-row.rec { align-self: flex-start; align-items: flex-start; }
-        .msg-bub { padding: 10px 14px; border-radius: 18px; font-size: 15px; line-height: 1.4; word-wrap: break-word; position: relative; }
+        
+        /* Reply Context Style */
+        .reply-ctx { font-size: 11px; color: #888; background: rgba(0,0,0,0.05); padding: 4px 8px; border-radius: 8px; margin-bottom: -5px; z-index: 0; width: fit-content; max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; transform: scale(0.9); transform-origin: inherit; }
+        .sent .reply-ctx { align-self: flex-end; transform-origin: bottom right; }
+
+        .msg-bub { padding: 8px 12px; border-radius: 18px; font-size: 15px; line-height: 1.4; word-wrap: break-word; position: relative; z-index: 1; cursor: pointer; }
         .sent .msg-bub { background: var(--bubble-sent); color: white; border-bottom-right-radius: 4px; }
         .rec .msg-bub { background: var(--bubble-rec); color: var(--text); border-bottom-left-radius: 4px; }
-        .msg-img, .msg-vid { width: 100%; max-width: 200px; border-radius: 15px; margin-bottom: 5px; border: 1px solid rgba(0,0,0,0.1); }
-        .msg-aud { height: 40px; max-width: 220px; border-radius: 20px; }
+        
+        .msg-img, .msg-vid { width: 100%; border-radius: 12px; margin-top: 5px; cursor: pointer; }
+        .dl-btn { font-size: 11px; text-decoration: none; color: inherit; opacity: 0.7; display: block; margin-top: 3px; text-align: right; }
 
-        /* FULL SCREEN CALL OVERLAY (MESSENGER STYLE) */
-        #call-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; animation: fadeIn 0.3s; }
-        .call-avatar-box { position: relative; margin-bottom: 20px; }
-        .call-avatar { width: 120px; height: 120px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); object-fit: cover; }
-        .pulse-ring { position: absolute; top:0; left:0; width:100%; height:100%; border-radius: 50%; animation: pulseRing 1.5s infinite; border: 4px solid rgba(255,255,255,0.5); }
-        .call-name { font-size: 28px; font-weight: 700; margin-bottom: 5px; text-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-        .call-status { font-size: 16px; opacity: 0.8; margin-bottom: 80px; }
-        .call-actions { display: flex; gap: 50px; align-items: center; }
-        .c-btn { width: 70px; height: 70px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        /* FOOTER & INPUT */
+        .chat-foot { padding: 5px 10px 10px 10px; display: flex; align-items: center; gap: 8px; background: var(--bg); position: relative; }
+        
+        /* Reply Preview Box */
+        #reply-box { position: absolute; bottom: 100%; left: 0; width: 100%; background: var(--bg); border-top: 1px solid rgba(0,0,0,0.1); padding: 8px 15px; display: none; justify-content: space-between; align-items: center; border-left: 4px solid var(--primary); }
+        .rep-txt { font-size: 13px; color: var(--gray); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 80%; }
+
+        .cf-actions i { font-size: 22px; color: var(--primary); padding: 8px; cursor: pointer; }
+        .cf-in-box { flex: 1; background: var(--input-bg); border-radius: 20px; display: flex; align-items: center; padding: 8px 12px; transition: 0.2s; }
+        .cf-in { background: transparent; border: none; flex: 1; outline: none; color: var(--text); font-size: 15px; max-height: 100px; }
+        
+        /* Voice Recorder UI */
+        #rec-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: var(--bg); display: none; align-items: center; padding: 0 15px; z-index: 5; }
+        .rec-wave { flex: 1; height: 30px; background: url('https://i.gifer.com/7S7F.gif'); background-size: contain; opacity: 0.5; margin: 0 15px; }
+        .rec-time { font-weight: bold; color: var(--primary); min-width: 45px; }
+        .rec-cancel { color: red; font-weight: 500; cursor: pointer; padding: 10px; }
+
+        /* CALL OVERLAY */
+        #call-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: #222; z-index: 9999; display: none; flex-direction: column; align-items: center; padding-top: 80px; color: white; animation: slideUp 0.3s; }
+        .c-u-img { width: 100px; height: 100px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); object-fit: cover; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
+        .c-nm { font-size: 24px; font-weight: 600; margin-bottom: 5px; }
+        .c-st { font-size: 16px; opacity: 0.7; margin-bottom: 50px; }
+        
+        .c-ctrls { position: absolute; bottom: 40px; width: 100%; display: flex; justify-content: center; gap: 30px; align-items: center; }
+        .c-btn { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: 0.2s; background: rgba(255,255,255,0.2); }
         .c-btn:active { transform: scale(0.9); }
-        .bg-red { background: #ff3b30; color: white; }
-        .bg-green { background: #34c759; color: white; animation: bounce 1s infinite; }
+        .c-end { background: #ff3b30; }
+        .c-ans { background: #34c759; }
+        .c-mute.active { background: white; color: black; }
+        .c-btn-sm { width: 45px; height: 45px; font-size: 18px; }
 
-        @keyframes pulseRing { 0% {transform: scale(1); opacity: 0.8;} 100% {transform: scale(1.5); opacity: 0;} }
-        @keyframes bounce { 0%, 100% {transform: translateY(0);} 50% {transform: translateY(-10px);} }
-        @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
-
-        /* INPUT BAR */
-        .chat-foot { padding: 8px 10px; display: flex; align-items: center; gap: 10px; border-top: 1px solid rgba(0,0,0,0.1); background: var(--bg); }
-        .cf-icon { font-size: 22px; color: var(--bubble-sent); padding: 5px; cursor: pointer; }
-        .cf-in-box { flex: 1; background: var(--input-bg); border-radius: 20px; display: flex; align-items: center; padding: 8px 12px; }
-        .cf-in { background: transparent; border: none; flex: 1; outline: none; color: var(--text); font-size: 15px; }
-        .mic-active { color: red !important; animation: pulse 1s infinite; }
-
+        @keyframes slideUp { from{transform: translateY(100%);} to{transform: translateY(0);} }
         #loader { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg); z-index: 100; display:flex; justify-content:center; align-items:center; }
     </style>
 </head>
@@ -82,22 +91,16 @@
 
     <div id="loader"><i class="fas fa-circle-notch fa-spin" style="color:#0084ff;font-size:30px;"></i></div>
 
-    <!-- INBOX VIEW -->
+    <!-- INBOX -->
     <div id="inbox-view">
-        <div class="ib-title">
-            <span>Chats</span>
-            <i class="fas fa-home" style="font-size:22px; color:#0084ff; cursor:pointer;" onclick="location.href='index.html'"></i>
-        </div>
+        <div class="ib-header">Chats</div>
         <div class="ib-list" id="chat-list"></div>
-        <div class="fab" onclick="openFriends()"><i class="fas fa-edit"></i></div>
+        <div style="position:fixed; bottom:20px; right:20px; width:55px; height:55px; background:var(--primary); border-radius:50%; color:white; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,132,255,0.4); cursor:pointer;" onclick="openFriends()"><i class="fas fa-edit"></i></div>
     </div>
 
-    <!-- FRIEND SELECTOR -->
-    <div id="fr-modal">
-        <div class="ib-title">
-            <span>New Message</span>
-            <span style="font-size:16px; color:#0084ff; cursor:pointer;" onclick="document.getElementById('fr-modal').style.display='none'">Cancel</span>
-        </div>
+    <!-- FRIEND SELECTOR MODAL -->
+    <div id="fr-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:30; flex-direction:column;">
+        <div class="chat-head"><span class="u-nm">New Message</span><span style="color:var(--primary); cursor:pointer;" onclick="document.getElementById('fr-modal').style.display='none'">Cancel</span></div>
         <div class="ib-list" id="fr-list"></div>
     </div>
 
@@ -107,43 +110,74 @@
             <div class="head-left">
                 <i class="fas fa-arrow-left back-btn" onclick="closeChat()"></i>
                 <img id="c-ava" class="u-ava">
-                <div id="c-name" class="u-nm">User</div>
+                <div class="u-info">
+                    <div id="c-name" class="u-nm">User</div>
+                    <div class="u-st">Active now</div>
+                </div>
             </div>
             <div class="head-act">
-                <i class="fas fa-phone-alt" onclick="initiateCall()"></i>
-                <i class="fas fa-info-circle"></i>
+                <i class="fas fa-phone-alt" onclick="startCall()"></i>
+                <i class="fas fa-video"></i>
             </div>
         </div>
+        
         <div id="msg-area"></div>
+        
+        <!-- Reply Preview -->
         <div class="chat-foot">
-            <i class="fas fa-image cf-icon" onclick="document.getElementById('media-in').click()"></i>
+            <div id="reply-box">
+                <div>
+                    <div style="font-size:11px; color:var(--primary); font-weight:600;">Replying to</div>
+                    <div id="rep-txt" class="rep-txt">Message text...</div>
+                </div>
+                <i class="fas fa-times" style="color:#888; cursor:pointer;" onclick="cancelReply()"></i>
+            </div>
+
+            <!-- Normal Inputs -->
+            <div class="cf-actions" id="std-act">
+                <i class="fas fa-image" onclick="document.getElementById('media-in').click()"></i>
+            </div>
             <input type="file" id="media-in" hidden accept="image/*,video/*" onchange="uploadMedia(this)">
-            <div class="cf-in-box"><input id="msg-in" class="cf-in" placeholder="Message..." onkeyup="chkTyping(this)"></div>
-            <i class="fas fa-microphone cf-icon" id="mic-btn" onclick="toggleMic()"></i>
-            <i class="fas fa-paper-plane cf-icon" id="send-btn" style="display:none;" onclick="sendTxt()"></i>
+            
+            <div class="cf-in-box">
+                <input id="msg-in" class="cf-in" placeholder="Message..." onkeyup="chkTyping(this)">
+            </div>
+            
+            <div class="cf-actions">
+                <i class="fas fa-microphone" id="mic-btn" onclick="startRecord()"></i>
+                <i class="fas fa-paper-plane" id="send-btn" style="display:none; color:var(--primary);" onclick="sendTxt()"></i>
+            </div>
+
+            <!-- Voice Overlay -->
+            <div id="rec-overlay">
+                <div class="rec-cancel" onclick="cancelRecord()">Cancel</div>
+                <div class="rec-time" id="rec-timer">0:00</div>
+                <div class="rec-wave"></div>
+                <i class="fas fa-paper-plane" style="color:var(--primary); font-size:24px; padding:10px; cursor:pointer;" onclick="stopAndSendRecord()"></i>
+            </div>
         </div>
     </div>
 
-    <!-- CALL OVERLAY -->
+    <!-- CALL UI -->
     <div id="call-modal">
-        <div class="call-avatar-box">
-            <div class="pulse-ring"></div>
-            <img id="call-img" class="call-avatar" src="">
-        </div>
-        <div id="call-nm" class="call-name">Unknown</div>
-        <div id="call-st" class="call-status">Calling...</div>
+        <img id="call-img" class="c-u-img" src="">
+        <div id="call-nm" class="c-nm">User</div>
+        <div id="call-st" class="c-st">Calling...</div>
         
-        <div class="call-actions">
-            <!-- Decline -->
-            <div class="c-btn bg-red" onclick="endCall()">
-                <i class="fas fa-phone-slash"></i>
-            </div>
-            <!-- Accept (Only shows for receiver) -->
-            <div class="c-btn bg-green" id="ans-btn" style="display:none;" onclick="answerCall()">
-                <i class="fas fa-phone"></i>
-            </div>
-        </div>
+        <!-- Audio Element (Hidden but active) -->
         <audio id="remote-audio" autoplay></audio>
+
+        <div class="c-ctrls">
+            <div class="c-btn c-btn-sm" id="spk-btn" onclick="toggleSpk()"><i class="fas fa-volume-up"></i></div>
+            
+            <!-- End Call -->
+            <div class="c-btn c-end" onclick="endCall()"><i class="fas fa-phone-slash"></i></div>
+            
+            <!-- Answer (Hidden by default) -->
+            <div class="c-btn c-ans" id="ans-btn" style="display:none;" onclick="answerCall()"><i class="fas fa-phone"></i></div>
+
+            <div class="c-btn c-btn-sm c-mute" id="mute-btn" onclick="toggleMute()"><i class="fas fa-microphone-slash"></i></div>
+        </div>
     </div>
 
     <script type="module">
@@ -151,6 +185,7 @@
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, collection, query, orderBy, addDoc, onSnapshot, where, setDoc, serverTimestamp, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // CONFIG (Replace with your own if needed, used generic placeholder)
         const cfg = { apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs", authDomain: "new-all-f99f7.firebaseapp.com", projectId: "new-all-f99f7", storageBucket: "new-all-f99f7.appspot.com", messagingSenderId: "1069748173900", appId: "1:1069748173900:web:158d6336c0f4628133c8e9" };
         const C_URL = "https://api.cloudinary.com/v1_1/dwgvvzbvn/auto/upload";
         const C_PRE = "storyapp"; 
@@ -161,44 +196,39 @@
 
         let me = null;
         let chatId = null;
-        let otherUser = null; // For current chat context
-        let incomingCallData = null; // For global call context
+        let otherUser = null;
+        let replyData = null; // { id, txt, senderName }
         
-        let unsubMsg = null;
+        // Audio / Recorder vars
         let mediaRecorder = null;
         let audioChunks = [];
+        let recInterval = null;
+
+        // Call Vars
         let pc = null;
         let localStream = null;
+        let incomingCallId = null;
+        let isMuted = false;
+        
         const servers = { iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
-
-        if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
 
         onAuthStateChanged(auth, async (u) => {
             if(u) {
                 me = u;
                 document.getElementById('loader').style.display = 'none';
                 loadInbox();
-                
-                // **** GLOBAL CALL LISTENER ****
-                listenIncomingCalls();
-
-                const targetUid = new URLSearchParams(window.location.search).get('uid');
-                if(targetUid) startChat(targetUid);
+                listenGlobalCalls();
             } else {
                 location.href = "Account.html";
             }
         });
 
-        // 1. INBOX
+        // --- INBOX ---
         function loadInbox() {
             const q = query(collection(db, "chats"), where("users", "array-contains", me.uid));
             onSnapshot(q, (snap) => {
                 const list = document.getElementById('chat-list');
                 list.innerHTML = "";
-                if(snap.empty) {
-                    list.innerHTML = `<div style="text-align:center; padding:40px 20px;"><div style="font-size:60px; color:#ddd; margin-bottom:10px;"><i class="fab fa-facebook-messenger"></i></div><h3 style="color:var(--text)">No messages yet</h3></div>`;
-                    return;
-                }
                 let chats = [];
                 snap.forEach(d => chats.push({id: d.id, ...d.data()}));
                 chats.sort((a, b) => (b.lastMsgTime?.toMillis() || 0) - (a.lastMsgTime?.toMillis() || 0));
@@ -206,7 +236,8 @@
                 chats.forEach(d => {
                     const oid = d.users.find(id => id !== me.uid);
                     const info = d.userInfo && d.userInfo[oid] ? d.userInfo[oid] : {name: "Unknown", pic: ""};
-                    list.innerHTML += `<div class="ib-item" onclick="startChat('${oid}')"><img src="${info.pic}" class="u-ava"><div class="ib-det"><div class="ib-n">${info.name}</div><div class="ib-m">${d.lastMsg}</div></div></div>`;
+                    const isBold = (d.lastMsgSender !== me.uid && !d.seen) ? "font-weight:700;color:var(--text)" : "";
+                    list.innerHTML += `<div class="ib-item" onclick="startChat('${oid}')"><img src="${info.pic}" class="u-ava"><div class="ib-det"><div class="ib-n">${info.name}</div><div class="ib-m" style="${isBold}">${d.lastMsgSender === me.uid ? 'You: ' : ''}${d.lastMsg}</div></div></div>`;
                 });
             });
         }
@@ -214,21 +245,20 @@
         window.openFriends = async () => {
             document.getElementById('fr-modal').style.display = 'flex';
             const list = document.getElementById('fr-list');
-            list.innerHTML = 'Loading...';
+            list.innerHTML = '<div style="padding:20px;text-align:center">Loading...</div>';
             const d = await getDoc(doc(db,"users",me.uid));
             const fr = d.data().friends || [];
             list.innerHTML = "";
-            fr.forEach(async id => {
+            for(const id of fr) {
                 const f = (await getDoc(doc(db,"users",id))).data();
-                list.innerHTML += `<div class="ib-item" onclick="startChat('${id}');document.getElementById('fr-modal').style.display='none'"><img src="${f.profilePic}" class="u-ava"><div class="ib-n">${f.fullName}</div></div>`;
-            });
+                list.innerHTML += `<div class="ib-item" onclick="startChat('${id}');document.getElementById('fr-modal').style.display='none'"><img src="${f.profilePic}" class="u-ava"><div class="ib-det"><div class="ib-n">${f.fullName}</div></div></div>`;
+            }
         }
 
-        // 2. CHAT
+        // --- CHAT LOGIC ---
         window.startChat = async (uid) => {
             document.getElementById('inbox-view').style.display = 'none';
             document.getElementById('chat-interface').style.display = 'flex';
-            document.getElementById('msg-area').innerHTML = '';
             
             const u = (await getDoc(doc(db,"users",uid))).data();
             otherUser = { uid: uid, name: u.fullName, pic: u.profilePic };
@@ -237,29 +267,53 @@
             
             chatId = me.uid < uid ? `${me.uid}_${uid}` : `${uid}_${me.uid}`;
             
-            if(unsubMsg) unsubMsg();
             const q = query(collection(db, "chats", chatId, "messages"), orderBy("time", "asc"));
-            unsubMsg = onSnapshot(q, (snap) => {
+            onSnapshot(q, (snap) => {
                 const area = document.getElementById('msg-area');
                 area.innerHTML = "";
-                snap.forEach(d => renderMsg(d.data(), area));
+                snap.forEach(d => renderMsg(d.data(), d.id, area));
                 area.scrollTop = area.scrollHeight;
             });
         }
 
-        function renderMsg(m, area) {
+        function renderMsg(m, id, area) {
             const isMe = m.sender === me.uid;
             const cls = isMe ? 'sent' : 'rec';
-            let c = `<div class="msg-bub">${m.txt}</div>`;
-            if(m.type === 'image') c = `<img src="${m.url}" class="msg-img">`;
-            if(m.type === 'video') c = `<video src="${m.url}" controls class="msg-vid"></video>`;
-            if(m.type === 'audio') c = `<audio src="${m.url}" controls class="msg-aud"></audio>`;
-            area.innerHTML += `<div class="msg-row ${cls}">${c}</div>`;
+            
+            let content = '';
+            
+            // Check Reply
+            let replyBlock = '';
+            if(m.replyTo) {
+                replyBlock = `<div class="reply-ctx"><i class="fas fa-share" style="margin-right:4px"></i> ${m.replyTo.txt}</div>`;
+            }
+
+            if(m.type === 'text') content = `<div class="msg-bub" onclick="setReply('${m.txt}', '${m.sender}')" oncontextmenu="setReply('${m.txt}', '${m.sender}'); return false;">${m.txt}</div>`;
+            else if(m.type === 'image') content = `<img src="${m.url}" class="msg-img" onclick="window.open('${m.url}', '_blank')"><a href="${m.url}" download class="dl-btn">Save Image</a>`;
+            else if(m.type === 'video') content = `<video src="${m.url}" controls class="msg-vid"></video><a href="${m.url}" download class="dl-btn">Save Video</a>`;
+            else if(m.type === 'audio') content = `<audio src="${m.url}" controls style="height:40px; border-radius:20px; margin-top:5px; max-width:200px;"></audio>`;
+
+            area.innerHTML += `<div class="msg-row ${cls}">${replyBlock}${content}</div>`;
+        }
+
+        // --- REPLY SYSTEM ---
+        window.setReply = (txt, senderId) => {
+            replyData = { txt: txt, sender: senderId };
+            document.getElementById('reply-box').style.display = 'flex';
+            document.getElementById('rep-txt').innerText = txt;
+            document.getElementById('msg-in').focus();
+        }
+
+        window.cancelReply = () => {
+            replyData = null;
+            document.getElementById('reply-box').style.display = 'none';
         }
 
         window.chkTyping = (el) => {
-            document.getElementById('send-btn').style.display = el.value.trim().length > 0 ? 'block' : 'none';
-            document.getElementById('mic-btn').style.display = el.value.trim().length > 0 ? 'none' : 'block';
+            const hasTxt = el.value.trim().length > 0;
+            document.getElementById('send-btn').style.display = hasTxt ? 'block' : 'none';
+            document.getElementById('mic-btn').style.display = hasTxt ? 'none' : 'block';
+            document.getElementById('std-act').style.display = hasTxt ? 'none' : 'flex';
         }
 
         window.sendTxt = async () => {
@@ -268,160 +322,261 @@
             if(!txt) return;
             inp.value = "";
             chkTyping(inp);
-            await pushMsg(txt, 'text', null);
+            
+            const payload = { sender: me.uid, txt: txt, type: 'text', time: serverTimestamp() };
+            if(replyData) {
+                payload.replyTo = { txt: replyData.txt };
+                cancelReply();
+            }
+            
+            await pushMsg(payload);
+        }
+
+        // --- VOICE RECORDER ---
+        window.startRecord = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                
+                document.getElementById('rec-overlay').style.display = 'flex';
+                let sec = 0;
+                recInterval = setInterval(() => {
+                    sec++;
+                    let m = Math.floor(sec/60);
+                    let s = sec%60;
+                    document.getElementById('rec-timer').innerText = `${m}:${s<10?'0':''}${s}`;
+                }, 1000);
+
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.start();
+            } catch(e) { alert("Mic permission denied"); }
+        }
+
+        window.cancelRecord = () => {
+            if(mediaRecorder) mediaRecorder.stop();
+            resetRecUI();
+            audioChunks = []; // discard
+        }
+
+        window.stopAndSendRecord = () => {
+            if(!mediaRecorder) return;
+            mediaRecorder.onstop = async () => {
+                const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                await uploadAndSend(blob, 'audio', 'voice.webm');
+                resetRecUI();
+            };
+            mediaRecorder.stop();
+        }
+
+        function resetRecUI() {
+            document.getElementById('rec-overlay').style.display = 'none';
+            clearInterval(recInterval);
+            document.getElementById('rec-timer').innerText = "0:00";
+            if(mediaRecorder && mediaRecorder.stream) mediaRecorder.stream.getTracks().forEach(t=>t.stop());
         }
 
         window.uploadMedia = async (inp) => {
             if(inp.files && inp.files[0]) {
                 const f = inp.files[0];
                 const type = f.type.startsWith('video') ? 'video' : 'image';
-                const fd = new FormData(); fd.append('file', f); fd.append('upload_preset', C_PRE);
-                const r = await fetch(C_URL, {method:'POST', body:fd});
-                const d = await r.json();
-                await pushMsg(type, type, d.secure_url);
+                await uploadAndSend(f, type, f.name);
             }
         }
 
-        window.toggleMic = async () => {
-            const btn = document.getElementById('mic-btn');
-            if(!mediaRecorder || mediaRecorder.state === 'inactive') {
-                const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(s);
-                audioChunks = [];
-                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                mediaRecorder.onstop = async () => {
-                    const b = new Blob(audioChunks, { type: 'audio/webm' });
-                    const fd = new FormData(); fd.append('file', b); fd.append('upload_preset', C_PRE);
-                    const r = await fetch(C_URL, {method:'POST', body:fd});
-                    const d = await r.json();
-                    await pushMsg('Voice', 'audio', d.secure_url);
-                };
-                mediaRecorder.start();
-                btn.classList.add('mic-active');
-            } else { mediaRecorder.stop(); btn.classList.remove('mic-active'); }
+        async function uploadAndSend(file, type, name) {
+            const fd = new FormData(); 
+            fd.append('file', file); 
+            fd.append('upload_preset', C_PRE);
+            
+            // Cloudinary upload
+            const r = await fetch(C_URL, {method:'POST', body:fd});
+            const d = await r.json();
+            
+            await pushMsg({ sender: me.uid, txt: (type==='audio'?'Voice Message':type), type: type, url: d.secure_url, time: serverTimestamp() });
         }
 
-        async function pushMsg(txt, type, url) {
-            await addDoc(collection(db, "chats", chatId, "messages"), { sender: me.uid, txt: txt, type: type, url: url || null, time: serverTimestamp() });
+        async function pushMsg(data) {
+            await addDoc(collection(db, "chats", chatId, "messages"), data);
+            
             const myInfo = (await getDoc(doc(db, "users", me.uid))).data();
             await setDoc(doc(db, "chats", chatId), {
-                users: [me.uid, otherUser.uid], lastMsg: txt, lastMsgTime: serverTimestamp(),
-                userInfo: { [me.uid]: { name: myInfo.fullName, pic: myInfo.profilePic }, [otherUser.uid]: { name: otherUser.name, pic: otherUser.pic } }
+                users: [me.uid, otherUser.uid], 
+                lastMsg: data.txt, 
+                lastMsgSender: me.uid,
+                seen: false,
+                lastMsgTime: serverTimestamp(),
+                userInfo: { 
+                    [me.uid]: { name: myInfo.fullName, pic: myInfo.profilePic }, 
+                    [otherUser.uid]: { name: otherUser.name, pic: otherUser.pic } 
+                }
             }, { merge: true });
         }
 
         window.closeChat = () => {
-            if(unsubMsg) unsubMsg();
             document.getElementById('chat-interface').style.display = 'none';
             document.getElementById('inbox-view').style.display = 'flex';
-            history.pushState(null, "", "chat.html");
         }
 
-        // --- GLOBAL AUDIO CALL LOGIC ---
+        // --- CALL SYSTEM (With ICE Candidate Fix) ---
 
-        window.initiateCall = async () => {
-            // Show UI
+        function showCallUI(name, pic, status, isIncoming) {
+            document.getElementById('call-modal').style.display = 'flex';
+            document.getElementById('call-nm').innerText = name;
+            document.getElementById('call-img').src = pic;
+            document.getElementById('call-st').innerText = status;
+            document.getElementById('ans-btn').style.display = isIncoming ? 'flex' : 'none';
+            document.getElementById('spk-btn').style.display = 'flex'; // Reset buttons
+        }
+
+        window.startCall = async () => {
             showCallUI(otherUser.name, otherUser.pic, "Calling...", false);
             
-            // WebRTC Setup
             pc = new RTCPeerConnection(servers);
             localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
             localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
 
-            pc.ontrack = (event) => { document.getElementById('remote-audio').srcObject = event.streams[0]; }
+            pc.ontrack = (event) => {
+                const remoteAudio = document.getElementById('remote-audio');
+                remoteAudio.srcObject = event.streams[0];
+            };
 
-            // Offer
+            // ICE Candidate Handling (Sender)
+            const callDoc = doc(collection(db, "calls")); // Create new ID
+            const offerCandidates = collection(db, "calls", callDoc.id, "offerCandidates");
+            const answerCandidates = collection(db, "calls", callDoc.id, "answerCandidates");
+
+            pc.onicecandidate = (event) => {
+                if(event.candidate) addDoc(offerCandidates, event.candidate.toJSON());
+            };
+
             const offer = await pc.createOffer();
             await pc.setLocalDescription(offer);
 
-            // Save call doc with RECEIVER ID so they can listen globally
-            const callDoc = doc(db, "calls", chatId);
-            await setDoc(callDoc, { 
-                type: 'offer', 
-                sdp: JSON.stringify(offer), 
-                caller: me.uid,
-                receiver: otherUser.uid 
+            await setDoc(callDoc, {
+                offer: { type: offer.type, sdp: offer.sdp },
+                callerId: me.uid,
+                receiverId: otherUser.uid,
+                status: 'calling'
             });
+            incomingCallId = callDoc.id; // Store temp ID
 
-            // Listen for answer
+            // Listen for Answer
             onSnapshot(callDoc, (snap) => {
-                const d = snap.data();
-                if(!d) { endCallUI(); return; }
-                if(d.type === 'answer' && !pc.currentRemoteDescription) {
-                    pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(d.sdp)));
+                const data = snap.data();
+                if(!pc || !data) return;
+                
+                if(data.answer && !pc.currentRemoteDescription) {
+                    const rtcSessionDescription = new RTCSessionDescription(data.answer);
+                    pc.setRemoteDescription(rtcSessionDescription);
                     document.getElementById('call-st').innerText = "Connected";
                 }
+                if(data.status === 'ended') endCallCleanup();
             });
-        }
 
-        function listenIncomingCalls() {
-            // Listen to all calls where I am the receiver
-            const q = query(collection(db, "calls"), where("receiver", "==", me.uid));
-            onSnapshot(q, async (snap) => {
-                snap.docChanges().forEach(async (change) => {
-                    if (change.type === "added") {
-                        const d = change.doc.data();
-                        if (d.type === 'offer') {
-                            incomingCallData = { id: change.doc.id, ...d };
-                            // Fetch Caller Info
-                            const callerDoc = await getDoc(doc(db, "users", d.caller));
-                            const caller = callerDoc.data();
-                            
-                            // Show Incoming Call Screen (Global)
-                            showCallUI(caller.fullName, caller.profilePic, "Incoming Audio Call...", true);
-                        }
-                    }
-                    if (change.type === "removed") {
-                        endCallUI();
+            // Listen for Callee Candidates
+            onSnapshot(answerCandidates, (snap) => {
+                snap.docChanges().forEach((change) => {
+                    if (change.type === 'added') {
+                        const candidate = new RTCIceCandidate(change.doc.data());
+                        pc.addIceCandidate(candidate);
                     }
                 });
             });
         }
 
+        function listenGlobalCalls() {
+            const q = query(collection(db, "calls"), where("receiverId", "==", me.uid), where("status", "==", "calling"));
+            onSnapshot(q, async (snap) => {
+                snap.docChanges().forEach(async (change) => {
+                    if(change.type === 'added') {
+                        const d = change.doc.data();
+                        incomingCallId = change.doc.id;
+                        
+                        // Get caller info
+                        const cUser = (await getDoc(doc(db, "users", d.callerId))).data();
+                        showCallUI(cUser.fullName, cUser.profilePic, "Incoming Audio Call", true);
+                    }
+                });
+            });
+            
+            // Listen for ends on general
+            const qEnd = query(collection(db, "calls"), where("receiverId", "==", me.uid));
+            onSnapshot(qEnd, (snap) => {
+                 snap.docChanges().forEach(change => {
+                     if(change.type === 'modified' && change.doc.data().status === 'ended') {
+                         if(document.getElementById('call-modal').style.display === 'flex') endCallCleanup();
+                     }
+                 });
+            });
+        }
+
         window.answerCall = async () => {
-            document.getElementById('ans-btn').style.display = 'none';
-            document.getElementById('call-st').innerText = "Connecting...";
+            const callId = incomingCallId;
+            const callDoc = doc(db, "calls", callId);
+            const answerCandidates = collection(db, "calls", callId, "answerCandidates");
+            const offerCandidates = collection(db, "calls", callId, "offerCandidates");
 
             pc = new RTCPeerConnection(servers);
             localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
             localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
 
-            pc.ontrack = (event) => { document.getElementById('remote-audio').srcObject = event.streams[0]; };
+            pc.ontrack = (event) => {
+                document.getElementById('remote-audio').srcObject = event.streams[0];
+            };
 
-            // Set Remote Desc (Offer)
-            await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(incomingCallData.sdp)));
-            
-            // Create Answer
+            pc.onicecandidate = (event) => {
+                if(event.candidate) addDoc(answerCandidates, event.candidate.toJSON());
+            };
+
+            const callData = (await getDoc(callDoc)).data();
+            await pc.setRemoteDescription(new RTCSessionDescription(callData.offer));
+
             const answer = await pc.createAnswer();
             await pc.setLocalDescription(answer);
 
-            // Update Doc
-            await updateDoc(doc(db, "calls", incomingCallData.id), { type: 'answer', sdp: JSON.stringify(answer) });
+            await updateDoc(callDoc, { answer: { type: answer.type, sdp: answer.sdp }, status: 'connected' });
+
+            // Listen for Offer Candidates (ICE)
+            onSnapshot(offerCandidates, (snap) => {
+                snap.docChanges().forEach((change) => {
+                    if (change.type === 'added') {
+                        const candidate = new RTCIceCandidate(change.doc.data());
+                        pc.addIceCandidate(candidate);
+                    }
+                });
+            });
+
+            document.getElementById('ans-btn').style.display = 'none';
             document.getElementById('call-st').innerText = "Connected";
         }
 
         window.endCall = async () => {
-            // If I am caller, delete my chat call doc. If receiver, delete incoming doc ID.
-            const cId = chatId || (incomingCallData ? incomingCallData.id : null);
-            if(cId) await deleteDoc(doc(db, "calls", cId));
-            endCallUI();
+            if(incomingCallId) {
+                await updateDoc(doc(db, "calls", incomingCallId), { status: 'ended' });
+            }
+            endCallCleanup();
         }
 
-        function showCallUI(name, pic, status, isIncoming) {
-            document.getElementById('call-modal').style.display = 'flex';
-            document.getElementById('call-img').src = pic;
-            document.getElementById('call-nm').innerText = name;
-            document.getElementById('call-st').innerText = status;
-            document.getElementById('ans-btn').style.display = isIncoming ? 'flex' : 'none';
-        }
-
-        function endCallUI() {
+        function endCallCleanup() {
             document.getElementById('call-modal').style.display = 'none';
-            if(localStream) localStream.getTracks().forEach(t => t.stop());
-            if(pc) pc.close();
-            pc = null;
-            localStream = null;
-            incomingCallData = null;
+            if(pc) { pc.close(); pc = null; }
+            if(localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+            incomingCallId = null;
+        }
+
+        window.toggleMute = () => {
+            if(localStream) {
+                isMuted = !isMuted;
+                localStream.getAudioTracks()[0].enabled = !isMuted;
+                document.getElementById('mute-btn').classList.toggle('active');
+            }
+        }
+        
+        window.toggleSpk = () => {
+            // Note: Mobile browsers handle Speaker routing automatically or via OS. 
+            // setSinkId is mostly desktop chrome supported, but we add visual feedback.
+            alert("Please toggle Speakerphone from your system menu or notification tray.");
         }
 
     </script>
