@@ -3,95 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Messenger Ultra</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Messenger Ultra Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        :root { --p: #0084ff; --g: linear-gradient(135deg, #0084ff, #0060ff); --bg: #fff; --t: #050505; --bub-s: #0084ff; --bub-r: #f0f0f0; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { background: var(--bg); color: var(--t); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-        .h { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.95); border-bottom: 1px solid #eee; z-index: 20; }
-        .tt { font-size: 26px; font-weight: 700; background: var(--g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .lst { flex: 1; overflow-y: auto; }
-        .itm { display: flex; align-items: center; padding: 12px 15px; gap: 12px; cursor: pointer; }
-        .itm:active { background: #f5f5f5; }
-        .av { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #eee; flex-shrink: 0; }
-        .nm { font-weight: 600; font-size: 16px; }
-        .sub { font-size: 14px; color: #65676b; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 250px; }
-        .sub.b { font-weight: 700; color: #000; }
-        #v-ch { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 30; display: none; flex-direction: column; }
-        .ch-h { height: 60px; display: flex; align-items: center; padding: 0 10px; border-bottom: 1px solid #eee; justify-content: space-between; background: #fff; }
-        .u-bx { display: flex; align-items: center; gap: 10px; }
-        .act i { font-size: 20px; color: var(--p); padding: 10px; cursor: pointer; }
-        #msgs { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 4px; }
-        .r { display: flex; flex-direction: column; max-width: 75%; margin-bottom: 2px; }
-        .r.s { align-self: flex-end; align-items: flex-end; }
-        .r.r { align-self: flex-start; align-items: flex-start; }
-        .bub { padding: 8px 14px; border-radius: 18px; font-size: 15px; word-wrap: break-word; }
-        .s .bub { background: var(--bub-s); color: #fff; border-bottom-right-radius: 4px; }
-        .r .bub { background: var(--bub-r); color: #000; border-bottom-left-radius: 4px; }
-        .m-im, .m-vd { width: 100%; border-radius: 12px; margin-top: 5px; border: 1px solid #eee; }
-        .m-au { height: 40px; margin-top: 5px; border-radius: 20px; max-width: 220px; }
-        .ft { padding: 8px; display: flex; align-items: center; gap: 8px; border-top: 1px solid #eee; background: #fff; }
-        .bx { flex: 1; background: #f0f2f5; border-radius: 20px; padding: 8px 12px; display: flex; }
-        .in { border: none; background: transparent; width: 100%; font-size: 15px; }
-        .ic { font-size: 22px; color: var(--p); padding: 6px; cursor: pointer; }
-        .m-on { color: red !important; animation: pl 1s infinite; }
-        #c-ui { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1e3c72, #000); z-index: 9999; display: none; flex-direction: column; align-items: center; padding-top: 60px; color: #fff; }
-        .c-p { position: relative; margin-bottom: 20px; }
-        .c-av { width: 110px; height: 110px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.2); }
-        .pl { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; border: 2px solid rgba(255,255,255,0.5); animation: pg 1.5s infinite; }
-        .tm { font-size: 20px; font-weight: 500; margin-top: 10px; display: none; }
-        .bts { position: absolute; bottom: 50px; width: 100%; display: flex; justify-content: space-evenly; align-items: center; }
-        .bt { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; background: rgba(255,255,255,0.2); transition: 0.2s; }
-        .bt:active { transform: scale(0.9); }
-        .br { background: #ff3b30; }
-        .bg { background: #34c759; animation: bn 1s infinite; }
-        .bs { width: 50px; height: 50px; font-size: 20px; }
-        .bs.a { background: #fff; color: #000; }
-        @keyframes pl { 0%{opacity:1} 50%{opacity:0.5} 100%{opacity:1} }
-        @keyframes pg { 75%,100%{transform:scale(1.8);opacity:0} }
-        @keyframes bn { 50%{transform:translateY(-10px)} }
+        :root {
+            --primary: #0084ff;
+            --gradient: linear-gradient(135deg, #00C6FF, #0072FF);
+            --bg: #ffffff;
+            --surface: #f0f2f5;
+            --text: #050505;
+            --text-sec: #65676b;
+            --bubble-me: #0084ff;
+            --bubble-other: #e4e6eb;
+            --danger: #ff3b30;
+            --success: #34c759;
+            --shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* Loader */
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        
+        /* Views */
+        .view { width: 100%; height: 100%; display: none; flex-direction: column; position: absolute; top:0; left:0; background: var(--bg); transition: transform 0.3s ease; }
+        .view.active { display: flex; z-index: 10; }
+
+        /* Headers */
+        .header { height: 65px; padding: 0 15px; display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); z-index: 50; }
+        .header-title { font-size: 24px; font-weight: 700; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .back-btn { font-size: 20px; color: var(--primary); padding: 8px; cursor: pointer; border-radius: 50%; transition: 0.2s; }
+        .back-btn:active { background: var(--surface); }
+
+        /* User List */
+        .chat-list { flex: 1; overflow-y: auto; padding: 10px 0; }
+        .user-item { display: flex; align-items: center; padding: 12px 15px; gap: 15px; cursor: pointer; transition: background 0.2s; }
+        .user-item:active { background: var(--surface); }
+        .avatar-box { position: relative; width: 55px; height: 55px; flex-shrink: 0; }
+        .avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #eee; border: 1px solid #eee; }
+        .status-dot { position: absolute; bottom: 2px; right: 2px; width: 13px; height: 13px; background: var(--success); border-radius: 50%; border: 2px solid #fff; display: none; }
+        .status-dot.online { display: block; }
+        .info-box { flex: 1; overflow: hidden; }
+        .name-row { display: flex; justify-content: space-between; align-items: baseline; }
+        .user-name { font-weight: 600; font-size: 16px; color: var(--text); }
+        .msg-time { font-size: 11px; color: var(--text-sec); }
+        .last-msg { font-size: 13px; color: var(--text-sec); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+        .last-msg.unread { font-weight: 700; color: var(--text); }
+
+        /* Chat Area */
+        .chat-header-info { display: flex; flex-direction: column; }
+        .chat-header-name { font-size: 16px; font-weight: 600; }
+        .chat-header-status { font-size: 11px; color: var(--text-sec); }
+        .chat-actions i { font-size: 18px; color: var(--primary); margin-left: 20px; cursor: pointer; padding: 8px; }
+        
+        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 5px; background: var(--bg); }
+        .message-row { display: flex; flex-direction: column; max-width: 75%; }
+        .message-row.mine { align-self: flex-end; align-items: flex-end; }
+        .message-row.theirs { align-self: flex-start; align-items: flex-start; }
+        
+        .bubble { padding: 10px 16px; border-radius: 20px; font-size: 15px; line-height: 1.4; word-wrap: break-word; position: relative; box-shadow: var(--shadow); }
+        .mine .bubble { background: var(--bubble-me); color: #fff; border-bottom-right-radius: 4px; }
+        .theirs .bubble { background: var(--bubble-other); color: #000; border-bottom-left-radius: 4px; }
+        
+        .media-img { width: 100%; border-radius: 12px; margin-top: 5px; max-width: 250px; }
+        .custom-audio { display: flex; align-items: center; gap: 10px; padding: 5px 0; min-width: 150px; }
+        .audio-play { width: 30px; height: 30px; background: rgba(255,255,255,0.3); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        .mine .audio-play { color: #fff; }
+        .theirs .audio-play { background: rgba(0,0,0,0.1); color: #000; }
+        
+        /* Input Area */
+        .input-area { padding: 10px; background: #fff; border-top: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; gap: 8px; z-index: 50; }
+        .icon-btn { font-size: 22px; color: var(--primary); padding: 8px; cursor: pointer; }
+        .input-box { flex: 1; background: var(--surface); border-radius: 20px; padding: 10px 15px; display: flex; align-items: center; }
+        .msg-input { width: 100%; border: none; background: transparent; font-size: 15px; max-height: 100px; resize: none; }
+        
+        /* Voice Recorder UI */
+        .recorder-ui { display: none; flex: 1; align-items: center; justify-content: space-between; background: var(--surface); padding: 0 15px; border-radius: 25px; height: 45px; animation: slideIn 0.2s; }
+        .rec-wave { display: flex; align-items: center; gap: 3px; height: 20px; }
+        .bar { width: 3px; background: var(--danger); animation: wave 1s infinite ease-in-out; border-radius: 2px; }
+        .rec-timer { font-size: 14px; color: var(--danger); font-weight: 600; min-width: 45px; }
+
+        /* Call UI */
+        #call-ui { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, #1a2a6c, #b21f1f, #fdbb2d); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: space-between; padding: 60px 0 40px 0; color: #fff; }
+        .call-bg-blur { position: absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; opacity: 0.3; filter: blur(30px); z-index: -1; }
+        .call-avatar-container { position: relative; margin-top: 40px; }
+        .call-avatar { width: 120px; height: 120px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.2); object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .pulse-ring { position: absolute; top:0; left:0; width:100%; height:100%; border-radius: 50%; border: 2px solid rgba(255,255,255,0.5); animation: pulse 2s infinite; opacity: 0; }
+        
+        .call-info { text-align: center; }
+        .call-name { font-size: 26px; font-weight: 700; margin-bottom: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .call-status { font-size: 16px; opacity: 0.8; font-weight: 300; }
+
+        .call-controls { width: 100%; display: flex; justify-content: space-evenly; align-items: center; margin-bottom: 20px; }
+        .c-btn { width: 65px; height: 65px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 24px; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .c-btn:active { transform: scale(0.9); }
+        .btn-end { background: #ff3b30; color: #fff; }
+        .btn-ans { background: #34c759; color: #fff; animation: bounce 1.5s infinite; }
+        .btn-mute { background: rgba(255,255,255,0.2); color: #fff; backdrop-filter: blur(5px); }
+        .btn-mute.active { background: #fff; color: #000; }
+
+        /* Floating New Chat */
+        .fab { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; background: var(--gradient); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 24px; box-shadow: 0 4px 15px rgba(0,132,255,0.4); cursor: pointer; z-index: 40; transition: transform 0.2s; }
+        .fab:active { transform: scale(0.9) rotate(90deg); }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes wave { 0%,100%{height:5px} 50%{height:15px} }
+        @keyframes pulse { 0%{transform:scale(1);opacity:1} 100%{transform:scale(2);opacity:0} }
+        @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+        @keyframes slideIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
     </style>
 </head>
 <body>
-    <div id="ld" style="position:fixed;width:100%;height:100%;background:#fff;z-index:9999;display:flex;justify-content:center;align-items:center;"><i class="fas fa-circle-notch fa-spin" style="color:var(--p);font-size:30px;"></i></div>
 
-    <div id="v-ib">
-        <div class="h"><span class="tt">Chats</span><img src="https://via.placeholder.com/30" class="av" style="width:30px;height:30px;" onclick="location.reload()"></div>
-        <div class="lst" id="cl"></div>
-        <div style="position:fixed;bottom:20px;right:20px;width:55px;height:55px;background:var(--p);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;box-shadow:0 4px 10px rgba(0,0,0,0.3);" onclick="oFr()"><i class="fas fa-edit"></i></div>
-    </div>
+    <!-- Loading Screen -->
+    <div id="loader"><div class="spinner"></div><div>Loading...</div></div>
 
-    <div id="md" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:40;flex-direction:column;">
-        <div class="h"><span class="nm">New Message</span><span style="color:var(--p);cursor:pointer;" onclick="document.getElementById('md').style.display='none'">Cancel</span></div>
-        <div class="lst" id="fl"></div>
-    </div>
-
-    <div id="v-ch">
-        <div class="ch-h">
-            <div class="u-bx"><i class="fas fa-arrow-left" style="font-size:20px;color:var(--p);padding:5px;cursor:pointer;" onclick="xCh()"></i><img id="c-im" class="av"><div class="nm" id="c-nm">User</div></div>
-            <div class="act"><i class="fas fa-phone-alt" onclick="goC()"></i><i class="fas fa-video"></i></div>
+    <!-- View: Chat List -->
+    <div id="view-list" class="view active">
+        <div class="header">
+            <span class="header-title">Chats</span>
+            <img id="my-avatar" class="avatar" style="width:35px;height:35px;" src="">
         </div>
-        <div id="msgs"></div>
-        <div class="ft">
-            <i class="fas fa-image ic" onclick="document.getElementById('fi').click()"></i><input type="file" id="fi" hidden onchange="uF(this)">
-            <div class="bx"><input id="tx" class="in" placeholder="Message..." onkeyup="kT(this)"></div>
-            <i class="fas fa-microphone ic" id="mb" onclick="rec()"></i><i class="fas fa-paper-plane ic" id="sb" style="display:none" onclick="sn()"></i>
+        <div class="chat-list" id="chat-list-container"></div>
+        <div class="fab" onclick="showNewChatModal()"><i class="fas fa-edit"></i></div>
+    </div>
+
+    <!-- View: Chat Interface -->
+    <div id="view-chat" class="view">
+        <div class="header">
+            <div class="header-left">
+                <i class="fas fa-arrow-left back-btn" onclick="goBack()"></i>
+                <div class="avatar-box" style="width:35px;height:35px;"><img id="chat-avatar" class="avatar"></div>
+                <div class="chat-header-info">
+                    <span id="chat-name" class="chat-header-name">User</span>
+                    <span id="chat-status" class="chat-header-status">Offline</span>
+                </div>
+            </div>
+            <div class="chat-actions">
+                <i class="fas fa-phone-alt" onclick="startCall()"></i>
+                <i class="fas fa-video"></i>
+            </div>
+        </div>
+        <div id="messages"></div>
+        <div class="input-area">
+            <i class="fas fa-image icon-btn" onclick="document.getElementById('img-input').click()"></i>
+            <input type="file" id="img-input" hidden accept="image/*" onchange="uploadImage(this)">
+            
+            <div id="text-wrapper" class="input-box" style="flex:1">
+                <input id="msg-input" class="msg-input" placeholder="Type a message..." onkeyup="handleTyping()">
+            </div>
+            
+            <div id="rec-ui" class="recorder-ui">
+                <div class="rec-timer" id="rec-time">00:00</div>
+                <div class="rec-wave"><div class="bar"></div><div class="bar" style="animation-delay:0.1s"></div><div class="bar" style="animation-delay:0.2s"></div><div class="bar"></div></div>
+                <i class="fas fa-trash" style="color:#666; cursor:pointer;" onclick="cancelRecord()"></i>
+            </div>
+
+            <i class="fas fa-microphone icon-btn" id="btn-mic" onclick="toggleRecord()"></i>
+            <i class="fas fa-paper-plane icon-btn" id="btn-send" style="display:none; color:var(--primary);" onclick="sendText()"></i>
         </div>
     </div>
 
-    <div id="c-ui">
-        <div class="c-p"><div class="pl" id="pl"></div><img id="cl-im" class="c-av"></div>
-        <div id="cl-nm" style="font-size:24px;font-weight:700;margin-bottom:5px;">User</div>
-        <div id="cl-st" style="opacity:0.8;">Calling...</div>
-        <div id="tm" class="tm">00:00</div>
-        <audio id="rm" autoplay playsinline></audio>
-        <div class="bts">
-            <div class="bt bs" id="bm" style="display:none" onclick="tM()"><i class="fas fa-microphone-slash"></i></div>
-            <div class="bt br" onclick="eC()"><i class="fas fa-phone-slash"></i></div>
-            <div class="bt bg" id="ba" style="display:none" onclick="aC()"><i class="fas fa-phone"></i></div>
-            <div class="bt bs" id="bs" style="display:none" onclick="tS()"><i class="fas fa-volume-up"></i></div>
+    <!-- Modal: New Chat -->
+    <div id="modal-users" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:100;backdrop-filter:blur(5px);">
+        <div style="background:#fff;width:100%;height:100%;display:flex;flex-direction:column;">
+            <div class="header">
+                <span class="header-title" style="font-size:20px;">New Message</span>
+                <span style="color:var(--primary);font-weight:600;cursor:pointer;" onclick="document.getElementById('modal-users').style.display='none'">Close</span>
+            </div>
+            <div class="chat-list" id="users-list-container"></div>
+        </div>
+    </div>
+
+    <!-- View: Call Screen -->
+    <div id="call-ui">
+        <img id="call-bg" class="call-bg-blur">
+        <div class="call-avatar-container">
+            <div class="pulse-ring" id="call-pulse"></div>
+            <img id="call-ui-avatar" class="call-avatar">
+        </div>
+        <div class="call-info">
+            <div id="call-ui-name" class="call-name">User Name</div>
+            <div id="call-ui-status" class="call-status">Calling...</div>
+            <div id="call-timer" style="font-size:20px; font-weight:500; margin-top:10px; display:none;">00:00</div>
+        </div>
+        
+        <!-- HIDDEN AUDIO ELEMENT FOR WEBRTC -->
+        <audio id="remoteAudio" autoplay playsinline style="display:none;"></audio>
+
+        <div class="call-controls">
+            <div class="c-btn btn-mute" id="btn-mute" style="display:none" onclick="toggleMute()"><i class="fas fa-microphone-slash"></i></div>
+            <div class="c-btn btn-end" onclick="endCall()"><i class="fas fa-phone-slash"></i></div>
+            <div class="c-btn btn-ans" id="btn-answer" style="display:none" onclick="answerCall()"><i class="fas fa-phone"></i></div>
+            <div class="c-btn btn-mute" id="btn-spk" style="display:none"><i class="fas fa-volume-up"></i></div>
         </div>
     </div>
 
@@ -100,134 +208,534 @@
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, collection, query, orderBy, addDoc, onSnapshot, where, setDoc, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const app = initializeApp({ apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs", authDomain: "new-all-f99f7.firebaseapp.com", projectId: "new-all-f99f7", storageBucket: "new-all-f99f7.appspot.com", messagingSenderId: "1069748173900", appId: "1:1069748173900:web:158d6336c0f4628133c8e9" });
-        const db=getFirestore(app), auth=getAuth(app);
-        const CU="https://api.cloudinary.com/v1_1/dwgvvzbvn/auto/upload", CP="storyapp";
+        // CONFIG (Plug & Play)
+        const firebaseConfig = { apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs", authDomain: "new-all-f99f7.firebaseapp.com", projectId: "new-all-f99f7", storageBucket: "new-all-f99f7.appspot.com", messagingSenderId: "1069748173900", appId: "1:1069748173900:web:158d6336c0f4628133c8e9" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
         
-        let me, cid, ou, pc, ls, cd, mr, ach=[], tmI, sc=0;
-        const srv={iceServers:[{urls:['stun:stun1.l.google.com:19302']}]};
-        const so=new Audio('https://www.soundjay.com/phone/telephone-ring-03a.mp3'); so.loop=true;
-        const si=new Audio('https://www.soundjay.com/phone/phone-calling-1.mp3'); si.loop=true;
+        const CLOUD_URL = "https://api.cloudinary.com/v1_1/dwgvvzbvn/auto/upload";
+        const CLOUD_PRESET = "storyapp";
 
-        onAuthStateChanged(auth, u=>{
-            if(u){ me=u; document.getElementById('ld').style.display='none'; lI(); lC(); }
-            else location.href="Account.html";
+        // STATE
+        let currentUser = null;
+        let currentChatUser = null;
+        let chatId = null;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recordTimerInterval;
+        let callDocId = null;
+        let peerConnection = null;
+        let localStream = null;
+        let callTimerInterval;
+        
+        // Sounds
+        const ringSound = new Audio('https://nzt6ku-a.akamaihd.net/downloads/ringtones/files/mp3/mi-remix-ringtone-49340.mp3'); ringSound.loop = true;
+        const callSound = new Audio('https://cdn.pixabay.com/audio/2025/04/29/audio_2a52b7d68b.mp3'); callSound.loop = true;
+        
+        // WebRTC Servers
+        const servers = { iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
+
+        // AUTH & INIT
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                // Update online status loop
+                setInterval(() => updatePresence(), 60000);
+                updatePresence();
+                loadChatList();
+                listenForCalls();
+                
+                const uDoc = await getDoc(doc(db, "users", user.uid));
+                if(uDoc.exists()) document.getElementById('my-avatar').src = uDoc.data().profilePic;
+                document.getElementById('loader').style.display = 'none';
+            } else {
+                location.href = "Account.html";
+            }
         });
 
-        function lI(){
-            onSnapshot(query(collection(db,"chats"),where("users","array-contains",me.uid)), s=>{
-                const l=document.getElementById('cl'); l.innerHTML="";
-                let d=[]; s.forEach(x=>d.push({id:x.id,...x.data()}));
-                d.sort((a,b)=>(b.lastMsgTime?.toMillis()||0)-(a.lastMsgTime?.toMillis()||0));
-                d.forEach(c=>{
-                    const o=c.users.find(i=>i!==me.uid), i=c.userInfo?.[o]||{name:"User",pic:""};
-                    let t=c.lastMsg; if(c.lastMsgType==='image')t='Sent a photo'; if(c.lastMsgType==='audio')t='Sent a voice message';
-                    l.innerHTML+=`<div class="itm" onclick="sC('${o}')"><img src="${i.pic}" class="av"><div><div class="nm">${i.name}</div><div class="sub ${c.lastMsgSender!==me.uid&&!c.seen?'b':''}">${c.lastMsgSender===me.uid?'You: ':''}${t}</div></div></div>`;
+        const updatePresence = async () => {
+            if(!currentUser) return;
+            await updateDoc(doc(db, "users", currentUser.uid), {
+                lastSeen: serverTimestamp(),
+                online: true
+            });
+        };
+
+        // NAVIGATION
+        window.switchView = (viewId) => {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        };
+
+        window.goBack = () => {
+            chatId = null;
+            currentChatUser = null;
+            switchView('view-list');
+        };
+
+        // TIME FORMATTER
+        function formatTime(timestamp) {
+            if (!timestamp) return '';
+            const date = timestamp.toDate();
+            const now = new Date();
+            const diff = (now - date) / 1000; // seconds
+            
+            if(diff < 60) return 'Just now';
+            if(diff < 3600) return Math.floor(diff/60) + 'm ago';
+            if(diff < 86400) return Math.floor(diff/3600) + 'h ago';
+            return date.toLocaleDateString();
+        }
+
+        // CHAT LIST LOGIC
+        function loadChatList() {
+            const q = query(collection(db, "chats"), where("users", "array-contains", currentUser.uid));
+            onSnapshot(q, (snapshot) => {
+                const list = document.getElementById('chat-list-container');
+                list.innerHTML = "";
+                let chats = [];
+                snapshot.forEach(doc => chats.push({ id: doc.id, ...doc.data() }));
+                chats.sort((a,b) => (b.lastMsgTime?.toMillis() || 0) - (a.lastMsgTime?.toMillis() || 0));
+
+                chats.forEach(chat => {
+                    const otherId = chat.users.find(u => u !== currentUser.uid);
+                    const info = chat.userInfo ? chat.userInfo[otherId] : { name: 'User', pic: '' };
+                    const isUnread = chat.lastMsgSender !== currentUser.uid && !chat.seen;
+                    const msgPreview = chat.lastMsgSender === currentUser.uid ? `You: ${chat.lastMsg}` : chat.lastMsg;
+                    
+                    // Fetch real-time status for list
+                    getDoc(doc(db, "users", otherId)).then(uSnap => {
+                        const uData = uSnap.data();
+                        const isOnline = uData.lastSeen && (new Date() - uData.lastSeen.toDate()) < 120000; // 2 min active
+                        
+                        const div = document.createElement('div');
+                        div.className = 'user-item';
+                        div.onclick = () => openChat(otherId, info);
+                        div.innerHTML = `
+                            <div class="avatar-box">
+                                <img src="${info.pic}" class="avatar">
+                                <div class="status-dot ${isOnline ? 'online' : ''}"></div>
+                            </div>
+                            <div class="info-box">
+                                <div class="name-row">
+                                    <span class="user-name">${info.name}</span>
+                                    <span class="msg-time">${formatTime(chat.lastMsgTime)}</span>
+                                </div>
+                                <div class="last-msg ${isUnread ? 'unread' : ''}">${msgPreview}</div>
+                            </div>
+                        `;
+                        list.appendChild(div);
+                    });
                 });
             });
         }
 
-        window.oFr=async()=>{
-            document.getElementById('md').style.display='flex';
-            const l=document.getElementById('fl'); l.innerHTML='Loading...';
-            const f=(await getDoc(doc(db,"users",me.uid))).data().friends||[];
-            l.innerHTML="";
-            for(const id of f){
-                const u=(await getDoc(doc(db,"users",id))).data();
-                l.innerHTML+=`<div class="itm" onclick="sC('${id}');document.getElementById('md').style.display='none'"><img src="${u.profilePic}" class="av"><div class="nm">${u.fullName}</div></div>`;
+        window.showNewChatModal = async () => {
+            document.getElementById('modal-users').style.display = 'flex';
+            const container = document.getElementById('users-list-container');
+            container.innerHTML = '<div style="padding:20px;text-align:center">Loading...</div>';
+            
+            const myData = (await getDoc(doc(db, "users", currentUser.uid))).data();
+            const friends = myData.friends || [];
+            
+            container.innerHTML = '';
+            for(const fid of friends) {
+                const fData = (await getDoc(doc(db, "users", fid))).data();
+                container.innerHTML += `
+                    <div class="user-item" onclick="openChat('${fid}', {name:'${fData.fullName}', pic:'${fData.profilePic}'}); document.getElementById('modal-users').style.display='none'">
+                        <img src="${fData.profilePic}" class="avatar" style="width:50px;height:50px">
+                        <div class="user-name">${fData.fullName}</div>
+                    </div>
+                `;
             }
-        }
+        };
 
-        window.sC=async(id)=>{
-            document.getElementById('v-ib').style.display='none';
-            document.getElementById('v-ch').style.display='flex';
-            const u=(await getDoc(doc(db,"users",id))).data();
-            ou={id,name:u.fullName,pic:u.profilePic};
-            document.getElementById('c-nm').innerText=ou.name; document.getElementById('c-im').src=ou.pic;
-            cid=me.uid<id?`${me.uid}_${id}`:`${id}_${me.uid}`;
-            setDoc(doc(db,"chats",cid),{seen:true},{merge:true});
-            onSnapshot(query(collection(db,"chats",cid,"messages"),orderBy("time","asc")), s=>{
-                const a=document.getElementById('msgs'); a.innerHTML="";
-                s.forEach(d=>rM(d.data(),a)); a.scrollTop=a.scrollHeight;
+        // CHAT INTERFACE LOGIC
+        window.openChat = async (uid, info) => {
+            currentChatUser = { id: uid, ...info };
+            chatId = currentUser.uid < uid ? `${currentUser.uid}_${uid}` : `${uid}_${currentUser.uid}`;
+            
+            document.getElementById('chat-name').innerText = info.name;
+            document.getElementById('chat-avatar').src = info.pic;
+            document.getElementById('messages').innerHTML = "";
+            switchView('view-chat');
+
+            // Mark seen
+            setDoc(doc(db, "chats", chatId), { seen: true }, { merge: true });
+
+            // Status Listener
+            onSnapshot(doc(db, "users", uid), (doc) => {
+                if(doc.exists()) {
+                    const data = doc.data();
+                    const diff = new Date() - (data.lastSeen?.toDate() || 0);
+                    const statusEl = document.getElementById('chat-status');
+                    if(diff < 120000) {
+                        statusEl.innerText = "Active Now";
+                        statusEl.style.color = "var(--success)";
+                    } else {
+                        statusEl.innerText = "Active " + formatTime(data.lastSeen);
+                        statusEl.style.color = "var(--text-sec)";
+                    }
+                }
             });
+
+            // Messages Listener
+            const q = query(collection(db, "chats", chatId, "messages"), orderBy("time", "asc"));
+            onSnapshot(q, (snapshot) => {
+                const msgContainer = document.getElementById('messages');
+                msgContainer.innerHTML = "";
+                snapshot.forEach(d => renderMessage(d.data()));
+                msgContainer.scrollTop = msgContainer.scrollHeight;
+            });
+        };
+
+        function renderMessage(msg) {
+            const isMe = msg.sender === currentUser.uid;
+            const div = document.createElement('div');
+            div.className = `message-row ${isMe ? 'mine' : 'theirs'}`;
+            
+            let content = '';
+            if(msg.type === 'text') content = msg.txt;
+            else if(msg.type === 'image') content = `<img src="${msg.url}" class="media-img" onclick="window.open('${msg.url}')">`;
+            else if(msg.type === 'audio') content = `
+                <div class="custom-audio">
+                    <div class="audio-play" onclick="playAudio(this, '${msg.url}')"><i class="fas fa-play"></i></div>
+                    <div style="font-size:12px;">Voice Message</div>
+                </div>`;
+
+            div.innerHTML = `<div class="bubble">${content}</div>`;
+            document.getElementById('messages').appendChild(div);
         }
 
-        function rM(m,a){
-            let c=`<div class="bub">${m.txt}</div>`;
-            if(m.type==='image')c=`<img src="${m.url}" class="m-im" onclick="window.open('${m.url}')">`;
-            if(m.type==='video')c=`<video src="${m.url}" controls class="m-vd"></video>`;
-            if(m.type==='audio')c=`<audio src="${m.url}" controls class="m-au"></audio>`;
-            a.innerHTML+=`<div class="r ${m.sender===me.uid?'s':'r'}">${c}</div>`;
+        window.playAudio = (btn, url) => {
+            const audio = new Audio(url);
+            audio.play();
+            const icon = btn.querySelector('i');
+            icon.className = "fas fa-stop";
+            audio.onended = () => icon.className = "fas fa-play";
+        };
+
+        // SENDING MESSAGES
+        window.handleTyping = () => {
+            const val = document.getElementById('msg-input').value.trim();
+            document.getElementById('btn-send').style.display = val ? 'block' : 'none';
+            document.getElementById('btn-mic').style.display = val ? 'none' : 'block';
+        };
+
+        window.sendText = async () => {
+            const input = document.getElementById('msg-input');
+            const txt = input.value.trim();
+            if(!txt) return;
+            input.value = ''; handleTyping();
+            await sendMessage({ type: 'text', txt: txt });
+        };
+
+        window.uploadImage = async (e) => {
+            if(e.files[0]) {
+                const file = e.files[0];
+                document.getElementById('messages').innerHTML += `<div class="message-row mine"><div class="bubble">Uploading image...</div></div>`;
+                const fd = new FormData();
+                fd.append('file', file);
+                fd.append('upload_preset', CLOUD_PRESET);
+                try {
+                    const res = await fetch(CLOUD_URL, { method: 'POST', body: fd });
+                    const data = await res.json();
+                    await sendMessage({ type: 'image', url: data.secure_url, txt: 'Sent a photo' });
+                } catch(err) { alert('Upload failed'); }
+            }
+        };
+
+        // VOICE RECORDING UI & LOGIC
+        window.toggleRecord = async () => {
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    
+                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                    mediaRecorder.onstop = async () => {
+                        if(audioChunks.length === 0) return; // Cancelled
+                        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const fd = new FormData();
+                        fd.append('file', blob);
+                        fd.append('upload_preset', CLOUD_PRESET);
+                        const res = await fetch(CLOUD_URL, { method: 'POST', body: fd });
+                        const data = await res.json();
+                        await sendMessage({ type: 'audio', url: data.secure_url, txt: 'Sent a voice message' });
+                        stream.getTracks().forEach(t => t.stop());
+                    };
+
+                    mediaRecorder.start();
+                    
+                    // UI Update
+                    document.getElementById('rec-ui').style.display = 'flex';
+                    document.getElementById('text-wrapper').style.display = 'none';
+                    document.getElementById('btn-mic').className = "fas fa-paper-plane icon-btn";
+                    document.getElementById('btn-mic').style.color = "var(--primary)";
+                    document.getElementById('btn-mic').onclick = stopAndSendRecord;
+                    
+                    // Timer
+                    let sec = 0;
+                    document.getElementById('rec-time').innerText = "00:00";
+                    recordTimerInterval = setInterval(() => {
+                        sec++;
+                        let m = Math.floor(sec/60), s = sec%60;
+                        document.getElementById('rec-time').innerText = `${m}:${s<10?'0':''}${s}`;
+                    }, 1000);
+
+                } catch (err) { alert("Microphone access denied"); }
+            }
+        };
+
+        window.stopAndSendRecord = () => {
+            if(mediaRecorder) mediaRecorder.stop();
+            resetRecordUI();
+        };
+
+        window.cancelRecord = () => {
+            if(mediaRecorder) { audioChunks = []; mediaRecorder.stop(); } // empty chunks prevents send
+            resetRecordUI();
+        };
+
+        function resetRecordUI() {
+            clearInterval(recordTimerInterval);
+            document.getElementById('rec-ui').style.display = 'none';
+            document.getElementById('text-wrapper').style.display = 'flex';
+            const micBtn = document.getElementById('btn-mic');
+            micBtn.className = "fas fa-microphone icon-btn";
+            micBtn.style.color = "var(--primary)";
+            micBtn.onclick = toggleRecord;
         }
 
-        window.kT=e=>{ const h=e.value.trim().length>0; document.getElementById('sb').style.display=h?'block':'none'; document.getElementById('mb').style.display=h?'none':'block'; }
-        window.sn=async()=>{ const i=document.getElementById('tx'), t=i.value.trim(); if(!t)return; i.value=""; kT(i); await pM({sender:me.uid,txt:t,type:'text',time:serverTimestamp()}); }
-        window.uF=async(e)=>{ if(e.files[0]){ const f=e.files[0], ty=f.type.startsWith('video')?'video':'image', fd=new FormData(); fd.append('file',f); fd.append('upload_preset',CP); const r=await fetch(CU,{method:'POST',body:fd}), d=await r.json(); await pM({sender:me.uid,type:ty,url:d.secure_url,time:serverTimestamp()}); } }
-        
-        window.rec=async()=>{
-            const b=document.getElementById('mb');
-            if(!mr||mr.state==='inactive'){
-                const s=await navigator.mediaDevices.getUserMedia({audio:true}); mr=new MediaRecorder(s); ach=[];
-                mr.ondataavailable=e=>ach.push(e.data);
-                mr.onstop=async()=>{
-                    const fd=new FormData(); fd.append('file',new Blob(ach,{type:'audio/webm'})); fd.append('upload_preset',CP);
-                    const r=await fetch(CU,{method:'POST',body:fd}), d=await r.json();
-                    await pM({sender:me.uid,type:'audio',url:d.secure_url,time:serverTimestamp()}); s.getTracks().forEach(t=>t.stop());
-                }; mr.start(); b.classList.add('m-on');
-            } else { mr.stop(); b.classList.remove('m-on'); }
+        async function sendMessage(data) {
+            const time = serverTimestamp();
+            await addDoc(collection(db, "chats", chatId, "messages"), { ...data, sender: currentUser.uid, time });
+            
+            const myInfo = (await getDoc(doc(db,"users", currentUser.uid))).data();
+            await setDoc(doc(db, "chats", chatId), {
+                users: [currentUser.uid, currentChatUser.id],
+                lastMsg: data.txt || 'Media',
+                lastMsgType: data.type,
+                lastMsgSender: currentUser.uid,
+                lastMsgTime: time,
+                seen: false,
+                userInfo: {
+                    [currentUser.uid]: { name: myInfo.fullName, pic: myInfo.profilePic },
+                    [currentChatUser.id]: { name: currentChatUser.name, pic: currentChatUser.pic }
+                }
+            }, { merge: true });
         }
 
-        async function pM(d){ await addDoc(collection(db,"chats",cid,"messages"),d); const i=(await getDoc(doc(db,"users",me.uid))).data(); await setDoc(doc(db,"chats",cid),{users:[me.uid,ou.id],lastMsg:d.txt||'Media',lastMsgType:d.type,lastMsgSender:me.uid,lastMsgTime:serverTimestamp(),seen:false,userInfo:{[me.uid]:{name:i.fullName,pic:i.profilePic},[ou.id]:{name:ou.name,pic:ou.pic}}},{merge:true}); }
-        window.xCh=()=>{ document.getElementById('v-ch').style.display='none'; document.getElementById('v-ib').style.display='flex'; }
+        // ==========================================
+        // CALLING LOGIC (WEBRTC AUDIO FIX)
+        // ==========================================
 
-        function uUI(s){
-            const pl=document.getElementById('pl'), st=document.getElementById('cl-st'), tm=document.getElementById('tm'), ba=document.getElementById('ba'), bm=document.getElementById('bm'), bs=document.getElementById('bs');
-            if(s==='r'||s==='i'){ pl.style.animation='pg 1.5s infinite'; st.style.display='block'; tm.style.display='none'; bm.style.display='none'; bs.style.display='none'; if(s==='i')ba.style.display='flex'; }
-            else { pl.style.animation='none'; pl.style.border='2px solid #34c759'; st.style.display='none'; tm.style.display='block'; bm.style.display='flex'; bs.style.display='flex'; ba.style.display='none'; si.pause(); so.pause(); sT(); }
-        }
+        window.startCall = async () => {
+            document.getElementById('call-ui').style.display = 'flex';
+            updateCallUI(currentChatUser.name, currentChatUser.pic, "Calling...", 'ring');
+            
+            ringSound.play().catch(e=>console.log(e));
 
-        function sT(){ sc=0; if(tmI)clearInterval(tmI); tmI=setInterval(()=>{ sc++; let m=Math.floor(sc/60), s=sc%60; document.getElementById('tm').innerText=`${m}:${s<10?'0':''}${s}`; },1000); }
+            callDocId = doc(collection(db, "calls")).id;
+            peerConnection = new RTCPeerConnection(servers);
 
-        window.goC=async()=>{
-            document.getElementById('c-ui').style.display='flex'; document.getElementById('cl-nm').innerText=ou.name; document.getElementById('cl-im').src=ou.pic; document.getElementById('cl-st').innerText="Calling...";
-            so.currentTime=0; so.play().catch(()=>{}); uUI('r');
-            cd=doc(collection(db,"calls")).id; pc=new RTCPeerConnection(srv);
-            ls=await navigator.mediaDevices.getUserMedia({audio:true}); ls.getTracks().forEach(t=>pc.addTrack(t,ls));
-            pc.ontrack=e=>document.getElementById('rm').srcObject=e.streams[0];
-            pc.onicecandidate=e=>{if(e.candidate)addDoc(collection(db,"calls",cd,"oc"),e.candidate.toJSON())};
-            const o=await pc.createOffer(); await pc.setLocalDescription(o);
-            await setDoc(doc(db,"calls",cd),{c:me.uid,r:ou.id,o:{type:o.type,sdp:o.sdp},st:'ring'});
-            onSnapshot(doc(db,"calls",cd),d=>{ const v=d.data(); if(v?.a&&!pc.currentRemoteDescription){pc.setRemoteDescription(new RTCSessionDescription(v.a));uUI('c');} if(v?.st==='end')eL(); });
-            onSnapshot(collection(db,"calls",cd,"ac"),s=>s.docChanges().forEach(c=>{if(c.type==='added')pc.addIceCandidate(new RTCIceCandidate(c.doc.data()))}));
-        }
+            // 1. Get Local Stream
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
-        function lC(){
-            onSnapshot(query(collection(db,"calls"),where("r","==",me.uid),where("st","==","ring")),async s=>{
-                s.docChanges().forEach(async c=>{
-                    if(c.type==='added'){
-                        cd=c.doc.id; const d=c.doc.data(), u=(await getDoc(doc(db,"users",d.c))).data();
-                        document.getElementById('c-ui').style.display='flex'; document.getElementById('cl-nm').innerText=u.fullName; document.getElementById('cl-im').src=u.profilePic; document.getElementById('cl-st').innerText="Incoming Call...";
-                        si.currentTime=0; si.play().catch(()=>{}); uUI('i');
+            // 2. Handle Remote Stream (CRITICAL FIX)
+            peerConnection.ontrack = (event) => {
+                const remoteAudio = document.getElementById('remoteAudio');
+                if (remoteAudio.srcObject !== event.streams[0]) {
+                    remoteAudio.srcObject = event.streams[0];
+                    console.log("Remote stream attached!");
+                }
+            };
+
+            // 3. ICE Candidates
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    addDoc(collection(db, "calls", callDocId, "offerCandidates"), event.candidate.toJSON());
+                }
+            };
+
+            // 4. Create Offer
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+
+            // 5. Save to Firestore
+            await setDoc(doc(db, "calls", callDocId), {
+                callerId: currentUser.uid,
+                receiverId: currentChatUser.id,
+                offer: { type: offer.type, sdp: offer.sdp },
+                status: 'calling' // Changed status string
+            });
+
+            // 6. Listen for Answer
+            onSnapshot(doc(db, "calls", callDocId), (snapshot) => {
+                const data = snapshot.data();
+                if (peerConnection && !peerConnection.currentRemoteDescription && data?.answer) {
+                    const answerDescription = new RTCSessionDescription(data.answer);
+                    peerConnection.setRemoteDescription(answerDescription);
+                    updateCallUI(currentChatUser.name, currentChatUser.pic, "Connected", 'connected');
+                    ringSound.pause();
+                }
+                if (data?.status === 'ended') endCallCleanup();
+            });
+
+            // 7. Listen for Answer Candidates
+            onSnapshot(collection(db, "calls", callDocId, "answerCandidates"), (snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === 'added') {
+                        const candidate = new RTCIceCandidate(change.doc.data());
+                        peerConnection.addIceCandidate(candidate);
                     }
                 });
             });
-            onSnapshot(query(collection(db,"calls"),where("r","==",me.uid)),s=>s.docChanges().forEach(c=>{if(c.type==='modified'&&c.doc.data().st==='end')eL()}));
+        };
+
+        function listenForCalls() {
+            const q = query(collection(db, "calls"), where("receiverId", "==", currentUser.uid), where("status", "==", "calling"));
+            onSnapshot(q, (snapshot) => {
+                snapshot.docChanges().forEach(async (change) => {
+                    if (change.type === 'added') {
+                        callDocId = change.doc.id;
+                        const data = change.doc.data();
+                        const callerData = (await getDoc(doc(db, "users", data.callerId))).data();
+                        
+                        document.getElementById('call-ui').style.display = 'flex';
+                        callSound.play().catch(e=>console.log(e));
+                        updateCallUI(callerData.fullName, callerData.profilePic, "Incoming Call...", 'incoming');
+                    }
+                });
+            });
+            
+            // Listen for end elsewhere
+            const qEnd = query(collection(db, "calls"), where("receiverId", "==", currentUser.uid));
+            onSnapshot(qEnd, (snap) => {
+                snap.docChanges().forEach(change => {
+                    if(change.type === 'modified' && change.doc.data().status === 'ended') endCallCleanup();
+                });
+            });
         }
 
-        window.aC=async()=>{
-            pc=new RTCPeerConnection(srv); ls=await navigator.mediaDevices.getUserMedia({audio:true}); ls.getTracks().forEach(t=>pc.addTrack(t,ls));
-            pc.ontrack=e=>document.getElementById('rm').srcObject=e.streams[0];
-            pc.onicecandidate=e=>{if(e.candidate)addDoc(collection(db,"calls",cd,"ac"),e.candidate.toJSON())};
-            const d=(await getDoc(doc(db,"calls",cd))).data(); await pc.setRemoteDescription(new RTCSessionDescription(d.o));
-            const a=await pc.createAnswer(); await pc.setLocalDescription(a);
-            await updateDoc(doc(db,"calls",cd),{a:{type:a.type,sdp:a.sdp},st:'con'}); uUI('c');
-            onSnapshot(collection(db,"calls",cd,"oc"),s=>s.docChanges().forEach(c=>{if(c.type==='added')pc.addIceCandidate(new RTCIceCandidate(c.doc.data()))}));
+        window.answerCall = async () => {
+            callSound.pause();
+            updateCallUI(null, null, "Connecting...", 'connected'); // Temporary status
+            
+            peerConnection = new RTCPeerConnection(servers);
+            
+            // 1. Get Local Stream
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+            // 2. Handle Remote Stream
+            peerConnection.ontrack = (event) => {
+                const remoteAudio = document.getElementById('remoteAudio');
+                remoteAudio.srcObject = event.streams[0];
+            };
+
+            // 3. ICE
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    addDoc(collection(db, "calls", callDocId, "answerCandidates"), event.candidate.toJSON());
+                }
+            };
+
+            // 4. Set Remote Description (Offer)
+            const callData = (await getDoc(doc(db, "calls", callDocId))).data();
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(callData.offer));
+
+            // 5. Create Answer
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+
+            // 6. Update Firestore
+            await updateDoc(doc(db, "calls", callDocId), {
+                answer: { type: answer.type, sdp: answer.sdp },
+                status: 'connected'
+            });
+            
+            // 7. Listen for Offer Candidates
+            onSnapshot(collection(db, "calls", callDocId, "offerCandidates"), (snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === 'added') {
+                        peerConnection.addIceCandidate(new RTCIceCandidate(change.doc.data()));
+                    }
+                });
+            });
+
+            updateCallUI(null, null, "Connected", 'connected');
+        };
+
+        window.endCall = async () => {
+            if (callDocId) await updateDoc(doc(db, "calls", callDocId), { status: 'ended' });
+            endCallCleanup();
+        };
+
+        window.toggleMute = () => {
+            if(localStream) {
+                const track = localStream.getAudioTracks()[0];
+                track.enabled = !track.enabled;
+                document.getElementById('btn-mute').classList.toggle('active');
+            }
+        };
+
+        function endCallCleanup() {
+            document.getElementById('call-ui').style.display = 'none';
+            if (peerConnection) { peerConnection.close(); peerConnection = null; }
+            if (localStream) { localStream.getTracks().forEach(track => track.stop()); localStream = null; }
+            ringSound.pause(); ringSound.currentTime = 0;
+            callSound.pause(); callSound.currentTime = 0;
+            callDocId = null;
+            clearInterval(callTimerInterval);
         }
 
-        window.eC=async()=>{ if(cd)await updateDoc(doc(db,"calls",cd),{st:'end'}); eL(); }
-        function eL(){ document.getElementById('c-ui').style.display='none'; if(pc){pc.close();pc=null;} if(ls){ls.getTracks().forEach(t=>t.stop());ls=null;} so.pause(); si.pause(); if(tmI)clearInterval(tmI); cd=null; }
-        window.tM=()=>{ if(ls){ ls.getAudioTracks()[0].enabled=!ls.getAudioTracks()[0].enabled; document.getElementById('bm').classList.toggle('a'); } }
-        window.tS=()=>{ document.getElementById('bs').classList.toggle('a'); }
+        function updateCallUI(name, pic, status, type) {
+            if(name) {
+                document.getElementById('call-ui-name').innerText = name;
+                document.getElementById('call-ui-avatar').src = pic;
+                document.getElementById('call-bg').src = pic;
+            }
+            document.getElementById('call-ui-status').innerText = status;
+            
+            const pulse = document.getElementById('call-pulse');
+            const btnAns = document.getElementById('btn-answer');
+            const btnMute = document.getElementById('btn-mute');
+            const timer = document.getElementById('call-timer');
+            const stTxt = document.getElementById('call-ui-status');
+
+            if (type === 'incoming') {
+                pulse.style.animation = 'pulse 1.5s infinite';
+                btnAns.style.display = 'flex';
+                btnMute.style.display = 'none';
+                timer.style.display = 'none';
+            } else if (type === 'ring') {
+                pulse.style.animation = 'pulse 2s infinite';
+                btnAns.style.display = 'none';
+                btnMute.style.display = 'none';
+                timer.style.display = 'none';
+            } else if (type === 'connected') {
+                pulse.style.animation = 'none';
+                pulse.style.border = '2px solid #34c759';
+                btnAns.style.display = 'none';
+                btnMute.style.display = 'flex';
+                stTxt.style.display = 'none';
+                timer.style.display = 'block';
+                startCallTimer();
+            }
+        }
+
+        function startCallTimer() {
+            let sc = 0;
+            if(callTimerInterval) clearInterval(callTimerInterval);
+            callTimerInterval = setInterval(() => {
+                sc++;
+                let m = Math.floor(sc/60), s = sc%60;
+                document.getElementById('call-timer').innerText = `${m}:${s<10?'0':''}${s}`;
+            }, 1000);
+        }
     </script>
 </body>
 </html>
