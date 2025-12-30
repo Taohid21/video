@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Create Reel / Post</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg: #000000;
+            --card: #121212;
+            --text: #ffffff;
+            --text-sec: #a8a8a8;
+            --accent: #0095f6; /* Instagram-like Blue */
+            --accent-grad: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            --border: #262626;
+            --hover: #1e1e1e;
+            --input: #262626;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { background-color: var(--bg); color: var(--text); height: 100vh; overflow: hidden; position: relative; }
+
+        /* --- VIEWS / PAGES SYSTEM --- */
+        .view {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); display: flex; flex-direction: column;
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform: translateX(100%); z-index: 100; opacity: 0; pointer-events: none;
+        }
+        .view.active { transform: translateX(0); opacity: 1; pointer-events: auto; z-index: 200; }
+        .view.main-view { transform: translateX(0); opacity: 1; z-index: 10; pointer-events: auto; }
+
+        /* --- HEADER --- */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); background: rgba(18,18,18,0.95); backdrop-filter: blur(10px); z-index: 50; }
+        .h-title { font-size: 17px; font-weight: 700; }
+        .h-btn { font-size: 15px; font-weight: 600; color: var(--accent); background: none; border: none; cursor: pointer; }
+        .h-btn:disabled { opacity: 0.5; }
+        
+        /* --- MAIN CREATE POST VIEW --- */
+        .user-sec { padding: 15px; display: flex; gap: 12px; align-items: center; }
+        .u-img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: var(--input); }
+        .u-name { font-weight: 600; font-size: 16px; }
+        
+        #txt { width: 100%; border: none; outline: none; font-size: 18px; resize: none; min-height: 120px; background: transparent; color: var(--text); padding: 0 15px; margin-bottom: 10px; }
+        #txt::placeholder { color: var(--text-sec); }
+
+        /* Colored Backgrounds */
+        #txt.bg-active { text-align: center; font-weight: 800; font-size: 24px; color: white; display: flex; align-items: center; justify-content: center; min-height: 300px; padding: 40px 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .bg-scroll { display: flex; gap: 8px; padding: 10px 15px; overflow-x: auto; scrollbar-width: none; }
+        .bg-btn { width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0; border: 2px solid transparent; cursor: pointer; }
+        .bg-btn.selected { border-color: white; transform: scale(1.1); }
+
+        /* Standard Preview Box (Images/YT) */
+        .std-preview { position: relative; width: 100%; display: none; margin-top: 10px; }
+        .std-preview img { width: 100%; max-height: 400px; object-fit: contain; background: #000; }
+        .std-preview iframe { width: 100%; aspect-ratio: 16/9; border: none; }
+        .del-std { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); width: 30px; height: 30px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+
+        /* Bottom Sheet */
+        .bottom-tools { position: absolute; bottom: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); border-radius: 20px 20px 0 0; overflow: hidden; }
+        .tool-row { display: flex; align-items: center; padding: 16px; border-bottom: 1px solid var(--border); transition: 0.2s; active: var(--hover); cursor: pointer; }
+        .tool-row:active { background: var(--hover); }
+        .tool-row i { font-size: 22px; width: 35px; }
+        .tool-txt { font-weight: 500; font-size: 16px; color: var(--text); flex: 1; }
+        
+        /* --- REEL EDITOR VIEW --- */
+        .editor-container { flex: 1; position: relative; display: flex; flex-direction: column; background: #000; justify-content: center; }
+        .video-canvas { width: 100%; max-height: 70vh; object-fit: contain; }
+        
+        .filters-bar { height: 120px; background: rgba(0,0,0,0.8); display: flex; gap: 15px; align-items: center; padding: 0 20px; overflow-x: auto; position: absolute; bottom: 0; width: 100%; backdrop-filter: blur(10px); }
+        .filter-opt { display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0.7; transition: 0.2s; cursor: pointer; }
+        .filter-opt.active { opacity: 1; transform: scale(1.1); }
+        .f-preview { width: 50px; height: 50px; border-radius: 8px; border: 2px solid transparent; background-size: cover; background-position: center; transition: 0.2s; }
+        .filter-opt.active .f-preview { border-color: var(--accent); }
+        .f-name { font-size: 11px; font-weight: 500; color: white; }
+
+        /* Filter CSS Classes */
+        .f-norm { filter: none; }
+        .f-bw { filter: grayscale(100%); }
+        .f-warm { filter: sepia(40%) contrast(110%); }
+        .f-cool { filter: hue-rotate(180deg) saturate(0.5); }
+        .f-vivid { filter: contrast(130%) saturate(140%); }
+        .f-vintage { filter: sepia(60%) hue-rotate(-30deg) contrast(90%); }
+
+        /* --- FINAL UPLOAD VIEW --- */
+        .final-layout { padding: 20px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; height: 100%; padding-bottom: 100px; }
+        .thumb-box { display: flex; gap: 15px; }
+        .thumb-img { width: 90px; height: 130px; background: #222; border-radius: 8px; object-fit: cover; }
+        .caption-box { flex: 1; background: transparent; border: none; color: white; font-size: 16px; resize: none; height: 130px; padding-top: 5px; }
+        
+        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
+        .st-left { display: flex; align-items: center; gap: 12px; font-size: 16px; font-weight: 500; }
+        
+        /* Toggle Switch */
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--input); transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        .btn-post-final { width: 100%; background: var(--accent); color: white; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 16px; border: none; margin-top: 20px; }
+        .btn-cancel { width: 100%; background: var(--input); color: white; padding: 14px; border-radius: 12px; font-weight: 600; font-size: 16px; border: none; margin-top: 10px; }
+
+        /* Loader */
+        .loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 5000; backdrop-filter: blur(5px); }
+        
+        /* YT Modal */
+        .yt-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index: 3000; display:none; align-items:center; justify-content:center; padding: 20px; backdrop-filter: blur(10px); }
+        .ym-box { background: var(--card); width: 100%; max-width: 400px; padding: 25px; border-radius: 18px; border: 1px solid var(--border); }
+        .ym-inp { width: 100%; padding: 12px; background: var(--input); border: 1px solid var(--border); border-radius: 8px; color: white; margin: 15px 0; }
+    </style>
+</head>
+<body>
+
+    <!-- LOADING SPINNER -->
+    <div id="loader" class="loader">
+        <i class="fas fa-circle-notch fa-spin" style="font-size:40px; color:var(--accent); margin-bottom:20px;"></i>
+        <div style="font-weight:600; font-size:18px;">Publishing...</div>
+    </div>
+
+    <!-- VIEW 1: HOME (Standard Post) -->
+    <div id="viewHome" class="view main-view">
+        <div class="header">
+            <i class="fas fa-times" style="font-size:22px; cursor:pointer;" onclick="location.href='index.html'"></i>
+            <span class="h-title">Create Post</span>
+            <button id="mainPostBtn" class="h-btn" onclick="publishStandard()">Post</button>
+        </div>
+
+        <div class="user-sec">
+            <img id="uPic" class="u-img">
+            <div style="display:flex; flex-direction:column;">
+                <span id="uName" class="u-name">Loading...</span>
+                <div style="font-size:12px; color:var(--text-sec); border:1px solid var(--border); padding:2px 8px; border-radius:4px; width:fit-content; margin-top:4px;">
+                    <i class="fas fa-globe-americas"></i> Public
+                </div>
+            </div>
+        </div>
+
+        <div style="flex:1; overflow-y:auto; padding:0 15px;">
+            <textarea id="txt" placeholder="What's on your mind?"></textarea>
+            
+            <div class="bg-scroll" id="bgScroll">
+                <div class="bg-btn bg-reset selected" style="background:#333; display:flex; justify-content:center; align-items:center;" onclick="setBg(0)"><i class="fas fa-ban" style="font-size:12px;"></i></div>
+                <div class="bg-btn" style="background: linear-gradient(to bottom right, #ff512f, #dd2476);" onclick="setBg(1)"></div>
+                <div class="bg-btn" style="background: linear-gradient(to bottom right, #fd746c, #ff9068);" onclick="setBg(2)"></div>
+                <div class="bg-btn" style="background: linear-gradient(to bottom right, #1fa2ff, #12d8fa);" onclick="setBg(3)"></div>
+                <div class="bg-btn" style="background: linear-gradient(to bottom right, #8e2de2, #4a00e0);" onclick="setBg(4)"></div>
+                <div class="bg-btn" style="background: url('https://img.freepik.com/free-vector/gradient-heart-background_23-2149323608.jpg') center/cover;" onclick="setBg(5)"></div>
+            </div>
+
+            <div id="stdPreview" class="std-preview">
+                <div class="del-std" onclick="clearStdMedia()"><i class="fas fa-times"></i></div>
+                <div id="stdMediaCont"></div>
+            </div>
+        </div>
+
+        <div class="bottom-tools">
+            <div class="tool-row" id="opt-media" onclick="document.getElementById('fIn').click()">
+                <i class="fas fa-photo-video" style="color:#45bd62;"></i>
+                <span class="tool-txt">Photo / Reel</span>
+            </div>
+            <div class="tool-row" id="opt-yt" onclick="openYT()">
+                <i class="fab fa-youtube" style="color:#ff0000;"></i>
+                <span class="tool-txt">YouTube Video</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 2: REEL EDITOR -->
+    <div id="viewEditor" class="view">
+        <div class="header" style="position:absolute; top:0; width:100%; background:rgba(0,0,0,0.3); border:none;">
+            <i class="fas fa-chevron-left" style="font-size:22px; cursor:pointer; color:white;" onclick="history.back()"></i>
+            <span class="h-title" style="color:white; text-shadow:0 1px 3px rgba(0,0,0,0.5);">Edit Reel</span>
+            <button class="h-btn" style="color:white; background:var(--accent); padding:5px 15px; border-radius:20px;" onclick="finishEditing()">Next</button>
+        </div>
+
+        <div class="editor-container">
+            <video id="editVideo" class="video-canvas" autoplay loop playsinline muted></video>
+        </div>
+
+        <div class="filters-bar">
+            <!-- Filter Options Generated via JS -->
+        </div>
+    </div>
+
+    <!-- VIEW 3: FINAL UPLOAD SETTINGS -->
+    <div id="viewFinal" class="view">
+        <div class="header">
+            <i class="fas fa-chevron-left" style="font-size:22px; cursor:pointer;" onclick="history.back()"></i>
+            <span class="h-title">New Reel</span>
+            <div></div> 
+        </div>
+
+        <div class="final-layout">
+            <div class="thumb-box">
+                <img id="finalThumb" class="thumb-img">
+                <textarea id="finalCap" class="caption-box" placeholder="Write a caption... #reels"></textarea>
+            </div>
+
+            <div style="margin-top:10px;">
+                <div class="setting-item">
+                    <div class="st-left"><i class="fas fa-user-friends"></i> Audience</div>
+                    <div style="color:var(--text-sec); font-size:14px;">Public <i class="fas fa-chevron-right"></i></div>
+                </div>
+                
+                <div class="setting-item">
+                    <div class="st-left"><i class="fas fa-music"></i> Audio Sound</div>
+                    <label class="switch">
+                        <input type="checkbox" checked id="soundToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <div class="st-left"><i class="fas fa-comment-dots"></i> Allow Comments</div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <button class="btn-post-final" onclick="publishReel()">Publish Reel</button>
+            <button class="btn-cancel" onclick="cancelAll()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- HIDDEN INPUTS & MODALS -->
+    <input type="file" id="fIn" hidden accept="image/*,video/*" onchange="handleFile(this)">
+    
+    <div id="ytMod" class="yt-modal">
+        <div class="ym-box">
+            <div class="h-title">Add YouTube</div>
+            <input id="ytInp" class="ym-inp" placeholder="Paste link...">
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button class="h-btn" style="color:white;" onclick="closeYT()">Cancel</button>
+                <button class="h-btn" onclick="addYT()">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Config
+        const cfg = { apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs", authDomain: "new-all-f99f7.firebaseapp.com", projectId: "new-all-f99f7", storageBucket: "new-all-f99f7.appspot.com", messagingSenderId: "1069748173900", appId: "1:1069748173900:web:158d6336c0f4628133c8e9" };
+        const C_URL = "https://api.cloudinary.com/v1_1/dwgvvzbvn/auto/upload";
+        const C_PRE = "storyapp";
+        const YT_API_KEY = "AIzaSyBFxF8kRg7VdxYKsQdFO-WQkdxS9vF-B6M";
+
+        const app = initializeApp(cfg);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        let me = null;
+        let selectedFile = null; // Image or Video
+        let activeBg = 0;
+        let currentFilter = 'f-norm';
+        let ytId = null;
+
+        // --- NAVIGATION / BACK BUTTON SUPPORT ---
+        const views = {
+            home: document.getElementById('viewHome'),
+            editor: document.getElementById('viewEditor'),
+            final: document.getElementById('viewFinal')
+        };
+
+        // Initialize History State
+        window.history.replaceState({ page: 'home' }, '', '');
+
+        function goTo(viewName) {
+            // Push state for back button handling
+            window.history.pushState({ page: viewName }, '', `#${viewName}`);
+            showView(viewName);
+        }
+
+        function showView(name) {
+            // Reset Views
+            Object.values(views).forEach(v => v.classList.remove('active'));
+            views[name].classList.add('active');
+            
+            // Pause video if leaving editor
+            if(name !== 'editor') document.getElementById('editVideo').pause();
+        }
+
+        // Handle Back Button (Hardware/Browser)
+        window.onpopstate = (e) => {
+            if(e.state && e.state.page) {
+                showView(e.state.page);
+            } else {
+                showView('home');
+            }
+        };
+
+        window.cancelAll = () => {
+            // Go back to start
+            window.history.go(-(history.length - 1));
+            location.href = "index.html"; 
+        }
+
+        // --- INIT AUTH ---
+        onAuthStateChanged(auth, async (u) => {
+            if(u) {
+                me = u;
+                const d = (await getDoc(doc(db,"users",u.uid))).data();
+                document.getElementById('uPic').src = d.profilePic;
+                document.getElementById('uName').innerHTML = `${d.fullName} ${d.isVerified ? '<i class="fas fa-check-circle" style="color:var(--accent); font-size:14px;"></i>' : ''}`;
+            } else location.href = "Account.html";
+        });
+
+        // --- FILE HANDLING ---
+        window.handleFile = (inp) => {
+            const file = inp.files[0];
+            if(!file) return;
+
+            selectedFile = file;
+
+            if(file.type.startsWith('video')) {
+                // REEL FLOW
+                const url = URL.createObjectURL(file);
+                const vid = document.getElementById('editVideo');
+                vid.src = url;
+                vid.load();
+                
+                generateFilterPreviews(url);
+                goTo('editor'); // Go to Editor View
+            } else {
+                // IMAGE FLOW (Old Logic)
+                const url = URL.createObjectURL(file);
+                renderStdPreview(`<img src="${url}">`);
+            }
+        };
+
+        // --- EDITOR LOGIC ---
+        const filters = [
+            {name: 'Normal', class: 'f-norm'},
+            {name: 'B&W', class: 'f-bw'},
+            {name: 'Warm', class: 'f-warm'},
+            {name: 'Cool', class: 'f-cool'},
+            {name: 'Vivid', class: 'f-vivid'},
+            {name: 'Vintage', class: 'f-vintage'},
+        ];
+
+        function generateFilterPreviews(vidUrl) {
+            const bar = document.querySelector('.filters-bar');
+            bar.innerHTML = ''; // Clear
+
+            filters.forEach(f => {
+                const div = document.createElement('div');
+                div.className = 'filter-opt';
+                if(f.class === currentFilter) div.classList.add('active');
+                
+                // Use a video element as preview thumbnail (trick)
+                div.innerHTML = `
+                    <video class="f-preview ${f.class}" src="${vidUrl}" muted onloadeddata="this.currentTime=1"></video>
+                    <span class="f-name">${f.name}</span>
+                `;
+                div.onclick = () => applyFilter(f.class, div);
+                bar.appendChild(div);
+            });
+        }
+
+        function applyFilter(cls, el) {
+            document.querySelectorAll('.filter-opt').forEach(e => e.classList.remove('active'));
+            el.classList.add('active');
+            currentFilter = cls;
+            
+            const vid = document.getElementById('editVideo');
+            vid.className = `video-canvas ${cls}`;
+        }
+
+        window.finishEditing = () => {
+            const vid = document.getElementById('editVideo');
+            // Generate Thumbnail for Final Screen
+            const canvas = document.createElement('canvas');
+            canvas.width = vid.videoWidth;
+            canvas.height = vid.videoHeight;
+            canvas.getContext('2d').drawImage(vid, 0, 0, canvas.width, canvas.height);
+            
+            document.getElementById('finalThumb').src = canvas.toDataURL();
+            document.getElementById('finalThumb').className = `thumb-img ${currentFilter}`; // keep visual filter
+            
+            goTo('final');
+        }
+
+        // --- PUBLISH REEL ---
+        window.publishReel = async () => {
+            const cap = document.getElementById('finalCap').value;
+            const hasSound = document.getElementById('soundToggle').checked;
+            
+            uploadPost(selectedFile, cap, 'video', hasSound);
+        }
+
+        // --- PUBLISH STANDARD (Text/Image/YT) ---
+        window.publishStandard = async () => {
+            const txt = document.getElementById('txt').value;
+            let type = 'text';
+            if(activeBg > 0) type = 'bg_text';
+            else if(selectedFile && selectedFile.type.startsWith('image')) type = 'image';
+            else if(ytId) type = 'youtube';
+
+            uploadPost(selectedFile, txt, type, true);
+        }
+
+        // --- COMMON UPLOAD FUNCTION ---
+        async function uploadPost(file, text, type, soundOn) {
+            document.getElementById('loader').style.display = 'flex';
+            
+            try {
+                let mUrl = null;
+
+                // Handle Backgrounds
+                if(type === 'bg_text') {
+                    const bgs = ['', 'linear-gradient(to bottom right, #ff512f, #dd2476)', 'linear-gradient(to bottom right, #fd746c, #ff9068)', 'linear-gradient(to bottom right, #1fa2ff, #12d8fa)', 'linear-gradient(to bottom right, #8e2de2, #4a00e0)', 'url(https://img.freepik.com/free-vector/gradient-heart-background_23-2149323608.jpg) center/cover'];
+                    mUrl = bgs[activeBg];
+                }
+                // Handle YouTube
+                else if(type === 'youtube') {
+                    mUrl = `https://www.youtube.com/embed/${ytId}`;
+                }
+                // Handle File Upload
+                else if(file) {
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    fd.append('upload_preset', C_PRE);
+                    const res = await fetch(C_URL, {method:'POST', body:fd});
+                    const data = await res.json();
+                    mUrl = data.secure_url;
+                }
+
+                const uData = (await getDoc(doc(db,"users",me.uid))).data();
+
+                await addDoc(collection(db,"posts"), {
+                    uid: me.uid,
+                    userName: uData.fullName,
+                    userPic: uData.profilePic,
+                    isVerified: uData.isVerified || false,
+                    text: text,
+                    mediaUrl: mUrl,
+                    type: type,
+                    filter: currentFilter, // Save filter class name
+                    soundOn: soundOn,
+                    timestamp: new Date().toISOString(),
+                    likes: []
+                });
+
+                location.href = "index.html";
+
+            } catch(e) {
+                alert("Error: " + e.message);
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+
+        // --- HELPER FUNCTIONS (Existing features) ---
+        window.setBg = (idx) => {
+            activeBg = idx;
+            document.querySelectorAll('.bg-btn').forEach(b => b.classList.remove('selected'));
+            document.querySelectorAll('.bg-btn')[idx].classList.add('selected');
+            
+            const t = document.getElementById('txt');
+            const bgVals = ['', 'linear-gradient(to bottom right, #ff512f, #dd2476)', 'linear-gradient(to bottom right, #fd746c, #ff9068)', 'linear-gradient(to bottom right, #1fa2ff, #12d8fa)', 'linear-gradient(to bottom right, #8e2de2, #4a00e0)', 'url(https://img.freepik.com/free-vector/gradient-heart-background_23-2149323608.jpg) center/cover'];
+            
+            if(idx > 0) {
+                clearStdMedia();
+                t.style.background = bgVals[idx];
+                t.classList.add('bg-active');
+            } else {
+                t.style.background = 'transparent';
+                t.classList.remove('bg-active');
+            }
+        }
+
+        window.renderStdPreview = (html) => {
+            document.getElementById('stdMediaCont').innerHTML = html;
+            document.getElementById('stdPreview').style.display = 'block';
+            document.getElementById('bgScroll').style.display = 'none';
+            setBg(0);
+        }
+
+        window.clearStdMedia = () => {
+            selectedFile = null;
+            ytId = null;
+            document.getElementById('fIn').value = '';
+            document.getElementById('stdPreview').style.display = 'none';
+            document.getElementById('bgScroll').style.display = 'flex';
+        }
+
+        window.openYT = () => document.getElementById('ytMod').style.display = 'flex';
+        window.closeYT = () => document.getElementById('ytMod').style.display = 'none';
+        
+        window.addYT = async () => {
+            const v = document.getElementById('ytInp').value;
+            const match = v.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+            if(match) {
+                ytId = match[1];
+                renderStdPreview(`<iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>`);
+                closeYT();
+            }
+        }
+
+    </script>
+</body>
+</html>
