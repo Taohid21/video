@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Create Post & Reels</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg: #000000;
+            --card: #121212;
+            --text: #e4e6eb;
+            --text-sec: #b0b3b8;
+            --accent: #2d88ff;
+            --border: #2f3031;
+            --input: #1e1e1e;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            --gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { background-color: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+
+        /* --- PAGES TRANSITION --- */
+        .page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; flex-direction: column; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); z-index: 10; transform: translateX(100%); }
+        .page.active { transform: translateX(0); z-index: 20; }
+        #mainPage { transform: translateX(0); z-index: 10; position: relative; }
+
+        /* --- HEADER --- */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); background: var(--card); height: 60px; }
+        .h-title { font-size: 18px; font-weight: 700; }
+        .btn-post { background: var(--accent); color: white; padding: 8px 24px; border-radius: 20px; border: none; font-weight: 600; font-size: 14px; opacity: 0.5; transition: 0.2s; pointer-events: none; }
+        .btn-post.active { opacity: 1; pointer-events: auto; cursor: pointer; }
+        .btn-cancel { color: var(--text); font-size: 16px; background: none; border: none; cursor: pointer; }
+
+        /* --- USER INFO --- */
+        .user-sec { padding: 15px; display: flex; gap: 12px; align-items: center; }
+        .u-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: var(--input); }
+        .u-name { font-weight: 600; font-size: 16px; }
+
+        /* --- INPUT AREA --- */
+        .input-area { flex: 1; overflow-y: auto; padding: 0 15px; display: flex; flex-direction: column; }
+        #txt { width: 100%; border: none; background: transparent; color: var(--text); font-size: 20px; resize: none; min-height: 100px; line-height: 1.5; margin-bottom: 15px; }
+        #txt::placeholder { color: var(--text-sec); }
+
+        /* Colored Backgrounds */
+        #txt.bg-active { text-align: center; font-weight: 800; font-size: 26px; color: white; display: flex; align-items: center; justify-content: center; min-height: 300px; padding: 40px 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); border-radius: 12px; margin-bottom: 20px; }
+        .bg-scroll { display: flex; gap: 10px; padding: 10px 0; overflow-x: auto; scrollbar-width: none; margin-bottom: 10px; }
+        .bg-btn { width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0; border: 2px solid transparent; transition: 0.2s; cursor: pointer; }
+        .bg-btn.selected { border-color: var(--text); transform: scale(1.1); }
+        .bg-reset { background: var(--input); display: flex; align-items: center; justify-content: center; color: var(--text); border: 1px solid var(--border); }
+
+        /* --- THUMBNAIL & METADATA (Reels Mode) --- */
+        .post-meta { display: none; background: var(--card); border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px solid var(--border); }
+        .meta-row { display: flex; gap: 15px; }
+        .vid-thumb { width: 80px; height: 120px; border-radius: 8px; object-fit: cover; background: black; }
+        .meta-opts { flex: 1; display: flex; flex-direction: column; gap: 15px; justify-content: center; }
+        
+        .toggle-opt { display: flex; justify-content: space-between; align-items: center; }
+        .toggle-lbl { font-size: 15px; font-weight: 500; color: var(--text); display: flex; align-items: center; gap: 8px; }
+        
+        /* Switch */
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--input); border: 1px solid var(--border); border-radius: 34px; transition: .4s; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 2px; bottom: 2px; background-color: white; border-radius: 50%; transition: .4s; }
+        input:checked + .slider { background-color: var(--accent); border-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* --- PREVIEW BOX (Images/YT) --- */
+        .preview-box { width: 100%; position: relative; display: none; margin-bottom: 20px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+        .preview-box img, .preview-box video { width: 100%; max-height: 400px; object-fit: contain; background: black; display: block; }
+        .preview-box iframe { width: 100%; aspect-ratio: 16/9; border: none; display: block; }
+        .del-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); cursor: pointer; }
+
+        /* --- BOTTOM SHEET --- */
+        .bottom-tools { padding: 15px; background: var(--card); border-top: 1px solid var(--border); }
+        .tool-sheet { display: flex; flex-direction: column; gap: 10px; }
+        .tool-btn { display: flex; align-items: center; justify-content: space-between; background: var(--input); padding: 15px; border-radius: 12px; cursor: pointer; transition: 0.2s; }
+        .tool-btn:active { transform: scale(0.98); background: #2a2b2c; }
+        .tool-left { display: flex; align-items: center; gap: 12px; font-weight: 500; font-size: 15px; }
+        .tool-btn.disabled { opacity: 0.4; pointer-events: none; }
+
+        /* --- EDITOR PAGE (Reels) --- */
+        #editorPage { background: #000; display: flex; flex-direction: column; }
+        .editor-header { position: absolute; top: 0; left: 0; width: 100%; padding: 20px; z-index: 50; display: flex; justify-content: space-between; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); }
+        .ed-btn { color: white; background: rgba(255,255,255,0.2); border: none; padding: 8px 16px; border-radius: 20px; font-weight: 600; backdrop-filter: blur(5px); font-size: 14px; }
+        .ed-done { background: var(--accent); color: white; }
+
+        .video-container { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+        #editVideo { width: 100%; height: 100%; object-fit: contain; }
+
+        .filters-area { height: 120px; background: #000; display: flex; align-items: center; padding: 0 15px; overflow-x: auto; gap: 15px; scrollbar-width: none; z-index: 50; }
+        .filter-opt { display: flex; flex-direction: column; align-items: center; gap: 5px; color: #ccc; font-size: 12px; cursor: pointer; flex-shrink: 0; }
+        .filter-prev { width: 60px; height: 60px; border-radius: 50%; background-size: cover; background-position: center; border: 2px solid transparent; transition: 0.2s; }
+        .filter-opt.active .filter-prev { border-color: var(--accent); transform: scale(1.1); }
+        .filter-opt.active { color: var(--accent); font-weight: 700; }
+
+        /* Filter Classes */
+        .f-norm { filter: none; }
+        .f-bw { filter: grayscale(100%); }
+        .f-sepia { filter: sepia(80%); }
+        .f-warm { filter: sepia(50%) contrast(110%) saturate(140%); }
+        .f-cool { filter: contrast(110%) brightness(110%) saturate(130%) hue-rotate(180deg); }
+        .f-vint { filter: sepia(40%) contrast(120%) brightness(90%); }
+        .f-dream { filter: blur(0.5px) contrast(110%) brightness(115%) saturate(120%); }
+
+        /* --- YOUTUBE MODAL --- */
+        .yt-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
+        .ym-box { background: var(--card); width: 100%; max-width: 400px; padding: 20px; border-radius: 15px; border: 1px solid var(--border); }
+        .ym-inp { width: 100%; padding: 12px; background: var(--input); border: 1px solid var(--border); border-radius: 8px; color: white; margin: 15px 0; }
+        .ym-act { display: flex; justify-content: flex-end; gap: 10px; }
+        .ym-btn { padding: 8px 16px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; }
+
+        /* --- LOADER --- */
+        .loader { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; }
+
+    </style>
+</head>
+<body class="dark-mode">
+
+    <!-- === MAIN PAGE === -->
+    <div id="mainPage" class="page active">
+        <div class="header">
+            <button class="btn-cancel" onclick="goBackOrHome()">Cancel</button>
+            <span class="h-title">Create Post</span>
+            <button id="postBtn" class="btn-post" onclick="publish()">Publish</button>
+        </div>
+
+        <div class="user-sec">
+            <img id="uPic" class="u-img">
+            <div>
+                <div id="uName" class="u-name">Loading...</div>
+                <div style="font-size:12px; color:var(--text-sec); margin-top:2px;">
+                    <i class="fas fa-globe-americas"></i> Public
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <textarea id="txt" placeholder="What's on your mind?"></textarea>
+
+            <!-- Backgrounds -->
+            <div class="bg-scroll" id="bgScroll">
+                <div class="bg-btn bg-reset selected" onclick="setBg(0)"><i class="fas fa-ban"></i></div>
+                <div class="bg-btn" style="background: linear-gradient(to br, #ff512f, #dd2476);" onclick="setBg(1)"></div>
+                <div class="bg-btn" style="background: linear-gradient(to br, #fd746c, #ff9068);" onclick="setBg(2)"></div>
+                <div class="bg-btn" style="background: linear-gradient(to br, #1fa2ff, #12d8fa);" onclick="setBg(3)"></div>
+                <div class="bg-btn" style="background: linear-gradient(to br, #8e2de2, #4a00e0);" onclick="setBg(4)"></div>
+                <div class="bg-btn" style="background: #222;" onclick="setBg(7)"></div>
+                <div class="bg-btn" style="background: url('https://img.freepik.com/free-vector/gradient-heart-background_23-2149323608.jpg') center/cover;" onclick="setBg(8)"></div>
+            </div>
+
+            <!-- Reels/Video Metadata Preview -->
+            <div id="reelsMeta" class="post-meta">
+                <div class="meta-row">
+                    <canvas id="thumbCanvas" class="vid-thumb" hidden></canvas>
+                    <img id="thumbImg" class="vid-thumb"> <!-- Generated Thumbnail -->
+                    
+                    <div class="meta-opts">
+                        <div class="toggle-opt">
+                            <span class="toggle-lbl"><i class="fas fa-volume-up"></i> Sound On</span>
+                            <label class="switch">
+                                <input type="checkbox" id="swSound" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-opt">
+                            <span class="toggle-lbl"><i class="fas fa-lock"></i> Public</span>
+                            <label class="switch">
+                                <input type="checkbox" id="swPublic" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top:10px; text-align:right;">
+                    <button class="ed-btn" style="background:var(--input); font-size:12px;" onclick="reEditVideo()">
+                        <i class="fas fa-pen"></i> Edit Again
+                    </button>
+                    <button class="ed-btn" style="background: #dc3545; font-size:12px;" onclick="clearMedia()">
+                        <i class="fas fa-trash"></i> Remove
+                    </button>
+                </div>
+            </div>
+
+            <!-- Image/Youtube Preview -->
+            <div id="prevBox" class="preview-box">
+                <div class="del-btn" onclick="clearMedia()"><i class="fas fa-times"></i></div>
+                <div id="mediaCont"></div>
+            </div>
+        </div>
+
+        <div class="bottom-tools">
+            <div class="tool-sheet">
+                <!-- Changed to Photo / Reels -->
+                <div class="tool-btn" id="opt-media" onclick="document.getElementById('fIn').click()">
+                    <div class="tool-left">
+                        <i class="fas fa-clapperboard" style="color:#e1306c; font-size:24px; width:30px;"></i>
+                        <span>Photo / Reels</span>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color:var(--text-sec);"></i>
+                </div>
+
+                <div class="tool-btn" id="opt-yt" onclick="openYT()">
+                    <div class="tool-left">
+                        <i class="fab fa-youtube" style="color:#ff0000; font-size:24px; width:30px;"></i>
+                        <span>YouTube Video</span>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color:var(--text-sec);"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- === EDITOR PAGE (For Reels) === -->
+    <div id="editorPage" class="page">
+        <div class="editor-header">
+            <button class="ed-btn" onclick="closeEditor()">Cancel</button>
+            <button class="ed-btn ed-done" onclick="saveEditor()">Done</button>
+        </div>
+
+        <div class="video-container">
+            <!-- Video Element to Edit -->
+            <video id="editVideo" playsinline loop autoplay muted></video>
+        </div>
+
+        <div class="filters-area">
+            <div class="filter-opt active" onclick="applyFilter('f-norm', this)">
+                <div class="filter-prev" style="background:#333;"></div>
+                <span>Normal</span>
+            </div>
+            <div class="filter-opt" onclick="applyFilter('f-bw', this)">
+                <div class="filter-prev" style="background:linear-gradient(to right, #000, #fff);"></div>
+                <span>B&W</span>
+            </div>
+            <div class="filter-opt" onclick="applyFilter('f-sepia', this)">
+                <div class="filter-prev" style="background:#704214;"></div>
+                <span>Sepia</span>
+            </div>
+            <div class="filter-opt" onclick="applyFilter('f-warm', this)">
+                <div class="filter-prev" style="background:linear-gradient(45deg, #ff9a9e, #fecfef);"></div>
+                <span>Warm</span>
+            </div>
+            <div class="filter-opt" onclick="applyFilter('f-cool', this)">
+                <div class="filter-prev" style="background:linear-gradient(45deg, #a18cd1, #fbc2eb);"></div>
+                <span>Cool</span>
+            </div>
+            <div class="filter-opt" onclick="applyFilter('f-dream', this)">
+                <div class="filter-prev" style="background:linear-gradient(45deg, #d299c2, #fef9d7);"></div>
+                <span>Dream</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- === HIDDEN INPUTS & MODALS === -->
+    <input type="file" id="fIn" hidden accept="image/*,video/*" onchange="handleFile(this)">
+
+    <div id="ytMod" class="yt-modal">
+        <div class="ym-box">
+            <div style="font-weight:700; font-size:18px;">Add YouTube Video</div>
+            <input id="ytInp" class="ym-inp" placeholder="Paste link (Video, Shorts)...">
+            <div class="ym-act">
+                <button class="ym-btn" style="background:transparent; color:var(--text); border:1px solid var(--border);" onclick="closeYT()">Cancel</button>
+                <button id="ytAddBtn" class="ym-btn" style="background:var(--accent); color:white;" onclick="addYT()">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="loader" class="loader">
+        <i class="fas fa-circle-notch fa-spin" style="font-size:40px; color:var(--accent); margin-bottom:15px;"></i>
+        <div>Creating Post...</div>
+    </div>
+
+    <!-- === SCRIPTS === -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // CONFIG
+        const cfg = { apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs", authDomain: "new-all-f99f7.firebaseapp.com", projectId: "new-all-f99f7", storageBucket: "new-all-f99f7.appspot.com", messagingSenderId: "1069748173900", appId: "1:1069748173900:web:158d6336c0f4628133c8e9" };
+        const C_URL = "https://api.cloudinary.com/v1_1/dwgvvzbvn/auto/upload";
+        const C_PRE = "storyapp";
+        const YT_API_KEY = "AIzaSyBFxF8kRg7VdxYKsQdFO-WQkdxS9vF-B6M";
+
+        // INIT
+        const app = initializeApp(cfg);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let me = null;
+        let fileData = null; // Store file object
+        let activeBg = 0;
+        let ytId = null;
+        let selectedFilter = 'f-norm';
+        let isReelMode = false;
+
+        // BGs
+        const bgs = ['', 'linear-gradient(to br, #ff512f, #dd2476)', 'linear-gradient(to br, #fd746c, #ff9068)', 'linear-gradient(to br, #1fa2ff, #12d8fa)', 'linear-gradient(to br, #8e2de2, #4a00e0)', '', '', '#222', 'url(https://img.freepik.com/free-vector/gradient-heart-background_23-2149323608.jpg) center/cover'];
+
+        // AUTH CHECK
+        onAuthStateChanged(auth, async (u) => {
+            if(u) {
+                me = u;
+                const d = (await getDoc(doc(db,"users",u.uid))).data();
+                document.getElementById('uPic').src = d.profilePic;
+                const badge = d.isVerified ? `<i class="fas fa-check-circle" style="color:var(--accent); font-size:14px; margin-left:4px;"></i>` : '';
+                document.getElementById('uName').innerHTML = d.fullName + badge;
+            } else location.href = "Account.html";
+        });
+
+        const txt = document.getElementById('txt');
+        const postBtn = document.getElementById('postBtn');
+        txt.addEventListener('input', checkState);
+
+        // --- HISTORY API FOR BACK BUTTON ---
+        // When editor opens, we push state. When back pressed, popstate handles it.
+        window.addEventListener('popstate', (e) => {
+            if (document.getElementById('editorPage').classList.contains('active')) {
+                closeEditor(true); // true = skip history.back()
+            } else {
+                // If on main page, let default happen (which might be exit) or handle redirect
+                if(!fileData && !txt.value) location.href = 'index.html';
+            }
+        });
+
+        // --- FILE HANDLING ---
+        window.handleFile = (inp) => {
+            if(inp.files[0]) {
+                const f = inp.files[0];
+                const isVid = f.type.startsWith('video');
+
+                setBg(0); // Reset color bg
+                fileData = f;
+
+                if(isVid) {
+                    // Start Reel Flow
+                    openEditor(f);
+                } else {
+                    // Standard Image Flow
+                    isReelMode = false;
+                    const url = URL.createObjectURL(f);
+                    document.getElementById('mediaCont').innerHTML = `<img src="${url}">`;
+                    document.getElementById('prevBox').style.display = 'block';
+                    document.getElementById('reelsMeta').style.display = 'none';
+                    document.getElementById('bgScroll').style.display = 'none';
+                    checkState();
+                }
+            }
+        }
+
+        // --- REELS EDITOR LOGIC ---
+        window.openEditor = (file) => {
+            const url = URL.createObjectURL(file);
+            const v = document.getElementById('editVideo');
+            v.src = url;
+            v.className = 'f-norm'; // reset filter
+            selectedFilter = 'f-norm';
+            
+            // UI Reset
+            document.querySelectorAll('.filter-opt').forEach(el => el.classList.remove('active'));
+            document.querySelector('.filter-opt').classList.add('active');
+
+            // Show Editor
+            document.getElementById('editorPage').classList.add('active');
+            history.pushState({page:'editor'}, "Edit Reel", "#editor"); // Push history
+        }
+
+        window.applyFilter = (cls, el) => {
+            document.getElementById('editVideo').className = cls;
+            selectedFilter = cls;
+            document.querySelectorAll('.filter-opt').forEach(e => e.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        window.closeEditor = (fromBackBtn = false) => {
+            document.getElementById('editVideo').pause();
+            document.getElementById('editorPage').classList.remove('active');
+            document.getElementById('fIn').value = ''; // Reset input if cancelled
+            if(!fromBackBtn) history.back(); // Go back in history if clicked button
+        }
+
+        window.saveEditor = () => {
+            // 1. Generate Thumbnail
+            const v = document.getElementById('editVideo');
+            const canvas = document.getElementById('thumbCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = v.videoWidth;
+            canvas.height = v.videoHeight;
+            ctx.filter = getComputedStyle(v).filter; // Try to capture basic CSS filter if possible (limited support on canvas)
+            ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+            
+            document.getElementById('thumbImg').src = canvas.toDataURL('image/jpeg');
+
+            // 2. Set UI State
+            isReelMode = true;
+            document.getElementById('editorPage').classList.remove('active');
+            history.back(); // Remove editor from history stack
+
+            document.getElementById('reelsMeta').style.display = 'block';
+            document.getElementById('prevBox').style.display = 'none';
+            document.getElementById('bgScroll').style.display = 'none';
+            
+            // Disable other media inputs
+            document.getElementById('opt-media').classList.add('disabled');
+            document.getElementById('opt-yt').classList.add('disabled');
+            
+            checkState();
+        }
+
+        window.reEditVideo = () => {
+             // Re-open editor without resetting file
+             document.getElementById('editorPage').classList.add('active');
+             document.getElementById('editVideo').play();
+             history.pushState({page:'editor'}, "Edit Reel", "#editor");
+        }
+
+        // --- COMMON UI LOGIC ---
+        window.setBg = (idx) => {
+            activeBg = idx;
+            document.querySelectorAll('.bg-btn').forEach(b => b.classList.remove('selected'));
+            document.querySelectorAll('.bg-btn')[idx].classList.add('selected');
+
+            if(idx > 0) {
+                clearMedia();
+                txt.style.background = bgs[idx];
+                txt.classList.add('bg-active');
+                document.getElementById('opt-media').classList.add('disabled');
+                document.getElementById('opt-yt').classList.add('disabled');
+            } else {
+                txt.style.background = 'transparent';
+                txt.classList.remove('bg-active');
+                if(!isReelMode) {
+                    document.getElementById('opt-media').classList.remove('disabled');
+                    document.getElementById('opt-yt').classList.remove('disabled');
+                }
+            }
+            checkState();
+        }
+
+        window.clearMedia = () => {
+            fileData = null;
+            ytId = null;
+            isReelMode = false;
+            document.getElementById('fIn').value = '';
+            document.getElementById('prevBox').style.display = 'none';
+            document.getElementById('reelsMeta').style.display = 'none';
+            document.getElementById('mediaCont').innerHTML = '';
+            document.getElementById('bgScroll').style.display = 'flex';
+            document.getElementById('opt-media').classList.remove('disabled');
+            document.getElementById('opt-yt').classList.remove('disabled');
+            checkState();
+        }
+
+        window.goBackOrHome = () => {
+            if(txt.value || fileData) {
+                if(confirm("Discard post?")) location.href = "index.html";
+            } else {
+                location.href = "index.html";
+            }
+        }
+
+        function checkState() {
+            if(txt.value.trim() || fileData || ytId || activeBg > 0) postBtn.classList.add('active');
+            else postBtn.classList.remove('active');
+        }
+
+        // --- YOUTUBE LOGIC ---
+        window.openYT = () => { document.getElementById('ytMod').style.display = 'flex'; }
+        window.closeYT = () => { document.getElementById('ytMod').style.display = 'none'; }
+        
+        window.addYT = async () => {
+            const v = document.getElementById('ytInp').value.trim();
+            const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+            const match = v.match(regex);
+            
+            if(match) {
+                document.getElementById('ytAddBtn').innerText = "...";
+                ytId = match[1];
+                setBg(0);
+                document.getElementById('mediaCont').innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe>`;
+                document.getElementById('prevBox').style.display = 'block';
+                document.getElementById('bgScroll').style.display = 'none';
+                document.getElementById('ytAddBtn').innerText = "Add";
+                closeYT();
+                checkState();
+            } else alert("Invalid Link");
+        }
+
+        // --- PUBLISH ---
+        window.publish = async () => {
+            if(!postBtn.classList.contains('active')) return;
+            document.getElementById('loader').style.display = 'flex';
+
+            try {
+                let mUrl = null, type = 'text';
+
+                // 1. Colored BG
+                if(activeBg > 0) {
+                    type = 'bg_text';
+                    mUrl = bgs[activeBg];
+                } 
+                // 2. YouTube
+                else if(ytId) {
+                    mUrl = `https://www.youtube.com/embed/${ytId}`;
+                    type = 'youtube';
+                }
+                // 3. File Upload (Image or Video)
+                else if(fileData) {
+                    const fd = new FormData();
+                    fd.append('file', fileData);
+                    fd.append('upload_preset', C_PRE);
+                    
+                    const res = await fetch(C_URL, {method:'POST', body:fd});
+                    const d = await res.json();
+                    mUrl = d.secure_url;
+
+                    if(isReelMode) type = 'reel'; // It's a video/reel
+                    else type = 'image';
+                }
+
+                const uData = (await getDoc(doc(db,"users",me.uid))).data();
+                
+                // Get Settings
+                const isPublic = document.getElementById('swPublic').checked;
+                const soundOn = document.getElementById('swSound').checked;
+
+                await addDoc(collection(db,"posts"), {
+                    uid: me.uid,
+                    userName: uData.fullName,
+                    userPic: uData.profilePic,
+                    text: txt.value,
+                    mediaUrl: mUrl,
+                    type: type,
+                    likes: [],
+                    timestamp: new Date().toISOString(),
+                    isVerified: uData.isVerified || false,
+                    // New Fields
+                    filterClass: selectedFilter, 
+                    settings: {
+                        isPublic: isPublic,
+                        soundOn: soundOn
+                    }
+                });
+
+                location.href = "index.html";
+
+            } catch(e) {
+                alert("Error: " + e.message);
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
