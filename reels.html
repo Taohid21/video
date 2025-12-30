@@ -21,7 +21,7 @@
         
         /* --- Progress Bar --- */
         .progress-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: rgba(255,255,255,0.3); z-index: 20; }
-        .progress-bar { height: 100%; background: white; width: 0%; transition: width 0.1s linear; }
+        .progress-bar { height: 100%; background: var(--accent); width: 0%; transition: width 0.1s linear; box-shadow: 0 0 5px var(--accent); }
 
         /* --- Actions Bar (Clean Look) --- */
         .actions-bar { position: absolute; right: 10px; bottom: 60px; z-index: 10; display: flex; flex-direction: column; gap: 20px; align-items: center; }
@@ -176,7 +176,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs, query, orderBy, updateDoc, doc, arrayUnion, arrayRemove, addDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, query, orderBy, updateDoc, doc, arrayUnion, arrayRemove, addDoc, getDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const cfg = { apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs", authDomain: "new-all-f99f7.firebaseapp.com", projectId: "new-all-f99f7", storageBucket: "new-all-f99f7.appspot.com", messagingSenderId: "1069748173900", appId: "1:1069748173900:web:158d6336c0f4628133c8e9" };
         const app = initializeApp(cfg);
@@ -253,7 +253,7 @@
 
                             <div class="action-btn" onclick="openComments('${d.id}')">
                                 <div class="icon-box"><i class="fas fa-comment-dots"></i></div>
-                                <span class="action-label">${Math.floor(Math.random()*100)}</span>
+                                <span class="action-label">${p.commentCount || 0}</span>
                             </div>
 
                             <div class="action-btn" onclick="openGift('${d.id}')">
@@ -389,6 +389,9 @@
                 uid: me.uid, uName: uData.fullName, uPic: uData.profilePic, 
                 txt: txt, timestamp: new Date().toISOString(), isGift: isGift
             });
+            
+            // কমেন্ট কাউন্ট ১ বাড়ানো হলো
+            await updateDoc(doc(db, "posts", activeReelId), { commentCount: increment(1) });
         };
 
         window.openGift = (id) => {
