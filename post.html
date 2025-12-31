@@ -3,63 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Create Post - Tio</title>
+    <title>Create Post</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        :root {
-            --bg: #000000;
-            --text: #ffffff;
-            --accent: #1877f2;
-            --overlay: rgba(0,0,0,0.4);
-        }
+        :root { --bg: #000; --text: #fff; --accent: #1877f2; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
         body { background-color: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         
-        /* Main Canvas Area */
-        .editor-container { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #222; transition: background 0.3s; }
-        .bg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; object-fit: contain; }
+        .editor-container { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #111; }
+        
         .bg-gradient { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; transition: 0.3s; }
         
-        /* Text Input Area */
-        .text-layer { position: absolute; z-index: 10; width: 100%; padding: 20px; text-align: center; }
+        .media-layer { 
+            max-width: 100%; max-height: 100%; object-fit: contain; z-index: 2; transition: filter 0.3s; 
+            width: 100%; 
+        }
+        
+        #ytPreview { width: 100%; aspect-ratio: 16/9; border: none; z-index: 2; pointer-events: none; } 
+        
+        .text-layer { 
+            position: absolute; z-index: 10; width: 100%; height: 100%; pointer-events: none;
+            display: flex; align-items: center; justify-content: center;
+        }
+        
         #post-input { 
             width: 100%; background: transparent; border: none; 
-            color: white; font-size: 28px; font-weight: 700; 
+            color: white; font-size: 30px; font-weight: 700; 
             text-align: center; resize: none; overflow: hidden;
             text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            min-height: 50px;
+            padding: 10px; pointer-events: auto;
         }
-        #post-input::placeholder { color: rgba(255,255,255,0.6); }
+        
+        .caption-mode {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 20px !important;
+            width: 85% !important;
+            max-height: 50%;
+            overflow-y: auto !important;
+            backdrop-filter: blur(3px);
+            font-size: 22px !important;
+        }
 
-        /* Top Bar */
         .top-bar { position: absolute; top: 0; left: 0; width: 100%; padding: 15px; display: flex; justify-content: space-between; align-items: center; z-index: 20; background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent); }
-        .close-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; backdrop-filter: blur(5px); }
-        .post-btn { background: var(--accent); color: white; padding: 10px 25px; border-radius: 30px; border: none; font-weight: 700; font-size: 16px; cursor: pointer; opacity: 0.7; pointer-events: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.2s; }
-        .post-btn.active { opacity: 1; pointer-events: auto; transform: scale(1.05); }
+        .close-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; backdrop-filter: blur(5px); }
+        .post-btn { background: var(--accent); color: white; padding: 10px 25px; border-radius: 30px; border: none; font-weight: 700; font-size: 16px; cursor: pointer; opacity: 0.7; pointer-events: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .post-btn.active { opacity: 1; pointer-events: auto; }
 
-        /* Sidebar Tools */
-        .sidebar { position: absolute; top: 80px; right: 15px; display: flex; flex-direction: column; gap: 20px; z-index: 20; }
+        .sidebar { position: absolute; top: 80px; right: 15px; display: flex; flex-direction: column; gap: 20px; z-index: 25; }
         .tool { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
-        .tool-icon { width: 45px; height: 45px; background: rgba(0,0,0,0.4); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: white; backdrop-filter: blur(5px); transition: 0.2s; border: 1px solid rgba(255,255,255,0.1); }
-        .tool-icon:active { transform: scale(0.9); background: rgba(255,255,255,0.2); }
+        .tool-icon { width: 45px; height: 45px; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: white; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); }
         .tool span { font-size: 11px; font-weight: 600; text-shadow: 0 1px 2px black; }
 
-        /* User Info Badge */
-        .user-badge { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); padding: 5px 12px; border-radius: 20px; backdrop-filter: blur(5px); z-index: 15; }
+        .user-badge { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.4); padding: 5px 12px; border-radius: 20px; backdrop-filter: blur(5px); z-index: 15; }
         .ub-img { width: 25px; height: 25px; border-radius: 50%; object-fit: cover; }
         .ub-name { font-size: 13px; font-weight: 600; }
 
-        /* Bottom Preview / Remove Media */
-        .bottom-area { position: absolute; bottom: 20px; left: 0; width: 100%; display: flex; justify-content: center; z-index: 20; }
-        .remove-media { background: #ff4757; color: white; padding: 8px 15px; border-radius: 20px; font-size: 13px; font-weight: 600; display: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .bottom-area { position: absolute; bottom: 30px; left: 0; width: 100%; display: flex; justify-content: center; z-index: 20; }
+        .remove-media { background: #ff4757; color: white; padding: 10px 20px; border-radius: 30px; font-size: 14px; font-weight: 600; display: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
 
-        /* Modals */
         .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index: 3000; display:none; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
         .modal-box { background: #242526; width: 90%; max-width: 350px; padding: 20px; border-radius: 15px; color: white; }
         .m-inp { width: 100%; padding: 12px; background: #3a3b3c; border: none; border-radius: 8px; color: white; margin: 15px 0; outline: none; }
         .m-btn { width: 100%; padding: 10px; background: var(--accent); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; }
 
+        .filter-toast { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 20px; font-weight: 700; font-size: 24px; opacity: 0; pointer-events: none; z-index: 30; transition: opacity 0.3s; backdrop-filter: blur(5px); text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        
         #loader { position:fixed;top:0;left:0;width:100%;height:100%;background:black;z-index:9999;display:flex;justify-content:center;align-items:center;flex-direction:column; }
     </style>
 </head>
@@ -70,21 +80,20 @@
         <h3 style="font-weight:300;">Publishing...</h3>
     </div>
 
-    <!-- Main Editor -->
-    <div class="editor-container" id="editorBg">
-        <!-- Background Layers -->
+    <div class="editor-container" id="mainEditor">
         <div id="bgGradient" class="bg-gradient" style="background: linear-gradient(45deg, #ff9a9e, #fad0c4);"></div>
-        <img id="imgPreview" class="bg-layer" style="display:none;">
-        <video id="vidPreview" class="bg-layer" style="display:none;" loop muted playsinline></video>
-        <iframe id="ytPreview" class="bg-layer" style="display:none; border:none; height:auto; aspect-ratio:16/9;"></iframe>
-
-        <!-- Text Input Layer -->
+        
+        <img id="imgPreview" class="media-layer" style="display:none;">
+        <video id="vidPreview" class="media-layer" style="display:none;" loop muted playsinline></video>
+        <iframe id="ytPreview" style="display:none;"></iframe>
+        
         <div class="text-layer">
             <textarea id="post-input" placeholder="Type something..." oninput="autoResize(this); checkState()"></textarea>
         </div>
+
+        <div id="filterToast" class="filter-toast">Normal</div>
     </div>
 
-    <!-- UI Overlay -->
     <div class="top-bar">
         <div class="close-btn" onclick="location.href='index.html'"><i class="fas fa-times"></i></div>
         <button id="postBtn" class="post-btn" onclick="publish()">Post</button>
@@ -96,7 +105,7 @@
     </div>
 
     <div class="sidebar">
-        <div class="tool" onclick="cycleBg()">
+        <div class="tool" onclick="cycleBg()" id="colTool">
             <div class="tool-icon" style="background:linear-gradient(45deg, #ff00cc, #333399);"><i class="fas fa-palette"></i></div>
             <span>Color</span>
         </div>
@@ -114,7 +123,6 @@
         <div id="rmBtn" class="remove-media" onclick="resetMedia()"><i class="fas fa-trash"></i> Remove Media</div>
     </div>
 
-    <!-- Inputs & Modals -->
     <input type="file" id="fileIn" hidden accept="image/*,video/*" onchange="handleFile(this)">
 
     <div id="ytModal" class="modal-overlay">
@@ -136,25 +144,25 @@
         const cfg = { apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs", authDomain: "new-all-f99f7.firebaseapp.com", projectId: "new-all-f99f7", storageBucket: "new-all-f99f7.appspot.com", messagingSenderId: "1069748173900", appId: "1:1069748173900:web:158d6336c0f4628133c8e9" };
         const C_URL = "https://api.cloudinary.com/v1_1/dwgvvzbvn/auto/upload";
         const C_PRE = "storyapp";
-        const YT_API_KEY = "AIzaSyBFxF8kRg7VdxYKsQdFO-WQkdxS9vF-B6M";
 
         const app = initializeApp(cfg);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let me = null;
-        let mediaFile = null;
-        let ytId = null;
-        let bgIndex = 0;
+        let me = null, mediaFile = null, ytId = null, bgIndex = 0;
+        let startX = 0, currentFilter = 0;
 
         const gradients = [
-            'linear-gradient(45deg, #ff9a9e, #fad0c4)',
-            'linear-gradient(120deg, #a1c4fd, #c2e9fb)',
-            'linear-gradient(120deg, #84fab0, #8fd3f4)',
-            'linear-gradient(to top, #30cfd0 0%, #330867 100%)',
-            'linear-gradient(to top, #f43b47 0%, #453a94 100%)',
-            'linear-gradient(to right, #4facfe 0%, #00f2fe 100%)',
-            '#111111'
+            'linear-gradient(45deg, #ff9a9e, #fad0c4)', 'linear-gradient(120deg, #a1c4fd, #c2e9fb)',
+            'linear-gradient(120deg, #84fab0, #8fd3f4)', 'linear-gradient(to top, #30cfd0 0%, #330867 100%)',
+            'linear-gradient(to top, #f43b47 0%, #453a94 100%)', 'linear-gradient(to right, #4facfe 0%, #00f2fe 100%)', '#111'
+        ];
+
+        const filters = [
+            {name: 'Normal', val: 'none'}, {name: 'B&W', val: 'grayscale(100%)'},
+            {name: 'Warm', val: 'sepia(50%)'}, {name: 'Vivid', val: 'saturate(200%)'},
+            {name: 'Dark', val: 'brightness(60%)'}, {name: 'Vintage', val: 'contrast(120%) sepia(30%)'},
+            {name: 'Cool', val: 'hue-rotate(180deg)'}
         ];
 
         onAuthStateChanged(auth, async (u) => {
@@ -162,20 +170,15 @@
                 me = u;
                 const d = (await getDoc(doc(db,"users",u.uid))).data();
                 document.getElementById('uPic').src = d.profilePic;
-                // Verified Badge Logic
                 const badge = d.isVerified ? ' <i class="fas fa-check-circle" style="color:#1877f2; margin-left:3px;"></i>' : '';
                 document.getElementById('uName').innerHTML = d.fullName + badge;
             } else location.href = "Account.html";
         });
 
-        // UI Logic
-        window.autoResize = (el) => {
-            el.style.height = 'auto';
-            el.style.height = el.scrollHeight + 'px';
-        }
-
+        window.autoResize = (el) => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+        
         window.cycleBg = () => {
-            if(mediaFile || ytId) return; // Don't change if media is present
+            if(mediaFile || ytId) return;
             bgIndex = (bgIndex + 1) % gradients.length;
             document.getElementById('bgGradient').style.background = gradients[bgIndex];
         }
@@ -183,149 +186,126 @@
         window.checkState = () => {
             const txt = document.getElementById('post-input').value.trim();
             const btn = document.getElementById('postBtn');
-            if(txt || mediaFile || ytId) btn.classList.add('active');
-            else btn.classList.remove('active');
+            if(txt || mediaFile || ytId) btn.classList.add('active'); else btn.classList.remove('active');
         }
 
         window.handleFile = (inp) => {
             if(inp.files[0]) {
-                mediaFile = inp.files[0];
-                ytId = null;
+                mediaFile = inp.files[0]; ytId = null;
                 const url = URL.createObjectURL(mediaFile);
-                
-                document.getElementById('bgGradient').style.display = 'none';
-                document.getElementById('ytPreview').style.display = 'none';
-                
+                enableMediaMode();
                 const img = document.getElementById('imgPreview');
                 const vid = document.getElementById('vidPreview');
-                
                 if(mediaFile.type.startsWith('video')) {
-                    img.style.display = 'none';
-                    vid.src = url;
-                    vid.style.display = 'block';
-                    vid.play();
+                    img.style.display = 'none'; vid.src = url; vid.style.display = 'block'; vid.play();
                 } else {
-                    vid.style.display = 'none';
-                    img.src = url;
-                    img.style.display = 'block';
+                    vid.style.display = 'none'; img.src = url; img.style.display = 'block';
                 }
-                
-                // Move text to bottom caption style
-                const txt = document.getElementById('post-input');
-                txt.style.position = 'absolute';
-                txt.style.bottom = '100px';
-                txt.style.background = 'rgba(0,0,0,0.5)';
-                txt.style.borderRadius = '10px';
-                txt.style.fontSize = '16px';
-                txt.placeholder = "Add a caption...";
-                
-                document.getElementById('rmBtn').style.display = 'flex';
                 checkState();
             }
         }
 
-        window.resetMedia = () => {
-            mediaFile = null;
-            ytId = null;
-            document.getElementById('fileIn').value = '';
+        window.addYT = () => {
+            const val = document.getElementById('ytLink').value;
+            const match = val.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+            if(match) {
+                ytId = match[1]; mediaFile = null;
+                enableMediaMode();
+                const frame = document.getElementById('ytPreview');
+                frame.src = `https://www.youtube.com/embed/${ytId}?rel=0&controls=0&modestbranding=1`;
+                frame.style.display = 'block';
+                document.getElementById('ytModal').style.display='none';
+                checkState();
+            } else alert("Invalid YouTube Link");
+        }
+
+        function enableMediaMode() {
+            document.getElementById('bgGradient').style.display = 'none';
+            document.getElementById('imgPreview').style.display = 'none';
+            document.getElementById('vidPreview').style.display = 'none';
+            document.getElementById('ytPreview').style.display = 'none';
+            document.getElementById('rmBtn').style.display = 'flex';
+            document.getElementById('colTool').style.opacity = '0.3';
+            document.getElementById('colTool').style.pointerEvents = 'none';
             
+            const txt = document.getElementById('post-input');
+            txt.classList.add('caption-mode');
+            txt.placeholder = "Add a caption...";
+        }
+
+        window.resetMedia = () => {
+            mediaFile = null; ytId = null; currentFilter = 0;
+            document.getElementById('fileIn').value = '';
             document.getElementById('bgGradient').style.display = 'block';
             document.getElementById('imgPreview').style.display = 'none';
             document.getElementById('vidPreview').style.display = 'none';
             document.getElementById('ytPreview').style.display = 'none';
             document.getElementById('rmBtn').style.display = 'none';
-            
-            // Reset text style
+            document.getElementById('colTool').style.opacity = '1';
+            document.getElementById('colTool').style.pointerEvents = 'auto';
+            applyFilter();
+
             const txt = document.getElementById('post-input');
-            txt.style.position = 'static';
-            txt.style.background = 'transparent';
-            txt.style.fontSize = '28px';
+            txt.classList.remove('caption-mode');
             txt.placeholder = "Type something...";
-            
             checkState();
         }
 
         window.openYT = () => { document.getElementById('ytModal').style.display='flex'; document.getElementById('ytLink').focus(); }
-        
-        window.addYT = async () => {
-            const val = document.getElementById('ytLink').value;
-            const match = val.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-            
-            if(match) {
-                ytId = match[1];
-                mediaFile = null;
-                
-                document.getElementById('bgGradient').style.display = 'none';
-                document.getElementById('imgPreview').style.display = 'none';
-                document.getElementById('vidPreview').style.display = 'none';
-                
-                const frame = document.getElementById('ytPreview');
-                frame.src = `https://www.youtube.com/embed/${ytId}`;
-                frame.style.display = 'block';
-                
-                document.getElementById('ytModal').style.display='none';
-                document.getElementById('rmBtn').style.display = 'flex';
-                
-                // Move text to bottom
-                const txt = document.getElementById('post-input');
-                txt.style.position = 'absolute';
-                txt.style.bottom = '100px';
-                txt.style.background = 'rgba(0,0,0,0.5)';
-                txt.style.borderRadius = '10px';
-                txt.style.fontSize = '16px';
-                txt.placeholder = "Add a caption...";
-                
-                checkState();
-            } else {
-                alert("Invalid YouTube Link");
+
+        const editor = document.getElementById('mainEditor');
+        editor.addEventListener('touchstart', (e) => startX = e.touches[0].clientX);
+        editor.addEventListener('touchend', (e) => {
+            if(!mediaFile && !ytId) return;
+            const diff = startX - e.changedTouches[0].clientX;
+            if(Math.abs(diff) > 50) {
+                if(diff > 0) currentFilter = (currentFilter + 1) % filters.length;
+                else currentFilter = (currentFilter - 1 + filters.length) % filters.length;
+                applyFilter();
+                showToast(filters[currentFilter].name);
             }
+        });
+
+        function applyFilter() {
+            const f = filters[currentFilter].val;
+            document.getElementById('imgPreview').style.filter = f;
+            document.getElementById('vidPreview').style.filter = f;
+            document.getElementById('ytPreview').style.filter = f;
+        }
+
+        function showToast(txt) {
+            const t = document.getElementById('filterToast');
+            t.innerText = txt; t.style.opacity = '1';
+            setTimeout(() => t.style.opacity = '0', 1000);
         }
 
         window.publish = async () => {
             const btn = document.getElementById('postBtn');
             if(!btn.classList.contains('active')) return;
-            
             document.getElementById('loader').style.display = 'flex';
-            
             try {
                 let mUrl = null, type = 'text';
                 const txtVal = document.getElementById('post-input').value;
 
                 if(ytId) {
-                    mUrl = `https://www.youtube.com/embed/${ytId}`;
-                    type = 'youtube';
+                    mUrl = `https://www.youtube.com/embed/${ytId}`; type = 'youtube';
                 } else if(mediaFile) {
                     const fd = new FormData(); fd.append('file', mediaFile); fd.append('upload_preset', C_PRE);
                     const r = await fetch(C_URL, {method:'POST', body:fd});
                     const d = await r.json();
-                    mUrl = d.secure_url;
-                    type = mediaFile.type.startsWith('video') ? 'video' : 'image';
+                    mUrl = d.secure_url; type = mediaFile.type.startsWith('video') ? 'video' : 'image';
                 } else {
-                    // It is a background text post
-                    type = 'bg_text';
-                    mUrl = gradients[bgIndex];
+                    type = 'bg_text'; mUrl = gradients[bgIndex];
                 }
 
                 const uData = (await getDoc(doc(db,"users",me.uid))).data();
-                
                 await addDoc(collection(db,"posts"), {
-                    uid: me.uid,
-                    userName: uData.fullName,
-                    userPic: uData.profilePic,
-                    isVerified: uData.isVerified || false, // Verified Fix
-                    text: txtVal,
-                    mediaUrl: mUrl,
-                    type: type,
-                    likes: [],
-                    timestamp: new Date().toISOString()
+                    uid: me.uid, userName: uData.fullName, userPic: uData.profilePic,
+                    isVerified: uData.isVerified || false, text: txtVal,
+                    mediaUrl: mUrl, type: type, likes: [], timestamp: new Date().toISOString()
                 });
-                
                 location.href = "index.html";
-            } catch(e) {
-                console.error(e);
-                alert("Failed to post");
-                document.getElementById('loader').style.display = 'none';
-            }
+            } catch(e) { document.getElementById('loader').style.display = 'none'; alert("Error"); }
         }
     </script>
 </body>
