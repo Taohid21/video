@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Create Post with Music</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root { --bg: #000; --text: #fff; --accent: #1877f2; --glass: rgba(30, 30, 30, 0.85); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { background-color: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* --- EDITOR AREA --- */
+        .editor-container { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #111; }
+        .bg-gradient { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; transition: 0.3s; }
+        .media-layer { max-width: 100%; max-height: 100%; object-fit: contain; z-index: 2; transition: filter 0.3s; width: 100%; }
+        #ytPreview { width: 100%; aspect-ratio: 16/9; border: none; z-index: 2; pointer-events: none; } 
+        
+        .text-layer { position: absolute; z-index: 10; width: 100%; height: 100%; pointer-events: none; display: flex; align-items: center; justify-content: center; }
+        #post-input { width: 100%; background: transparent; border: none; color: white; font-size: 30px; font-weight: 700; text-align: center; resize: none; overflow: hidden; text-shadow: 0 2px 10px rgba(0,0,0,0.5); padding: 10px; pointer-events: auto; }
+        
+        .caption-mode { background: rgba(0, 0, 0, 0.5); border-radius: 15px; padding: 20px !important; width: 85% !important; max-height: 50%; overflow-y: auto !important; backdrop-filter: blur(3px); font-size: 22px !important; }
+
+        /* --- UI ELEMENTS --- */
+        .top-bar { position: absolute; top: 0; left: 0; width: 100%; padding: 15px; display: flex; justify-content: space-between; align-items: center; z-index: 20; background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent); }
+        .close-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; backdrop-filter: blur(5px); }
+        .post-btn { background: var(--accent); color: white; padding: 10px 25px; border-radius: 30px; border: none; font-weight: 700; font-size: 16px; cursor: pointer; opacity: 0.7; pointer-events: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.3s; }
+        .post-btn.active { opacity: 1; pointer-events: auto; }
+
+        .sidebar { position: absolute; top: 80px; right: 15px; display: flex; flex-direction: column; gap: 20px; z-index: 25; }
+        .tool { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; transition: transform 0.1s; }
+        .tool:active { transform: scale(0.9); }
+        .tool-icon { width: 45px; height: 45px; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: white; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); }
+        .tool span { font-size: 11px; font-weight: 600; text-shadow: 0 1px 2px black; }
+
+        .user-badge { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.4); padding: 5px 12px; border-radius: 20px; backdrop-filter: blur(5px); z-index: 15; }
+        .ub-img { width: 25px; height: 25px; border-radius: 50%; object-fit: cover; }
+        .ub-name { font-size: 13px; font-weight: 600; }
+
+        .bottom-area { position: absolute; bottom: 30px; left: 0; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; z-index: 20; }
+        .remove-media { background: #ff4757; color: white; padding: 10px 20px; border-radius: 30px; font-size: 14px; font-weight: 600; display: none; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+
+        /* --- MUSIC BADGE ON EDITOR --- */
+        .music-sticker {
+            display: none; align-items: center; gap: 10px;
+            background: rgba(255, 255, 255, 0.9); color: black;
+            padding: 8px 15px; border-radius: 20px;
+            font-size: 13px; font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 80%;
+        }
+        .ms-icon { color: var(--accent); animation: spin 3s linear infinite; }
+        .ms-info { display: flex; flex-direction: column; overflow: hidden; }
+        .ms-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .ms-artist { font-size: 10px; color: #555; }
+        .ms-close { color: #ff4757; margin-left: 5px; cursor: pointer; padding: 5px; }
+
+        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* --- MUSIC MODAL --- */
+        .music-modal {
+            position: fixed; bottom: -100%; left: 0; width: 100%; height: 85%;
+            background: #181818; border-radius: 25px 25px 0 0;
+            z-index: 5000; transition: bottom 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            display: flex; flex-direction: column;
+            box-shadow: 0 -5px 30px rgba(0,0,0,0.5);
+        }
+        .music-modal.open { bottom: 0; }
+        .mm-header { padding: 20px; text-align: center; border-bottom: 1px solid #333; position: relative; }
+        .mm-close { position: absolute; right: 20px; top: 20px; font-size: 20px; color: #aaa; cursor: pointer; }
+        
+        .mm-search { padding: 15px; }
+        .search-box {
+            background: #333; display: flex; align-items: center; padding: 0 15px;
+            border-radius: 12px; height: 45px;
+        }
+        .search-box input { background: transparent; border: none; flex: 1; color: white; margin-left: 10px; font-size: 15px; }
+        
+        .mm-list { flex: 1; overflow-y: auto; padding: 0 15px 20px 15px; }
+        .track-item {
+            display: flex; align-items: center; gap: 15px; padding: 12px 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+        .track-img { width: 50px; height: 50px; border-radius: 8px; background: #333; object-fit: cover; }
+        .track-info { flex: 1; overflow: hidden; }
+        .t-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .t-artist { font-size: 12px; color: #aaa; margin-top: 3px; }
+        
+        .play-btn { 
+            width: 35px; height: 35px; border-radius: 50%; border: 1px solid #555;
+            display: flex; align-items: center; justify-content: center; font-size: 12px;
+            margin-right: 10px; cursor: pointer;
+        }
+        .select-btn {
+            background: var(--accent); color: white; border: none;
+            padding: 6px 15px; border-radius: 20px; font-size: 12px; font-weight: 600;
+        }
+
+        /* --- OTHER MODALS --- */
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index: 3000; display:none; align-items:center; justify-content:center; backdrop-filter: blur(5px); }
+        .modal-box { background: #242526; width: 90%; max-width: 350px; padding: 20px; border-radius: 15px; color: white; }
+        .m-inp { width: 100%; padding: 12px; background: #3a3b3c; border: none; border-radius: 8px; color: white; margin: 15px 0; outline: none; }
+        .m-btn { width: 100%; padding: 10px; background: var(--accent); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; }
+
+        .filter-toast { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255,255,255,0.2); padding: 10px 20px; border-radius: 20px; font-weight: 700; font-size: 24px; opacity: 0; pointer-events: none; z-index: 30; transition: opacity 0.3s; backdrop-filter: blur(5px); text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        
+        #loader { position:fixed;top:0;left:0;width:100%;height:100%;background:black;z-index:9999;display:flex;justify-content:center;align-items:center;flex-direction:column; }
+        
+        /* Audio visualizer effect simply by using opacity */
+        .playing-indicator { color: var(--accent); }
+    </style>
+</head>
+<body>
+
+    <div id="loader" style="display:none;">
+        <i class="fas fa-circle-notch fa-spin" style="font-size:40px; color:var(--accent); margin-bottom:15px;"></i>
+        <h3 style="font-weight:300;">Publishing...</h3>
+        <p style="color:#777; font-size:12px; margin-top:5px;">Merging Music & Media</p>
+    </div>
+
+    <!-- MAIN EDITOR -->
+    <div class="editor-container" id="mainEditor">
+        <div id="bgGradient" class="bg-gradient" style="background: linear-gradient(45deg, #ff9a9e, #fad0c4);"></div>
+        
+        <img id="imgPreview" class="media-layer" style="display:none;">
+        <video id="vidPreview" class="media-layer" style="display:none;" loop muted playsinline></video>
+        <iframe id="ytPreview" style="display:none;"></iframe>
+        
+        <div class="text-layer">
+            <textarea id="post-input" placeholder="Type something..." oninput="autoResize(this); checkState()"></textarea>
+        </div>
+
+        <div id="filterToast" class="filter-toast">Normal</div>
+    </div>
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <div class="close-btn" onclick="location.href='index.html'"><i class="fas fa-times"></i></div>
+        <button id="postBtn" class="post-btn" onclick="publish()">Post</button>
+    </div>
+
+    <div class="user-badge">
+        <img id="uPic" class="ub-img">
+        <span id="uName" class="ub-name"></span>
+    </div>
+
+    <!-- SIDEBAR TOOLS -->
+    <div class="sidebar">
+        <div class="tool" onclick="cycleBg()" id="colTool">
+            <div class="tool-icon" style="background:linear-gradient(45deg, #ff00cc, #333399);"><i class="fas fa-palette"></i></div>
+            <span>Color</span>
+        </div>
+        <div class="tool" onclick="document.getElementById('fileIn').click()">
+            <div class="tool-icon"><i class="fas fa-image"></i></div>
+            <span>Media</span>
+        </div>
+        <!-- NEW MUSIC TOOL -->
+        <div class="tool" onclick="openMusicModal()">
+            <div class="tool-icon" style="background: linear-gradient(to bottom, #1db954, #191414);"><i class="fas fa-music"></i></div>
+            <span>Music</span>
+        </div>
+        <div class="tool" onclick="openYT()">
+            <div class="tool-icon" style="color:#ff0000; background:white;"><i class="fab fa-youtube"></i></div>
+            <span>YouTube</span>
+        </div>
+    </div>
+
+    <!-- BOTTOM AREA -->
+    <div class="bottom-area">
+        <!-- Selected Music Badge -->
+        <div id="musicSticker" class="music-sticker">
+            <i class="fas fa-compact-disc ms-icon"></i>
+            <div class="ms-info">
+                <span class="ms-title" id="msTitle">Song Name</span>
+                <span class="ms-artist" id="msArtist">Artist</span>
+            </div>
+            <i class="fas fa-times ms-close" onclick="removeMusic()"></i>
+        </div>
+
+        <div id="rmBtn" class="remove-media" onclick="resetMedia()"><i class="fas fa-trash"></i> Remove Media</div>
+    </div>
+
+    <!-- HIDDEN INPUTS & AUDIO -->
+    <input type="file" id="fileIn" hidden accept="image/*,video/*" onchange="handleFile(this)">
+    <audio id="globalAudio" loop></audio> <!-- Main audio for editor -->
+    <audio id="previewAudio"></audio> <!-- Preview audio for music picker -->
+
+    <!-- MUSIC MODAL -->
+    <div id="musicModal" class="music-modal">
+        <div class="mm-header">
+            <h3>Add Music</h3>
+            <div class="mm-close" onclick="closeMusicModal()"><i class="fas fa-chevron-down"></i></div>
+        </div>
+        <div class="mm-search">
+            <div class="search-box">
+                <i class="fas fa-search" style="color:#777;"></i>
+                <input id="musicSearch" placeholder="Search songs, artists..." onkeyup="handleSearch(event)">
+            </div>
+        </div>
+        <div class="mm-list" id="musicList">
+            <!-- Music items will be injected here -->
+            <div style="text-align:center; padding:50px; color:#555;">
+                <i class="fas fa-music" style="font-size:30px; margin-bottom:10px;"></i>
+                <p>Search for your favorite songs</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- YOUTUBE MODAL -->
+    <div id="ytModal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Add YouTube</h3>
+            <input id="ytLink" class="m-inp" placeholder="Paste video/shorts link...">
+            <div style="display:flex; gap:10px;">
+                <button class="m-btn" style="background:#444;" onclick="document.getElementById('ytModal').style.display='none'">Cancel</button>
+                <button class="m-btn" onclick="addYT()">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Firebase Config
+        const cfg = { apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs", authDomain: "new-all-f99f7.firebaseapp.com", projectId: "new-all-f99f7", storageBucket: "new-all-f99f7.appspot.com", messagingSenderId: "1069748173900", appId: "1:1069748173900:web:158d6336c0f4628133c8e9" };
+        const C_URL = "https://api.cloudinary.com/v1_1/dwgvvzbvn/auto/upload";
+        const C_PRE = "storyapp";
+
+        const app = initializeApp(cfg);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // State Variables
+        let me = null, mediaFile = null, ytId = null, bgIndex = 0;
+        let selectedMusic = null; // { url, title, artist, cover }
+        let startX = 0, currentFilter = 0;
+
+        const gradients = [
+            'linear-gradient(45deg, #ff9a9e, #fad0c4)', 'linear-gradient(120deg, #a1c4fd, #c2e9fb)',
+            'linear-gradient(120deg, #84fab0, #8fd3f4)', 'linear-gradient(to top, #30cfd0 0%, #330867 100%)',
+            'linear-gradient(to top, #f43b47 0%, #453a94 100%)', 'linear-gradient(to right, #4facfe 0%, #00f2fe 100%)', '#111'
+        ];
+
+        const filters = [
+            {name: 'Normal', val: 'none'}, {name: 'B&W', val: 'grayscale(100%)'},
+            {name: 'Warm', val: 'sepia(50%)'}, {name: 'Vivid', val: 'saturate(200%)'},
+            {name: 'Dark', val: 'brightness(60%)'}, {name: 'Vintage', val: 'contrast(120%) sepia(30%)'},
+            {name: 'Cool', val: 'hue-rotate(180deg)'}
+        ];
+
+        // --- AUTH & INIT ---
+        onAuthStateChanged(auth, async (u) => {
+            if(u) {
+                me = u;
+                const d = (await getDoc(doc(db,"users",u.uid))).data();
+                document.getElementById('uPic').src = d.profilePic;
+                const badge = d.isVerified ? ' <i class="fas fa-check-circle" style="color:#1877f2; margin-left:3px;"></i>' : '';
+                document.getElementById('uName').innerHTML = d.fullName + badge;
+            } else location.href = "Account.html";
+        });
+
+        // --- CORE FUNCTIONS ---
+        window.autoResize = (el) => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+        
+        window.cycleBg = () => {
+            if(mediaFile || ytId) return;
+            bgIndex = (bgIndex + 1) % gradients.length;
+            document.getElementById('bgGradient').style.background = gradients[bgIndex];
+        }
+
+        window.checkState = () => {
+            const txt = document.getElementById('post-input').value.trim();
+            const btn = document.getElementById('postBtn');
+            // Allow post if Text OR Media OR Music OR YouTube is present
+            if(txt || mediaFile || ytId || selectedMusic) btn.classList.add('active'); 
+            else btn.classList.remove('active');
+        }
+
+        // --- MEDIA HANDLING ---
+        window.handleFile = (inp) => {
+            if(inp.files[0]) {
+                mediaFile = inp.files[0]; ytId = null;
+                const url = URL.createObjectURL(mediaFile);
+                enableMediaMode();
+                const img = document.getElementById('imgPreview');
+                const vid = document.getElementById('vidPreview');
+                
+                if(mediaFile.type.startsWith('video')) {
+                    img.style.display = 'none'; vid.src = url; vid.style.display = 'block'; vid.play();
+                    // If music is already selected, video should mute or mix?
+                    // Usually user wants song over video, so we mute original video if music exists
+                    if(selectedMusic) vid.muted = true; else vid.muted = false;
+                } else {
+                    vid.style.display = 'none'; img.src = url; img.style.display = 'block';
+                }
+                checkState();
+            }
+        }
+
+        window.addYT = () => {
+            const val = document.getElementById('ytLink').value;
+            const match = val.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|live|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+            if(match) {
+                ytId = match[1]; mediaFile = null;
+                enableMediaMode();
+                const frame = document.getElementById('ytPreview');
+                frame.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&loop=1&playlist=${ytId}&controls=0&showinfo=0`;
+                frame.style.display = 'block';
+                document.getElementById('ytModal').style.display='none';
+                
+                // YouTube embeds can't easily have external audio mixed in iframe, 
+                // so we pause custom music if YouTube is added, or alert user.
+                if(selectedMusic) {
+                    alert("Note: External music cannot play over YouTube videos. Music removed.");
+                    removeMusic();
+                }
+                checkState();
+            } else alert("Invalid YouTube Link");
+        }
+
+        function enableMediaMode() {
+            document.getElementById('bgGradient').style.display = 'none';
+            document.getElementById('imgPreview').style.display = 'none';
+            document.getElementById('vidPreview').style.display = 'none';
+            document.getElementById('ytPreview').style.display = 'none';
+            document.getElementById('rmBtn').style.display = 'flex';
+            document.getElementById('colTool').style.opacity = '0.3';
+            document.getElementById('colTool').style.pointerEvents = 'none';
+            
+            const txt = document.getElementById('post-input');
+            txt.classList.add('caption-mode');
+            txt.placeholder = "Add a caption...";
+        }
+
+        window.resetMedia = () => {
+            mediaFile = null; ytId = null; currentFilter = 0;
+            document.getElementById('fileIn').value = '';
+            document.getElementById('bgGradient').style.display = 'block';
+            document.getElementById('imgPreview').style.display = 'none';
+            document.getElementById('vidPreview').style.display = 'none';
+            document.getElementById('ytPreview').style.display = 'none';
+            document.getElementById('rmBtn').style.display = 'none';
+            document.getElementById('colTool').style.opacity = '1';
+            document.getElementById('colTool').style.pointerEvents = 'auto';
+            
+            // If music is playing, keep it, but ensure video element is reset
+            const vid = document.getElementById('vidPreview');
+            vid.pause(); vid.src = "";
+
+            applyFilter();
+            const txt = document.getElementById('post-input');
+            txt.classList.remove('caption-mode');
+            txt.placeholder = "Type something...";
+            checkState();
+        }
+
+        window.openYT = () => { document.getElementById('ytModal').style.display='flex'; document.getElementById('ytLink').focus(); }
+
+        // --- FILTER SWIPE ---
+        const editor = document.getElementById('mainEditor');
+        editor.addEventListener('touchstart', (e) => startX = e.touches[0].clientX);
+        editor.addEventListener('touchend', (e) => {
+            if(!mediaFile && !ytId) return;
+            const diff = startX - e.changedTouches[0].clientX;
+            if(Math.abs(diff) > 50) {
+                if(diff > 0) currentFilter = (currentFilter + 1) % filters.length;
+                else currentFilter = (currentFilter - 1 + filters.length) % filters.length;
+                applyFilter();
+                showToast(filters[currentFilter].name);
+            }
+        });
+
+        function applyFilter() {
+            const f = filters[currentFilter].val;
+            document.getElementById('imgPreview').style.filter = f;
+            document.getElementById('vidPreview').style.filter = f;
+            document.getElementById('ytPreview').style.filter = f;
+        }
+
+        function showToast(txt) {
+            const t = document.getElementById('filterToast');
+            t.innerText = txt; t.style.opacity = '1';
+            setTimeout(() => t.style.opacity = '0', 1000);
+        }
+
+        // ==========================================
+        //         MUSIC SYSTEM INTEGRATION
+        // ==========================================
+        
+        // 1. Open/Close Modal
+        window.openMusicModal = () => {
+            if(ytId) { alert("Cannot add music to YouTube videos."); return; }
+            document.getElementById('musicModal').classList.add('open');
+            document.getElementById('musicSearch').focus();
+        }
+        window.closeMusicModal = () => {
+            document.getElementById('musicModal').classList.remove('open');
+            stopPreview();
+        }
+
+        // 2. Search Logic (iTunes API)
+        let debounceTimer;
+        window.handleSearch = (e) => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const q = e.target.value;
+                if(q.length > 2) fetchMusic(q);
+            }, 600);
+        }
+
+        async function fetchMusic(query) {
+            const list = document.getElementById('musicList');
+            list.innerHTML = `<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin"></i> Searching...</div>`;
+            
+            try {
+                // Using iTunes Search API (Free, no key, works via JSONP/CORS usually)
+                const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=15`);
+                const data = await res.json();
+                
+                list.innerHTML = '';
+                if(data.results.length === 0) {
+                    list.innerHTML = `<div style="text-align:center; color:#777; padding:20px;">No results found</div>`;
+                    return;
+                }
+
+                data.results.forEach(track => {
+                    const el = document.createElement('div');
+                    el.className = 'track-item';
+                    el.innerHTML = `
+                        <img src="${track.artworkUrl100}" class="track-img">
+                        <div class="track-info">
+                            <div class="t-title">${track.trackName}</div>
+                            <div class="t-artist">${track.artistName}</div>
+                        </div>
+                        <div class="play-btn" onclick="togglePreview(this, '${track.previewUrl}')">
+                            <i class="fas fa-play"></i>
+                        </div>
+                        <button class="select-btn" onclick="selectTrack('${track.previewUrl}', '${track.trackName.replace(/'/g, "")}', '${track.artistName.replace(/'/g, "")}')">Use</button>
+                    `;
+                    list.appendChild(el);
+                });
+            } catch(e) {
+                console.error(e);
+                list.innerHTML = `<div style="text-align:center; color:red;">Error fetching music.</div>`;
+            }
+        }
+
+        // 3. Preview Player
+        window.togglePreview = (btn, url) => {
+            const audio = document.getElementById('previewAudio');
+            const allBtns = document.querySelectorAll('.play-btn i');
+            
+            if(audio.src === url && !audio.paused) {
+                audio.pause();
+                btn.querySelector('i').className = 'fas fa-play';
+            } else {
+                allBtns.forEach(i => i.className = 'fas fa-play'); // Reset others
+                audio.src = url;
+                audio.play();
+                btn.querySelector('i').className = 'fas fa-pause';
+            }
+        }
+        function stopPreview() {
+            const audio = document.getElementById('previewAudio');
+            audio.pause();
+            audio.src = "";
+        }
+
+        // 4. Selection Logic
+        window.selectTrack = (url, title, artist) => {
+            selectedMusic = { url, title, artist };
+            
+            // UI Update
+            document.getElementById('musicSticker').style.display = 'flex';
+            document.getElementById('msTitle').innerText = title;
+            document.getElementById('msArtist').innerText = artist;
+            
+            // Audio Logic in Editor
+            const gAudio = document.getElementById('globalAudio');
+            gAudio.src = url;
+            gAudio.play();
+            
+            // If video exists, mute it
+            const vid = document.getElementById('vidPreview');
+            if(vid.style.display !== 'none') vid.muted = true;
+
+            closeMusicModal();
+            checkState();
+        }
+
+        window.removeMusic = () => {
+            selectedMusic = null;
+            document.getElementById('musicSticker').style.display = 'none';
+            
+            const gAudio = document.getElementById('globalAudio');
+            gAudio.pause(); gAudio.src = "";
+            
+            // Unmute video if exists
+            const vid = document.getElementById('vidPreview');
+            if(vid.style.display !== 'none') vid.muted = false;
+            
+            checkState();
+        }
+
+        // ==========================================
+        //         PUBLISH LOGIC (UPDATED)
+        // ==========================================
+        window.publish = async () => {
+            const btn = document.getElementById('postBtn');
+            if(!btn.classList.contains('active')) return;
+            
+            // Stop Audio
+            document.getElementById('globalAudio').pause();
+            document.getElementById('loader').style.display = 'flex';
+
+            try {
+                let mUrl = null, type = 'text';
+                const txtVal = document.getElementById('post-input').value;
+
+                // 1. Handle Media Upload
+                if(ytId) {
+                    mUrl = `https://www.youtube.com/embed/${ytId}`;
+                    type = 'youtube';
+                } else if(mediaFile) {
+                    const fd = new FormData(); 
+                    fd.append('file', mediaFile); 
+                    fd.append('upload_preset', C_PRE);
+                    
+                    // Cloudinary Upload
+                    const r = await fetch(C_URL, {method:'POST', body:fd});
+                    const d = await r.json();
+                    mUrl = d.secure_url; 
+                    type = mediaFile.type.startsWith('video') ? 'video' : 'image';
+                } else {
+                    type = 'bg_text'; 
+                    mUrl = gradients[bgIndex];
+                }
+
+                // 2. Prepare Data
+                const uData = (await getDoc(doc(db,"users",me.uid))).data();
+                
+                const postData = {
+                    uid: me.uid, 
+                    userName: uData.fullName, 
+                    userPic: uData.profilePic,
+                    isVerified: uData.isVerified || false, 
+                    text: txtVal,
+                    mediaUrl: mUrl, 
+                    type: type, 
+                    likes: [], 
+                    timestamp: new Date().toISOString()
+                };
+
+                // 3. Attach Music Metadata
+                if(selectedMusic) {
+                    postData.music = {
+                        url: selectedMusic.url,
+                        title: selectedMusic.title,
+                        artist: selectedMusic.artist
+                    };
+                    // Note: In the Feed page (index.html), you must check if 'post.music' exists.
+                    // If it exists, play this audio along with the video/image.
+                }
+
+                // 4. Save to Firestore
+                await addDoc(collection(db,"posts"), postData);
+                location.href = "index.html";
+
+            } catch(e) { 
+                console.error(e);
+                document.getElementById('loader').style.display = 'none'; 
+                alert("Error publishing post. Check console."); 
+            }
+        }
+    </script>
+</body>
+</html>
