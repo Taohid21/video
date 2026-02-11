@@ -115,6 +115,15 @@
         /* Story Editor */
         #story-editor { position: fixed; top:0; left:0; width:100%; height:100%; background: #000; z-index: 4000; display:none; flex-direction: column; }
         .se-prev { flex:1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #111; }
+/* Music Trimmer & Mute Button Styles */
+.se-music-controls { position: absolute; bottom: 80px; left: 0; width: 100%; padding: 0 20px; z-index: 35; display: none; flex-direction: column; gap: 10px; }
+.se-music-controls.show { display: flex; }
+.range-slider { width: 100%; -webkit-appearance: none; height: 4px; background: rgba(255,255,255,0.5); border-radius: 2px; outline: none; }
+.range-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid white; }
+.time-display { color: white; font-size: 12px; font-weight: 600; text-align: center; text-shadow: 0 1px 2px black; }
+.mute-btn { position: absolute; top: 15px; right: 15px; z-index: 40; width: 35px; height: 35px; background: rgba(0,0,0,0.5); border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(4px); display: none; }
+.mute-btn.show { display: flex; }
+.mute-btn.active { background: #ff4757; }
         .se-img { width: 100%; height: 100%; object-fit: contain; }
         .se-top-bar { position: absolute; top: 10px; left: 0; width: 100%; padding: 10px 15px; z-index: 20; display: flex; justify-content: space-between; pointer-events: none; }
         .se-icon-close { pointer-events: auto; width: 40px; height: 40px; background: rgba(0,0,0,0.5); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; backdrop-filter: blur(4px); }
@@ -262,7 +271,7 @@
                 <div class="story-overlay"></div>
                 <div class="s-plus"><i class="fas fa-plus"></i></div>
                 <div class="s-label">Create Story</div>
-                <input type="file" id="s-in" hidden accept="image/*" onchange="openStoryEditor(this)">
+                <input type="file" id="s-in" hidden accept="image/*, video/*" onchange="openStoryEditor(this)">
             </div>
         </div>
 
@@ -392,13 +401,16 @@
         </div>
     </div>
 
-    <!-- Story Editor -->
+    <!-- Story Editor (Updated) -->
     <div id="story-editor">
         <div class="se-top-bar"><div class="se-icon-close" onclick="closeStoryEditor()"><i class="fas fa-times"></i></div></div>
-        <div class="se-prev">
-            <img id="se-prev-img" class="se-img">
+        
+        <div class="se-prev" id="se-preview-container">
+            <!-- Dynamic Content (Img/Video) will go here -->
             <div id="se-drag-txt" class="se-txt" ontouchstart="dragStart(event)" ontouchmove="dragMove(event)"></div>
+            <div id="se-mute-btn" class="mute-btn" onclick="toggleMuteOriginal()"><i class="fas fa-volume-up" id="mute-icon"></i></div>
         </div>
+
         <div class="se-sidebar">
             <div class="se-tool" onclick="document.getElementById('se-caption-box').classList.toggle('show'); document.getElementById('se-caption').focus();">
                 <i class="fas fa-font"></i><span>Text</span>
@@ -407,6 +419,13 @@
                 <i class="fas fa-music"></i><span id="music-tool-lbl">Music</span>
             </div>
         </div>
+
+        <!-- Music Trimmer -->
+        <div id="se-music-trimmer" class="se-music-controls">
+            <div class="time-display">Select Music Part: <span id="m-start-time">0:00</span></div>
+            <input type="range" min="0" max="30" value="0" class="range-slider" id="music-slider" oninput="previewMusicFragment(this.value)" onchange="stopMusicPreview()">
+        </div>
+
         <div id="se-caption-box" class="se-float-inp"><input id="se-caption" placeholder="Type caption..." oninput="updateSeText(this.value)"></div>
         <div class="se-bottom-bar">
             <div class="se-user-info"><img id="se-my-pic" class="u-ava" style="width:30px;height:30px;border:none;"><span>Your Story</span></div>
@@ -543,7 +562,10 @@
             window.history.back();
         }
 
-        let me = null, actP = null, guestId = null, storyFile = null, storyYPos = 50, activeStoryTimer = null, selectedMusic = null;
+        let me = null, actP = null, guestId = null;
+let storyFile = null, storyType = 'image', storyYPos = 50; 
+let activeStoryTimer = null, selectedMusic = null;
+let musicStartTime = 0, isMuted = false, musicPreviewTimer = null;
         let videoObserver = null;
 
         const initTheme = () => {
@@ -974,16 +996,62 @@
         }
         window.openStoryEditor = async (inp) => {
             if(inp.files && inp.files[0]) {
-                window.history.pushState({modal: 'editor'}, '', ''); // Fix Close Button
-                storyFile = inp.files[0]; selectedMusic = null;
-                document.getElementById('se-caption').value = ''; document.getElementById('se-drag-txt').innerText = ''; document.getElementById('se-caption-box').classList.remove('show');
-                document.getElementById('music-tool-lbl').innerText = "Music"; document.getElementById('music-tool-lbl').style.color = "white";
-                const d = (await getDoc(doc(db,"users",me.uid))).data(); document.getElementById('se-my-pic').src = d.profilePic;
-                const r = new FileReader(); r.onload = (e) => { document.getElementById('se-prev-img').src = e.target.result; document.getElementById('story-editor').style.display = 'flex'; }
-                r.readAsDataURL(storyFile);
+                window.history.pushState({modal: 'editor'}, '', '');
+                storyFile = inp.files[0]; selectedMusic = null; musicStartTime = 0; isMuted = false;
+                
+                // Reset UI
+                document.getElementById('se-caption').value = ''; 
+                document.getElementById('se-drag-txt').innerText = ''; 
+                document.getElementById('se-caption-box').classList.remove('show');
+                document.getElementById('music-tool-lbl').innerText = "Music"; 
+                document.getElementById('music-tool-lbl').style.color = "white";
+                document.getElementById('se-music-trimmer').classList.remove('show'); // Hide trimmer initially
+                
+                const d = (await getDoc(doc(db,"users",me.uid))).data(); 
+                document.getElementById('se-my-pic').src = d.profilePic;
+
+                // Handle Preview (Video or Image)
+                const prevBox = document.querySelector('.se-prev');
+                // Remove old media but keep text and mute btn
+                const oldMedia = document.getElementById('se-main-media');
+                if(oldMedia) oldMedia.remove();
+                
+                let newMedia;
+                if(storyFile.type.startsWith('video')) {
+                    storyType = 'video';
+                    newMedia = document.createElement('video');
+                    newMedia.autoplay = true; newMedia.loop = true; newMedia.muted = false;
+                    document.getElementById('se-mute-btn').classList.add('show');
+                    document.getElementById('mute-icon').className = "fas fa-volume-up";
+                } else {
+                    storyType = 'image';
+                    newMedia = document.createElement('img');
+                    document.getElementById('se-mute-btn').classList.remove('show');
+                }
+                newMedia.className = 'se-img';
+                newMedia.id = 'se-main-media';
+                newMedia.src = URL.createObjectURL(storyFile);
+                
+                // Insert before text layer
+                prevBox.insertBefore(newMedia, document.getElementById('se-drag-txt'));
+                document.getElementById('story-editor').style.display = 'flex';
             }
         }
-        window.closeStoryEditor = () => { window.history.back(); }
+
+        window.toggleMuteOriginal = () => {
+            const v = document.getElementById('se-main-media');
+            if(v && storyType === 'video') {
+                isMuted = !isMuted;
+                v.muted = isMuted;
+                document.getElementById('mute-icon').className = isMuted ? "fas fa-volume-mute" : "fas fa-volume-up";
+                document.getElementById('se-mute-btn').classList.toggle('active');
+            }
+        }
+        window.closeStoryEditor = () => { 
+            const v = document.getElementById('se-main-media');
+            if(v) v.src = ""; // Stop video playback
+            window.history.back(); 
+        }
         window.updateSeText = (val) => { document.getElementById('se-drag-txt').innerText = val; }
         window.dragStart = (e) => { e.preventDefault(); }
         window.dragMove = (e) => {
@@ -992,24 +1060,82 @@
             const yPerc = (y / rect.height) * 100; storyYPos = yPerc; document.getElementById('se-drag-txt').style.top = yPerc + '%';
         }
         window.uploadStory = async() => {
-            const b = document.getElementById('st-up-btn'); const originalText = b.innerText; b.innerText = "Sharing..."; b.disabled = true;
+            const b = document.getElementById('st-up-btn'); const originalText = b.innerText; b.innerText = "Uploading..."; b.disabled = true;
             try {
-                let url = null; if (storyFile) { const fd = new FormData(); fd.append('file', storyFile); fd.append('upload_preset', C_PRE); const r = await fetch(C_URL, {method:'POST', body:fd}); const d = await r.json(); url = d.secure_url; }
+                let url = null; 
+                if (storyFile) { 
+                    const fd = new FormData(); fd.append('file', storyFile); fd.append('upload_preset', C_PRE); 
+                    const r = await fetch(C_URL, {method:'POST', body:fd}); const d = await r.json(); url = d.secure_url; 
+                }
                 const u = (await getDoc(doc(db,"users",me.uid))).data();
-                await addDoc(collection(db,"stories"),{ uid: me.uid, url: url, userName: u.fullName, userPic: u.profilePic, timestamp: new Date().toISOString(), caption: document.getElementById('se-caption').value, yPos: storyYPos, musicUrl: selectedMusic ? selectedMusic.url : null, musicName: selectedMusic ? selectedMusic.name : null });
+                await addDoc(collection(db,"stories"), { 
+                    uid: me.uid, url: url, type: storyType,
+                    userName: u.fullName, userPic: u.profilePic, timestamp: new Date().toISOString(), 
+                    caption: document.getElementById('se-caption').value, yPos: storyYPos, 
+                    musicUrl: selectedMusic ? selectedMusic.url : null, 
+                    musicName: selectedMusic ? selectedMusic.name : null,
+                    musicStart: musicStartTime, isMuted: isMuted 
+                });
                 window.history.back(); loadSt(); alert("Story Shared Successfully!"); 
             } catch(e) { alert("Error sharing story"); } finally { b.innerText = originalText; b.disabled = false; }
         }
         let storyAudio = new Audio();
         window.viewStory = (data) => {
-            window.history.pushState({modal: 'story'}, '', ''); // Fix Close Button
+            window.history.pushState({modal: 'story'}, '', '');
             document.getElementById('story-viewer').style.display = 'flex';
-            document.getElementById('sv-main-img').src = data.url; document.getElementById('sv-ava').src = data.userPic;
+            
+            // Setup Media (Video/Image)
+            const body = document.querySelector('.sv-body');
+            const oldMedia = document.getElementById('sv-main-img');
+            if(oldMedia) oldMedia.remove();
+            
+            let mediaEl;
+            let duration = 15000; // Default 15s
+
+            if(data.type === 'video') {
+                mediaEl = document.createElement('video');
+                mediaEl.autoplay = true; mediaEl.playsInline = true; mediaEl.loop = true;
+                mediaEl.muted = data.isMuted || false;
+            } else {
+                mediaEl = document.createElement('img');
+            }
+            mediaEl.src = data.url;
+            mediaEl.id = 'sv-main-img';
+            mediaEl.className = 'sv-img';
+            body.prepend(mediaEl);
+
+            document.getElementById('sv-ava').src = data.userPic;
             let nameTxt = data.userName; if(data.musicName) nameTxt += ` 🎵 ${data.musicName}`; document.getElementById('sv-name').innerText = nameTxt;
             const cap = document.getElementById('sv-caption'); cap.innerText = data.caption || ""; cap.style.top = (data.yPos || 50) + '%';
-            if(data.musicUrl) { storyAudio.src = data.musicUrl; storyAudio.volume = 1.0; storyAudio.play().catch(e => console.log("Auto-play blocked")); }
-            const bar = document.getElementById('sv-bar'); bar.style.width = '0%'; setTimeout(() => bar.style.width = '100%', 100); bar.style.transition = 'width 15s linear';
-if(activeStoryTimer) clearTimeout(activeStoryTimer); activeStoryTimer = setTimeout(closeStoryView, 15000);
+            
+            // Handle Music
+            storyAudio.pause();
+            if(data.musicUrl) { 
+                storyAudio.src = data.musicUrl; 
+                storyAudio.currentTime = data.musicStart || 0; // Start from trim point
+                storyAudio.volume = 1.0; 
+                storyAudio.play().catch(e => console.log("Auto-play blocked")); 
+            }
+
+            const bar = document.getElementById('sv-bar'); bar.style.width = '0%'; 
+            
+            // Set Timer based on video length or default
+            if(data.type === 'video') {
+                mediaEl.onloadedmetadata = () => {
+                    if(mediaEl.duration && mediaEl.duration < 30) duration = mediaEl.duration * 1000;
+                    startStoryTimer(duration);
+                };
+            } else {
+                startStoryTimer(duration);
+            }
+        }
+        
+        function startStoryTimer(dur) {
+            const bar = document.getElementById('sv-bar');
+            setTimeout(() => bar.style.width = '100%', 100); 
+            bar.style.transition = `width ${dur/1000}s linear`;
+            if(activeStoryTimer) clearTimeout(activeStoryTimer); 
+            activeStoryTimer = setTimeout(closeStoryView, dur);
         }
         window.closeStoryView = () => { window.history.back(); }
         window.sendReact = (emoji) => { const el = document.createElement('div'); el.className = 'flying-emoji'; el.innerText = emoji; document.getElementById('story-viewer').appendChild(el); setTimeout(() => el.remove(), 1500); }
@@ -1078,7 +1204,63 @@ if(activeStoryTimer) clearTimeout(activeStoryTimer); activeStoryTimer = setTimeo
             } catch(e) { resBox.innerHTML = 'Error'; }
         }
         window.playPreview = (url, btn) => { if(previewAudio.src === url && !previewAudio.paused) { previewAudio.pause(); btn.className = "fas fa-play-circle m-play-btn"; return; } document.querySelectorAll('.m-play-btn').forEach(b => b.className = "fas fa-play-circle m-play-btn"); previewAudio.src = url; previewAudio.volume = 0.8; previewAudio.play(); btn.className = "fas fa-pause-circle m-play-btn"; }
-        window.selectMusic = (url, name) => { previewAudio.pause(); selectedMusic = { url: url, name: name }; const shortName = name.length > 12 ? name.substring(0,10)+'..' : name; document.getElementById('music-tool-lbl').innerText = shortName; document.getElementById('music-tool-lbl').style.color = '#4cd137'; window.history.back(); }
+        let musicPreviewTimer = null;
+        
+        window.selectMusic = (url, name) => { 
+            previewAudio.pause(); 
+            selectedMusic = { url: url, name: name }; 
+            const shortName = name.length > 12 ? name.substring(0,10)+'..' : name; 
+            document.getElementById('music-tool-lbl').innerText = shortName; 
+            document.getElementById('music-tool-lbl').style.color = '#4cd137'; 
+            
+            // Show Trimmer UI
+            document.getElementById('se-music-trimmer').classList.add('show');
+            document.getElementById('music-slider').value = 0;
+            musicStartTime = 0;
+            window.history.back(); 
+        }
+
+        window.previewMusicFragment = (val) => {
+            musicStartTime = parseInt(val);
+            const display = document.getElementById('m-start-time');
+            const min = Math.floor(musicStartTime / 60);
+            const sec = musicStartTime % 60;
+            display.innerText = `${min}:${sec < 10 ? '0'+sec : sec}`;
+            
+            // Play preview fragment
+            if(selectedMusic) {
+                if(previewAudio.src !== selectedMusic.url) previewAudio.src = selectedMusic.url;
+                previewAudio.currentTime = musicStartTime;
+                previewAudio.play().catch(()=>{});
+                if(musicPreviewTimer) clearTimeout(musicPreviewTimer);
+                musicPreviewTimer = setTimeout(() => previewAudio.pause(), 4000); // Play for 4s
+            }
+        }
+        
+        window.stopMusicPreview = () => { previewAudio.pause(); }
+
+        window.previewMusicFragment = (val) => {
+            musicStartTime = parseInt(val);
+            const display = document.getElementById('m-start-time');
+            const min = Math.floor(musicStartTime / 60);
+            const sec = musicStartTime % 60;
+            display.innerText = `${min}:${sec < 10 ? '0'+sec : sec}`;
+            
+            // Play preview logic
+            if(selectedMusic) {
+                if(previewAudio.src !== selectedMusic.url) previewAudio.src = selectedMusic.url;
+                previewAudio.currentTime = musicStartTime;
+                previewAudio.play().catch(()=>{});
+                
+                // Play only for 5 seconds then loop or stop to save data/sanity
+                if(musicPreviewTimer) clearTimeout(musicPreviewTimer);
+                musicPreviewTimer = setTimeout(() => previewAudio.pause(), 4000);
+            }
+        }
+        
+        window.stopMusicPreview = () => {
+            previewAudio.pause();
+        }
 
         // --- Advanced Post Music Logic ---
         window.togglePostMusic = (url, id, isAuto = false) => {
