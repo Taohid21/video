@@ -217,6 +217,15 @@
 
         @keyframes vinylSpin { 100% { transform: rotate(360deg); } }
         @keyframes equalizer { 0% { height: 20%; } 100% { height: 100%; } }
+        
+        /* --- Game Section Styles --- */
+        .online-dot { width: 12px; height: 12px; background: #31a24c; border-radius: 50%; position: absolute; bottom: 2px; right: 2px; border: 2px solid var(--card); }
+        .game-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 15px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; box-shadow: var(--shadow); }
+        .game-icon { font-size: 35px; color: var(--accent); }
+        .invite-btn { background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .invite-btn:active { transform: scale(0.95); }
+        .game-popup { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--card); border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.4); padding: 15px; z-index: 9999; display: none; align-items: center; gap: 15px; width: 90%; max-width: 350px; border-left: 5px solid var(--accent); animation: slideDown 0.4s cubic-bezier(0.1, 0.7, 0.1, 1); }
+        @keyframes slideDown { from { top: -50px; opacity: 0; } to { top: 20px; opacity: 1; } }
     </style>
     </style>
 </head>
@@ -243,6 +252,7 @@
         <div class="tab active" id="t-home" onclick="nav('home')"><i class="fas fa-house"></i></div>
         <div class="tab" id="t-video" onclick="nav('video')"><i class="fas fa-play-circle"></i></div>
         <div class="tab" id="t-friends" onclick="nav('friends')"><i class="fas fa-user-group"></i></div>
+        <div class="tab" id="t-game" onclick="nav('game')"><i class="fas fa-gamepad"></i></div>
         <div class="tab" id="t-profile" onclick="nav('profile')"><i class="fas fa-user-circle"></i></div>
     </div>
 
@@ -273,7 +283,38 @@
     <div id="p-video" class="section">
         <div id="v-feed"></div>
     </div>
+<!-- GAME SECTION -->
+    <div id="p-game" class="section">
+        <!-- গেম লবি (যেকানে গেম সিলেক্ট এবং ফ্রেন্ড ইনভাইট করা হবে) -->
+        <div id="game-lobby">
+            <div class="sugg-container">
+                <div class="sec-title">Select a Game</div>
+                <div class="game-card">
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        <i class="fas fa-times-circle game-icon" style="color:#e74c3c;"></i>
+                        <div style="text-align:left;">
+                            <div style="font-weight:700; font-size:16px; color:var(--text);">Tic-Tac-Toe</div>
+                            <div style="font-size:12px; color:var(--text-sec);">Classic 2 Player Game</div>
+                        </div>
+                    </div>
+                    <span class="tag-btn" style="background:var(--accent); color:white; border:none;">Selected <i class="fas fa-check"></i></span>
+                </div>
+            </div>
+            
+            <div class="sugg-container">
+                <div class="sec-title">Play with Friends <span id="online-cnt" style="color:#31a24c; margin-left:5px; font-size:14px;"><i class="fas fa-circle"></i> Online</span></div>
+                <div id="online-friends-list">
+                    <!-- রিয়েল-টাইমে অনলাইনে থাকা বন্ধুদের লিস্ট এখানে আসবে -->
+                    <div style="padding:20px; text-align:center; color:var(--text-sec);">Loading friends...</div>
+                </div>
+            </div>
+        </div>
 
+        <!-- গেম প্লে ফ্রেম (যেখানে games.html লোড হবে) -->
+        <div id="game-frame-container" style="display:none; height: calc(100vh - 100px);">
+            <iframe id="game-frame" src="" style="width:100%; height:100%; border:none; background:var(--bg);"></iframe>
+        </div>
+    </div>
     <!-- FRIENDS SECTION -->
     <div id="p-friends" class="section">
         <div class="sugg-container" id="req-cont" style="display:none">
@@ -471,6 +512,17 @@
         </div>
         <button onclick="closeAll()" style="width:90%; margin:0 auto 20px; padding:12px; border:none; background:var(--input); color:var(--text); font-weight:600; border-radius:8px;">Cancel</button>
     </div>
+<!-- Game Invitation Popup -->
+    <div id="game-invite-popup" class="game-popup">
+        <img id="gip-img" class="u-ava" style="width:45px;height:45px;border:none;">
+        <div style="flex:1;">
+            <div id="gip-text" style="font-weight:600; font-size:14px; margin-bottom:8px; color:var(--text);">Loading...</div>
+            <div style="display:flex; gap:10px;">
+                <button onclick="acceptGameInvite()" style="flex:1; background:#31a24c; color:white; border:none; padding:8px; border-radius:6px; font-weight:600; cursor:pointer;">Accept</button>
+                <button onclick="declineGameInvite()" style="flex:1; background:#e74c3c; color:white; border:none; padding:8px; border-radius:6px; font-weight:600; cursor:pointer;">Decline</button>
+            </div>
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -603,6 +655,7 @@
             if(p === 'profile') loadMyP();
             if(p === 'home') loadFeed();
             if(p === 'friends') loadReq();
+            if(p === 'game') loadGameLobby(); // নতুন গেম লবি লোড ফাংশন
         }
 
         // Updated Intersection Observer for Video AND Music
@@ -1106,6 +1159,73 @@ if(activeStoryTimer) clearTimeout(activeStoryTimer); activeStoryTimer = setTimeo
             }
         }
             
+// --- GAME SYSTEM LOGIC (Phase 1: UI & Routing) ---
+        
+        window.loadGameLobby = async () => {
+            // গেম ট্যাব ওপেন হলে গেম ফ্রেম হাইড করে লবি দেখাবে
+            document.getElementById('game-frame-container').style.display = 'none';
+            document.getElementById('game-lobby').style.display = 'block';
+            
+            // আপাতত ডামি ফ্রেন্ড লিস্ট লোড করছি (ফায়ারবেস কানেকশন পরের ধাপে হবে)
+            const list = document.getElementById('online-friends-list');
+            list.innerHTML = `
+                <div class="s-row" style="background:var(--bg);">
+                    <div style="position:relative;">
+                        <img src="https://via.placeholder.com/150/1877f2/ffffff?text=F" class="u-ava" style="width:50px;height:50px;">
+                        <div class="online-dot"></div>
+                    </div>
+                    <div style="flex:1;">
+                        <div style="font-weight:600; margin-bottom:5px; color:var(--text);">Test Friend</div>
+                        <button class="invite-btn" onclick="sendGameInvite('dummy_id', this)">Invite to Play</button>
+                    </div>
+                </div>
+            `;
+        };
+
+        // ইনভাইট সেন্ড করার ফাংশন
+        window.sendGameInvite = (friendId, btn) => {
+            btn.innerText = "Inviting...";
+            btn.style.background = "var(--input)";
+            btn.style.color = "var(--text)";
+            btn.disabled = true;
+            
+            // এখানে ডাটাবেসে ইনভাইট যাবে (পরবর্তী ধাপে অ্যাড করব)
+            // আপাতত টেস্ট করার জন্য ৫ সেকেন্ড পর অটো পপ-আপ দেখাচ্ছি:
+            setTimeout(() => {
+                showGamePopup("Test Friend", "https://via.placeholder.com/150/1877f2/ffffff?text=F");
+                btn.innerText = "Invite to Play";
+                btn.style.background = "var(--accent)";
+                btn.style.color = "white";
+                btn.disabled = false;
+            }, 3000);
+        };
+
+        // পপ-আপ দেখানোর ফাংশন
+        window.showGamePopup = (friendName, friendPic) => {
+            document.getElementById('gip-img').src = friendPic;
+            document.getElementById('gip-text').innerHTML = `<b>${friendName}</b> wants to play Tic-Tac-Toe with you!`;
+            document.getElementById('game-invite-popup').style.display = 'flex';
+        };
+
+        // ইনভাইট একসেপ্ট করার ফাংশন
+        window.acceptGameInvite = () => {
+            document.getElementById('game-invite-popup').style.display = 'none';
+            
+            // গেম ট্যাবে নিয়ে যাওয়া
+            nav('game');
+            
+            // লবি হাইড করে iframe লোড করা
+            document.getElementById('game-lobby').style.display = 'none';
+            document.getElementById('game-frame-container').style.display = 'block';
+            
+            // games.html ফাইলটি লোড করা (প্যারামিটার হিসেবে রুম আইডি পাঠানো হবে)
+            document.getElementById('game-frame').src = "games.html?room=test_room_123";
+        };
+
+        // ইনভাইট ডিক্লাইন করার ফাংশন
+        window.declineGameInvite = () => {
+            document.getElementById('game-invite-popup').style.display = 'none';
+        };
     </script>
 </body>
 </html>
