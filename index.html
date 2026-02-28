@@ -1180,104 +1180,42 @@ if(activeStoryTimer) clearTimeout(activeStoryTimer); activeStoryTimer = setTimeo
             }
         }
             
-// --- GAME SYSTEM LOGIC (Phase 3: Real Presence & Sync) ---
+// --- GAME SYSTEM LOGIC (Phase 3: Real Firebase Invites & Unique Rooms) ---
         
         let currentInviteId = null;
         let currentGameRoomId = null;
+        let inviteListener = null;
+
+        // ইনভাইট শোনার জন্য ব্যাকগ্রাউন্ড লিসেনার
+        window.listenForGameInvites = () => {
+            if(inviteListener) inviteListener(); // আগের লিসেনার থাকলে বন্ধ করবে
+            inviteListener = onSnapshot(
+                query(collection(db, "Game_Invites"), where("receiverId", "==", me.uid), where("status", "==", "pending")),
+                (snapshot) => {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === "added") {
+                            const data = change.doc.data();
+                            showGamePopup(data.senderName, data.senderPic, change.doc.id, data.roomId);
+                        }
+                    });
+                }
+            );
+        };
 
         window.loadGameLobby = async () => {
             document.getElementById('game-frame-container').style.display = 'none';
             document.getElementById('game-lobby').style.display = 'block';
+            document.getElementById('game-frame').src = ""; // আগের গেম ক্লিয়ার করা
             
+            // লবি লোড হলেই ইনভাইট শোনা শুরু করবে
+            if(!inviteListener) window.listenForGameInvites();
+
             const list = document.getElementById('online-friends-list');
-            list.innerHTML = '<div style="padding:20px; text-align:center;"><i class="fas fa-spinner fa-spin" style="font-size:24px; color:var(--accent);"></i><br>Finding online friends...</div>';
+            list.innerHTML = '<div style="padding:20px; text-align:center;"><i class="fas fa-spinner fa-spin" style="font-size:24px; color:var(--accent);"></i><br>Finding friends...</div>';
             
             try {
                 const myD = (await getDoc(doc(db, "users", me.uid))).data();
-                const friends = myD.friends ||[];
-                
-                if(friends.length === 0) {
-                    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-sec)">You have no friends to play with. Add some friends first!</div>';
-                    document.getElementById('online-cnt').innerHTML = `0 Online`;
-                    return;
-                }
-                
-                let h = "";
-                document.getElementById('online-cnt').innerHTML = `<i class="fas fa-circle"></i> ${friends.length} Friends`;
-
-                // প্রত্যেক ফ্রেন্ডের ডাটাবেস থেকে প্রোফাইল পিকচার ও নাম নিয়ে আসা
-                for(let id of friends) {
-                    const fD = (await getDoc(doc(db, "users", id))).data();
-                    if(fD) {
-                        h += `
-                        <div class="s-row" style="background:var(--bg);">
-                            <div style="position:relative;">
-                                <img src="${fD.profilePic}" class="u-ava" style="width:50px;height:50px;">
-                                <div class="online-dot"></div>
-                            </div>
-                            <div style="flex:1;">
-                                <div style="font-weight:600; margin-bottom:5px; color:var(--text);">${fD.fullName}</div>
-                                <button class="invite-btn" onclick="sendGameInvite('${id}', '${fD.fullName}', '${fD.profilePic}', this)">Invite to Play</button>
-                            </div>
-                        </div>`;
-                    }
-                }
-                list.innerHTML = h || '<div style="padding:20px;text-align:center;color:var(--text-sec)">Error loading friends.</div>';
-            } catch(e) {
-                console.error("Lobby Load Error:", e);
-            }
-        };
-
-        window.sendGameInvite = (friendId, friendName, friendPic, btn) => {
-            btn.innerText = "Inviting...";
-            btn.style.background = "var(--input)";
-            btn.style.color = "var(--text)";
-            btn.disabled = true;
-            
-            // আপাতত পপ-আপ টেস্ট করার জন্য নিজেকেই ইনভাইট সেন্ড করা হচ্ছে (পরের ধাপে ২য় ইউজারের ফোনে যাবে)
-            setTimeout(() => {
-                showGamePopup(friendName, friendPic);
-                btn.innerText = "Invite to Play";
-                btn.style.background = "var(--accent)";
-                btn.style.color = "white";
-                btn.disabled = false;
-            }, 2000);
-        };
-
-        // পপ-আপ দেখানোর ফাংশন
-        window.showGamePopup = (friendName, friendPic) => {
-            document.getElementById('gip-img').src = friendPic;
-            document.getElementById('gip-text').innerHTML = `<b>${friendName}</b> wants to play Tic-Tac-Toe with you!`;
-            document.getElementById('game-invite-popup').style.display = 'flex';
-        };
-
-        // ইনভাইট একসেপ্ট করার ফাংশন
-        window.acceptGameInvite = () => {
-            document.getElementById('game-invite-popup').style.display = 'none';
-            
-            // গেম ট্যাবে নিয়ে যাওয়া
-            nav('game');
-            
-            // লবি হাইড করে iframe লোড করা
-            document.getElementById('game-lobby').style.display = 'none';
-            document.getElementById('game-frame-container').style.display = 'block';
-            
-            // games.html ফাইলটি লোড করা (প্যারামিটার হিসেবে রুম আইডি পাঠানো হবে)
-            document.getElementById('game-frame').src = "games.html?room=test_room_123";
-        };
-
-        // ইনভাইট ডিক্লাইন করার ফাংশন
-        window.declineGameInvite = () => {
-            document.getElementById('game-invite-popup').style.display = 'none';
-        };
-        // গেম থেকে বের হওয়ার মেসেজ রিসিভ করা
-        window.addEventListener('message', (e) => {
-            if(e.data === "leave_game") {
-                document.getElementById('game-frame-container').style.display = 'none';
-                document.getElementById('game-lobby').style.display = 'block';
-                document.getElementById('game-frame').src = "";
-            }
-        });
+                const friends = myD.friends ||
     </script>
 </body>
 </html>
