@@ -1180,15 +1180,16 @@ if(activeStoryTimer) clearTimeout(activeStoryTimer); activeStoryTimer = setTimeo
             }
         }
             
-// --- GAME SYSTEM LOGIC (Phase 3: Real Firebase Invites & Unique Rooms) ---
+// --- GAME SYSTEM LOGIC (Phase 3: Final Sync, Unique Rooms & Presence) ---
         
         let currentInviteId = null;
         let currentGameRoomId = null;
         let inviteListener = null;
+        let activeInviteWatch = null;
 
-        // ইনভাইট শোনার জন্য ব্যাকগ্রাউন্ড লিসেনার
+        // ১. ব্যাকগ্রাউন্ডে ইনভাইট শোনা (যাকে ইনভাইট করা হবে, শুধু তার কাছেই পপ-আপ যাবে)
         window.listenForGameInvites = () => {
-            if(inviteListener) inviteListener(); // আগের লিসেনার থাকলে বন্ধ করবে
+            if(inviteListener) inviteListener(); // আগের লিসেনার বন্ধ করা
             inviteListener = onSnapshot(
                 query(collection(db, "Game_Invites"), where("receiverId", "==", me.uid), where("status", "==", "pending")),
                 (snapshot) => {
@@ -1202,16 +1203,17 @@ if(activeStoryTimer) clearTimeout(activeStoryTimer); activeStoryTimer = setTimeo
             );
         };
 
+        // ২. গেম লবি লোড করা (শুধুমাত্র "Online" বন্ধুদের দেখাবে)
         window.loadGameLobby = async () => {
             document.getElementById('game-frame-container').style.display = 'none';
             document.getElementById('game-lobby').style.display = 'block';
             document.getElementById('game-frame').src = ""; // আগের গেম ক্লিয়ার করা
             
-            // লবি লোড হলেই ইনভাইট শোনা শুরু করবে
+            // লবি লোড হলেই ব্যাকগ্রাউন্ড ইনভাইট লিসেনার চালু হবে
             if(!inviteListener) window.listenForGameInvites();
 
             const list = document.getElementById('online-friends-list');
-            list.innerHTML = '<div style="padding:20px; text-align:center;"><i class="fas fa-spinner fa-spin" style="font-size:24px; color:var(--accent);"></i><br>Finding friends...</div>';
+            list.innerHTML = '<div style="padding:20px; text-align:center;"><i class="fas fa-spinner fa-spin" style="font-size:24px; color:var(--accent);"></i><br>Finding online friends...</div>';
             
             try {
                 const myD = (await getDoc(doc(db, "users", me.uid))).data();
