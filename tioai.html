@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NexGen | Premium Workspace</title>
+    
+    <!-- Google Fonts: Inter & Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+
+    <style>
+        /* ================= CSS VARIABLES & THEMING ================= */
+        :root {
+            --bg-gradient-1: #e0c3fc;
+            --bg-gradient-2: #8ec5fc;
+            --bg-gradient-3: #fbc2eb;
+            --glass-bg: rgba(255, 255, 255, 0.4);
+            --glass-card: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 12px 40px rgba(31, 38, 135, 0.15);
+            --nav-blur: blur(20px);
+        }
+
+        [data-theme="dark"] {
+            --bg-gradient-1: #0f172a;
+            --bg-gradient-2: #1e1b4b;
+            --bg-gradient-3: #312e81;
+            --glass-bg: rgba(15, 23, 42, 0.6);
+            --glass-card: rgba(30, 41, 59, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #818cf8;
+            --accent-hover: #6366f1;
+            --shadow-sm: 0 4px 16px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        /* ================= GLOBAL RESETS & BASE ================= */
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            overflow: hidden; /* App-like feel */
+            background: linear-gradient(-45deg, var(--bg-gradient-1), var(--bg-gradient-2), var(--bg-gradient-3));
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            transition: background 0.6s ease, color 0.6s ease;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        h1, h2, h3, h4 { font-family: 'Poppins', sans-serif; }
+
+        /* ================= UTILITIES & GLASSMORPHISM ================= */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+        }
+        
+        .glass-card {
+            background: var(--glass-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .hidden { display: none !important; }
+
+        /* ================= LOGIN SCREEN ================= */
+        #login-screen {
+            position: fixed; inset: 0; z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+            background: inherit; padding: 20px;
+        }
+
+        .login-box {
+            text-align: center; max-width: 400px; width: 100%;
+            animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .btn-google {
+            display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+            background: var(--text-main); color: var(--glass-bg);
+            border: none; border-radius: 100px; padding: 16px 32px;
+            font-size: 16px; font-weight: 600; font-family: 'Inter', sans-serif;
+            cursor: pointer; width: 100%; transition: all 0.3s ease;
+            box-shadow: var(--shadow-lg); margin-top: 30px;
+        }
+
+        [data-theme="dark"] .btn-google { color: #0f172a; }
+        .btn-google:active { transform: scale(0.96); }
+
+        /* ================= MAIN APP LAYOUT ================= */
+        #app-layout { display: flex; flex-direction: column; height: 100vh; }
+
+        /* HEADER */
+        header {
+            padding: 20px 24px; display: flex; justify-content: space-between; align-items: center;
+            z-index: 10; padding-top: max(20px, env(safe-area-inset-top));
+        }
+
+        .logo { font-size: 24px; font-weight: 700; font-family: 'Poppins', sans-serif; letter-spacing: -0.5px; }
+        .logo span { color: var(--accent); }
+
+        .user-profile { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .user-profile img { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--accent); object-fit: cover; }
+        .user-info { display: flex; flex-direction: column; text-align: right; }
+        .user-name { font-weight: 600; font-size: 14px; }
+        .user-email { font-size: 12px; color: var(--text-muted); }
+
+        /* SCROLLABLE MAIN CONTENT */
+        main {
+            flex: 1; overflow-y: auto; padding: 0 24px 100px 24px; scroll-behavior: smooth;
+        }
+        main::-webkit-scrollbar { display: none; } /* Hide scrollbar for PWA feel */
+
+        /* VIEW CONTAINERS */
+        .view-section { display: none; animation: fadeIn 0.4s ease forwards; }
+        .view-section.active { display: block; }
+        .section-header { margin-bottom: 24px; }
+        .section-header h2 { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+        .section-header p { color: var(--text-muted); font-size: 14px; }
+
+        /* ================= COMPONENTS ================= */
+
+        /* Dashboard Counters */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 30px; }
+        .stat-card { text-align: center; }
+        .stat-value { font-size: 40px; font-weight: 700; font-family: 'Poppins', sans-serif; color: var(--accent); margin: 8px 0; }
+        
+        /* Inputs & Forms */
+        .input-group { margin-bottom: 20px; }
+        .glass-input {
+            width: 100%; background: var(--glass-bg); border: 1px solid var(--glass-border);
+            padding: 18px 20px; border-radius: 16px; font-size: 16px;
+            color: var(--text-main); outline: none; transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .glass-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2); }
+        .glass-input::placeholder { color: var(--text-muted); }
+        
+        /* Primary Button */
+        .btn-action {
+            width: 100%; background: var(--accent); color: white; border: none;
+            padding: 18px; border-radius: 16px; font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease; display: flex; justify-content: center; align-items: center; gap: 8px;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-action:hover { background: var(--accent-hover); box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3); }
+        .btn-action:active { transform: scale(0.98); }
+
+        /* AI Output Box */
+        .ai-output-box { margin-top: 24px; padding: 20px; background: rgba(0,0,0,0.03); border-radius: 16px; display: none;}
+        [data-theme="dark"] .ai-output-box { background: rgba(0,0,0,0.2); }
+        .ai-badge { display: inline-block; padding: 4px 10px; background: var(--accent); color: white; border-radius: 8px; font-size: 12px; font-weight: 600; margin-bottom: 12px; }
+
+        /* Lists (Notes & Vault) */
+        .item-list { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+        .list-item { position: relative; padding-bottom: 60px; }
+        .list-item-content { font-size: 15px; line-height: 1.6; margin-top: 8px;}
+        .list-item-date { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; font-weight: 500;}
+        .delete-btn {
+            position: absolute; bottom: 20px; right: 20px;
+            background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none;
+            width: 36px; height: 36px; border-radius: 12px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+        }
+        .delete-btn:hover { background: #ef4444; color: white; }
+
+        /* Settings Toggle */
+        .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--glass-border); }
+        .toggle-switch { position: relative; width: 52px; height: 28px; background: var(--text-muted); border-radius: 30px; cursor: pointer; transition: 0.4s; }
+        .toggle-switch::before { content: ""; position: absolute; width: 20px; height: 20px; border-radius: 50%; background: white; left: 4px; bottom: 4px; transition: 0.4s; }
+        [data-theme="dark"] .toggle-switch { background: var(--accent); }
+        [data-theme="dark"] .toggle-switch::before { transform: translateX(24px); }
+
+        /* Logout Button */
+        .btn-logout { background: transparent; border: 1px solid #ef4444; color: #ef4444; margin-top: 30px; }
+        .btn-logout:hover { background: #ef4444; color: white; }
+
+        /* BOTTOM NAVIGATION */
+        nav {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            padding: 12px 24px calc(12px + env(safe-area-inset-bottom));
+            display: flex; justify-content: space-around;
+            border-top: 1px solid var(--glass-border);
+            border-top-left-radius: 24px; border-top-right-radius: 24px;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            color: var(--text-muted); text-decoration: none; cursor: pointer;
+            transition: all 0.3s ease; position: relative;
+        }
+        .nav-item span.material-symbols-outlined { font-size: 28px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .nav-label { font-size: 11px; font-weight: 500; }
+        
+        .nav-item.active { color: var(--accent); }
+        .nav-item.active span { transform: translateY(-4px); font-variation-settings: 'FILL' 1; }
+
+        /* Toast Notification */
+        #toast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+            background: var(--text-main); color: var(--glass-bg); padding: 12px 24px;
+            border-radius: 100px; font-weight: 500; font-size: 14px; z-index: 2000;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: var(--shadow-lg); pointer-events: none;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* Animations */
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .loader {
+            width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%; border-top-color: white; animation: spin 1s ease-in-out infinite; display: none;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Responsive Desktop Max Width */
+        @media(min-width: 768px) {
+            #app-layout { max-width: 480px; margin: 0 auto; position: relative; border-left: 1px solid var(--glass-border); border-right: 1px solid var(--glass-border); box-shadow: var(--shadow-lg); background: var(--glass-bg); backdrop-filter: blur(20px);}
+            body { justify-content: center; }
+            nav { position: absolute; max-width: 480px; left: 50%; transform: translateX(-50%); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast">Action successful</div>
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="glass">
+        <div class="glass-card login-box">
+            <h1 class="logo" style="margin-bottom: 8px;">Nex<span>Gen</span></h1>
+            <p style="color: var(--text-muted); font-size: 15px; margin-bottom: 24px;">Your AI-Powered Workspace</p>
+            <div style="font-size: 64px; margin-bottom: 24px;">🚀</div>
+            <button id="btn-login" class="btn-google">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Continue with Google
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN APPLICATION -->
+    <div id="app-layout" class="hidden">
+        
+        <!-- HEADER -->
+        <header>
+            <div class="logo">Nex<span>Gen</span></div>
+            <div class="user-profile" id="profile-btn">
+                <div class="user-info">
+                    <span class="user-name" id="ui-user-name">User</span>
+                    <span class="user-email" id="ui-user-email">email@domain.com</span>
+                </div>
+                <img id="ui-user-pic" src="" alt="Profile">
+            </div>
+        </header>
+
+        <!-- MAIN SCROLLABLE AREA -->
+        <main>
+            
+            <!-- 1. DASHBOARD VIEW -->
+            <div id="view-dashboard" class="view-section active">
+                <div class="section-header">
+                    <h2>Dashboard</h2>
+                    <p>Welcome back! Here's your workspace overview.</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="glass-card stat-card">
+                        <span class="material-symbols-outlined" style="color: var(--accent);">edit_note</span>
+                        <div class="stat-value" id="stat-notes">0</div>
+                        <div style="font-size: 13px; color: var(--text-muted);">Total Notes</div>
+                    </div>
+                    <div class="glass-card stat-card">
+                        <span class="material-symbols-outlined" style="color: var(--accent);">lightbulb</span>
+                        <div class="stat-value" id="stat-vault">0</div>
+                        <div style="font-size: 13px; color: var(--text-muted);">Saved Ideas</div>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 12px; font-size: 18px;">Quick Actions</h3>
+                    <button class="btn-action" onclick="switchView('view-ai', 'nav-ai')" style="margin-bottom: 12px; background: rgba(99, 102, 241, 0.1); color: var(--accent);">
+                        <span class="material-symbols-outlined">auto_awesome</span> Generate Content
+                    </button>
+                    <button class="btn-action" onclick="switchView('view-notes', 'nav-notes')" style="background: rgba(99, 102, 241, 0.1); color: var(--accent);">
+                        <span class="material-symbols-outlined">add_circle</span> Add New Note
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. AI GENERATOR VIEW -->
+            <div id="view-ai" class="view-section">
+                <div class="section-header">
+                    <h2>AI Creator</h2>
+                    <p>Generate high-converting content instantly.</p>
+                </div>
+
+                <div class="glass-card">
+                    <div class="input-group">
+                        <input type="text" id="ai-topic-input" class="glass-input" placeholder="E.g., Digital Marketing Tips, Mindset...">
+                    </div>
+                    <button class="btn-action" id="btn-generate">
+                        <span id="ai-btn-text">Generate Magic</span>
+                        <div class="loader" id="ai-loader"></div>
+                    </button>
+
+                    <div id="ai-output" class="ai-output-box glass">
+                        <div class="ai-badge">Generated Content</div>
+                        <h4 style="margin-top: 10px; font-size: 14px; color: var(--accent);">Caption:</h4>
+                        <p id="ai-caption" style="font-size: 14px; margin-bottom: 10px; line-height: 1.5;"></p>
+                        
+                        <h4 style="font-size: 14px; color: var(--accent);">Hashtags:</h4>
+                        <p id="ai-hashtags" style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;"></p>
+                        
+                        <h4 style="font-size: 14px; color: var(--accent);">Video Script:</h4>
+                        <p id="ai-script" style="font-size: 14px; line-height: 1.6; white-space: pre-wrap;"></p>
+                        
+                        <button class="btn-action" id="btn-save-idea" style="margin-top: 16px; padding: 12px; font-size: 14px;">
+                            <span class="material-symbols-outlined" style="font-size: 18px;">save</span> Save to Vault
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. NOTES VIEW -->
+            <div id="view-notes" class="view-section">
+                <div class="section-header">
+                    <h2>Smart Notes</h2>
+                    <p>Auto-syncing cloud storage.</p>
+                </div>
+
+                <div class="glass-card" style="margin-bottom: 24px;">
+                    <div class="input-group">
+                        <input type="text" id="note-title" class="glass-input" placeholder="Note Title" style="margin-bottom: 12px;">
+                        <textarea id="note-content" class="glass-input" placeholder="Write your thoughts here..." rows="3" style="resize: none;"></textarea>
+                    </div>
+                    <button class="btn-action" id="btn-add-note">Save Note</button>
+                </div>
+
+                <div id="notes-list" class="item-list">
+                    <!-- Notes injected here -->
+                </div>
+            </div>
+
+            <!-- 4. IDEA VAULT VIEW -->
+            <div id="view-vault" class="view-section">
+                <div class="section-header">
+                    <h2>Idea Vault</h2>
+                    <p>Your saved AI generations.</p>
+                </div>
+                <div id="vault-list" class="item-list">
+                    <!-- Vault items injected here -->
+                </div>
+            </div>
+
+            <!-- 5. SETTINGS VIEW -->
+            <div id="view-settings" class="view-section">
+                <div class="section-header">
+                    <h2>Settings</h2>
+                    <p>Manage your preferences.</p>
+                </div>
+
+                <div class="glass-card">
+                    <div class="setting-row">
+                        <span style="font-weight: 500;">Dark Mode</span>
+                        <div class="toggle-switch" id="theme-toggle"></div>
+                    </div>
+                    
+                    <button class="btn-action btn-logout" id="btn-logout">
+                        <span class="material-symbols-outlined">logout</span> Sign Out
+                    </button>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="glass" id="bottom-nav">
+            <div class="nav-item active" id="nav-dashboard" onclick="switchView('view-dashboard', 'nav-dashboard')">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="nav-label">Home</span>
+            </div>
+            <div class="nav-item" id="nav-ai" onclick="switchView('view-ai', 'nav-ai')">
+                <span class="material-symbols-outlined">magic_button</span>
+                <span class="nav-label">Create</span>
+            </div>
+            <div class="nav-item" id="nav-notes" onclick="switchView('view-notes', 'nav-notes')">
+                <span class="material-symbols-outlined">edit_document</span>
+                <span class="nav-label">Notes</span>
+            </div>
+            <div class="nav-item" id="nav-vault" onclick="switchView('view-vault', 'nav-vault')">
+                <span class="material-symbols-outlined">folder_special</span>
+                <span class="nav-label">Vault</span>
+            </div>
+            <div class="nav-item" id="nav-settings" onclick="switchView('view-settings', 'nav-settings')">
+                <span class="material-symbols-outlined">settings</span>
+                <span class="nav-label">Settings</span>
+            </div>
+        </nav>
+    </div>
+
+    <!-- ================= JAVASCRIPT & FIREBASE ================= -->
+    <script type="module">
+        // Import Firebase SDKs (v10.8.0 API is identical to v9 module format)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getDatabase, ref, push, onValue, remove, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Provided Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs",
+            authDomain: "new-all-f99f7.firebaseapp.com",
+            databaseURL: "https://new-all-f99f7-default-rtdb.firebaseio.com",
+            projectId: "new-all-f99f7",
+            storageBucket: "new-all-f99f7.firebasestorage.app",
+            messagingSenderId: "1069748173900",
+            appId: "1:1069748173900:web:158d6336c0f4628133c8e9",
+            measurementId: "G-V6DZ37WSBF"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const provider = new GoogleAuthProvider();
+
+        // Global State
+        let currentUser = null;
+        let generatedIdeaTemp = null;
+
+        // UI Elements - Core
+        const loginScreen = document.getElementById('login-screen');
+        const appLayout = document.getElementById('app-layout');
+        
+        // UI Elements - Auth
+        const btnLogin = document.getElementById('btn-login');
+        const btnLogout = document.getElementById('btn-logout');
+        const profileBtn = document.getElementById('profile-btn');
+
+        // UI Elements - AI Generator
+        const aiInput = document.getElementById('ai-topic-input');
+        const btnGenerate = document.getElementById('btn-generate');
+        const aiOutputBox = document.getElementById('ai-output');
+        const btnSaveIdea = document.getElementById('btn-save-idea');
+
+        // UI Elements - Notes
+        const btnAddNote = document.getElementById('btn-add-note');
+        
+        // UI Elements - Settings
+        const themeToggle = document.getElementById('theme-toggle');
+
+        // ================= UI HELPERS ================= //
+        
+        const showToast = (message) => {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        };
+
+        const animateValue = (obj, start, end, duration) => {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start);
+                if (progress < 1) window.requestAnimationFrame(step);
+            };
+            window.requestAnimationFrame(step);
+        };
+
+        // Expose switchView to global window for inline onclick attributes
+        window.switchView = (viewId, navId) => {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(viewId).classList.add('active');
+            document.getElementById(navId).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // Theme Management
+        const initTheme = () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        };
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+        initTheme();
+
+
+        // ================= AUTHENTICATION ================= //
+
+        btnLogin.addEventListener('click', async () => {
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                showToast("Login failed: " + error.message);
+            }
+        });
+
+        btnLogout.addEventListener('click', () => signOut(auth));
+        profileBtn.addEventListener('click', () => window.switchView('view-settings', 'nav-settings'));
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                loginScreen.classList.add('hidden');
+                appLayout.classList.remove('hidden');
+                
+                // Set UI
+                document.getElementById('ui-user-name').innerText = user.displayName.split(' ')[0];
+                document.getElementById('ui-user-email').innerText = user.email;
+                document.getElementById('ui-user-pic').src = user.photoURL;
+
+                // Load Data
+                loadNotes();
+                loadVault();
+                showToast(`Welcome, ${user.displayName.split(' ')[0]}!`);
+            } else {
+                currentUser = null;
+                loginScreen.classList.remove('hidden');
+                appLayout.classList.add('hidden');
+            }
+        });
+
+        // ================= AI CONTENT GENERATOR (MOCK) ================= //
+
+        btnGenerate.addEventListener('click', () => {
+            const topic = aiInput.value.trim();
+            if(!topic) return showToast("Please enter a topic first!");
+
+            // UI Loading state
+            document.getElementById('ai-btn-text').style.display = 'none';
+            document.getElementById('ai-loader').style.display = 'block';
+            aiOutputBox.style.display = 'none';
+            
+            // Simulate AI API delay
+            setTimeout(() => {
+                document.getElementById('ai-btn-text').style.display = 'block';
+                document.getElementById('ai-loader').style.display = 'none';
+                
+                const generated = {
+                    topic: topic,
+                    caption: `Ready to elevate your game in ${topic}? 🚀 Let's dive deep into the ultimate strategies that change everything. Drop a 💯 if you agree!`,
+                    hashtags: `#${topic.replace(/\s+/g, '')} #Innovation #Mindset #Growth #Trending`,
+                    script: `[Scene 1 - Hook]: "Are you still struggling with ${topic}? Stop scrolling!"\n[Scene 2 - Value]: "Here are 3 secret ways to master it today. First..."\n[Scene 3 - CTA]: "Save this video and follow for more insights!"`,
+                    date: new Date().toLocaleDateString()
+                };
+
+                generatedIdeaTemp = generated;
+
+                document.getElementById('ai-caption').innerText = generated.caption;
+                document.getElementById('ai-hashtags').innerText = generated.hashtags;
+                document.getElementById('ai-script').innerText = generated.script;
+                
+                aiOutputBox.style.display = 'block';
+                aiOutputBox.style.animation = 'fadeIn 0.5s ease';
+                showToast("Content generated!");
+
+            }, 1500);
+        });
+
+        btnSaveIdea.addEventListener('click', () => {
+            if(!generatedIdeaTemp || !currentUser) return;
+            const vaultRef = ref(db, `users/${currentUser.uid}/vault`);
+            push(vaultRef, generatedIdeaTemp).then(() => {
+                showToast("Saved to Idea Vault!");
+                aiOutputBox.style.display = 'none';
+                aiInput.value = '';
+            });
+        });
+
+        // ================= SMART NOTES SYSTEM ================= //
+
+        btnAddNote.addEventListener('click', () => {
+            const title = document.getElementById('note-title').value.trim();
+            const content = document.getElementById('note-content').value.trim();
+            
+            if(!title || !content) return showToast("Title and content required!");
+
+            const noteRef = ref(db, `users/${currentUser.uid}/notes`);
+            push(noteRef, {
+                title, content,
+                date: new Date().toLocaleDateString()
+            }).then(() => {
+                showToast("Note saved!");
+                document.getElementById('note-title').value = '';
+                document.getElementById('note-content').value = '';
+            });
+        });
+
+        // Expose delete function to window
+        window.deleteData = (type, id) => {
+            if(confirm("Are you sure you want to delete this?")) {
+                remove(ref(db, `users/${currentUser.uid}/${type}/${id}`))
+                .then(() => showToast("Deleted successfully!"));
+            }
+        };
+
+        const loadNotes = () => {
+            const notesRef = ref(db, `users/${currentUser.uid}/notes`);
+            onValue(notesRef, (snapshot) => {
+                const data = snapshot.val();
+                const container = document.getElementById('notes-list');
+                container.innerHTML = '';
+                
+                let count = 0;
+                if(data) {
+                    const keys = Object.keys(data).reverse(); // Newest first
+                    count = keys.length;
+                    keys.forEach(key => {
+                        const note = data[key];
+                        container.innerHTML += `
+                            <div class="glass-card list-item">
+                                <h3 style="font-size: 18px; margin-bottom: 4px;">${note.title}</h3>
+                                <div class="list-item-date">${note.date}</div>
+                                <p class="list-item-content">${note.content}</p>
+                                <button class="delete-btn" onclick="deleteData('notes', '${key}')">
+                                    <span class="material-symbols-outlined" style="font-size: 20px;">delete</span>
+                                </button>
+                            </div>
+                        `;
+                    });
+                } else {
+                    container.innerHTML = `<p style="color: var(--text-muted); padding: 20px 0;">No notes found. Create one!</p>`;
+                }
+                
+                // Animate Dashboard Counter
+                const statElem = document.getElementById('stat-notes');
+                animateValue(statElem, parseInt(statElem.innerText)||0, count, 800);
+            });
+        };
+
+        const loadVault = () => {
+            const vaultRef = ref(db, `users/${currentUser.uid}/vault`);
+            onValue(vaultRef, (snapshot) => {
+                const data = snapshot.val();
+                const container = document.getElementById('vault-list');
+                container.innerHTML = '';
+                
+                let count = 0;
+                if(data) {
+                    const keys = Object.keys(data).reverse();
+                    count = keys.length;
+                    keys.forEach(key => {
+                        const idea = data[key];
+                        container.innerHTML += `
+                            <div class="glass-card list-item">
+                                <div class="ai-badge">${idea.topic}</div>
+                                <div class="list-item-date" style="margin-top:8px;">${idea.date}</div>
+                                <p style="font-size: 13px; font-weight: 600; margin-top: 10px;">Caption:</p>
+                                <p class="list-item-content" style="font-size:13px; margin-top:4px;">${idea.caption}</p>
+                                <button class="delete-btn" onclick="deleteData('vault', '${key}')">
+                                    <span class="material-symbols-outlined" style="font-size: 20px;">delete</span>
+                                </button>
+                            </div>
+                        `;
+                    });
+                } else {
+                    container.innerHTML = `<p style="color: var(--text-muted); padding: 20px 0;">Vault is empty. Generate some ideas!</p>`;
+                }
+
+                // Animate Dashboard Counter
+                const statElem = document.getElementById('stat-vault');
+                animateValue(statElem, parseInt(statElem.innerText)||0, count, 800);
+            });
+        };
+
+    </script>
+</body>
+</html>
