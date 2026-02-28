@@ -1226,6 +1226,14 @@ if(activeStoryTimer) clearTimeout(activeStoryTimer); activeStoryTimer = setTimeo
         window.declineGameInvite = () => {
             document.getElementById('game-invite-popup').style.display = 'none';
         };
+        // গেম থেকে বের হওয়ার মেসেজ রিসিভ করা
+        window.addEventListener('message', (e) => {
+            if(e.data === "leave_game") {
+                document.getElementById('game-frame-container').style.display = 'none';
+                document.getElementById('game-lobby').style.display = 'block';
+                document.getElementById('game-frame').src = "";
+            }
+        });
     </script>
 </body>
 </html>
