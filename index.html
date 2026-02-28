@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>tio - Social</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg: #f0f2f5; --card: #ffffff; --text: #050505; --text-sec: #65676b;
+            --accent: #1877f2; --border: #e4e6eb; --hover: #f2f2f2; --input: #f0f2f5;
+            --shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            --story-gradient: linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.7) 100%);
+        }
+        body.dark-mode {
+            --bg: #18191a; --card: #242526; --text: #e4e6eb; --text-sec: #b0b3b8;
+            --accent: #2d88ff; --border: #3e4042; --hover: #3a3b3c; --input: #3a3b3c;
+            --shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
+        body { background-color: var(--bg); color: var(--text); padding-top: 100px; padding-bottom: 60px; min-height: 100vh; overflow-x: hidden; transition: background 0.3s, color 0.3s; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s; }
+        .overlay.active { display: block; opacity: 1; }
+        
+        /* Header & Tabs */
+        .header { position: fixed; top: 0; left: 0; width: 100%; height: 55px; background: var(--card); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; z-index: 1000; border-bottom: 1px solid var(--border); box-shadow: var(--shadow); }
+        .logo { font-size: 30px; font-weight: 800; color: var(--accent); letter-spacing: -1px; cursor: pointer; }
+        .h-icons { display: flex; gap: 8px; }
+        .h-btn { width: 35px; height: 35px; background: var(--input); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text); cursor: pointer; transition: 0.2s; font-size: 16px; }
+        .tabs { position: fixed; top: 55px; left: 0; width: 100%; height: 45px; background: var(--card); display: flex; align-items: center; z-index: 999; border-bottom: 1px solid var(--border); }
+        .tab { flex: 1; height: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; transition: 0.2s; }
+        .tab i { font-size: 22px; color: var(--text-sec); }
+        .tab.active i { color: var(--accent); }
+        .tab.active::after { content: ''; position: absolute; bottom: 0; width: 60%; height: 3px; background: var(--accent); border-radius: 3px 3px 0 0; }
+        
+        .section { display: none; animation: fadeIn 0.3s ease; }
+        .section.active { display: block; }
+        
+        /* Create & Story */
+        .create-box { background: var(--card); padding: 12px 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow); }
+        .u-ava { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #555; border: 1px solid var(--border); }
+        .c-in { flex: 1; background: var(--input); height: 40px; border-radius: 20px; padding: 0 15px; display: flex; align-items: center; color: var(--text-sec); cursor: pointer; transition: 0.2s; font-size: 15px; justify-content: space-between; }
+        .plus-icon-box { width: 32px; height: 32px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; margin-left: 5px; font-size: 14px; }
+        .story-tray { background: var(--card); padding: 15px 12px; margin-bottom: 10px; overflow-x: auto; display: flex; gap: 8px; scrollbar-width: none; box-shadow: var(--shadow); }
+        .story-card { width: 100px; min-width: 100px; height: 170px; border-radius: 12px; position: relative; overflow: hidden; background: #333; flex-shrink: 0; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: transform 0.2s; }
+        .story-img { width: 100%; height: 100%; object-fit: cover; transition: 0.3s; }
+        .story-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: var(--story-gradient); pointer-events: none; }
+        .s-ava { position: absolute; top: 10px; left: 10px; width: 36px; height: 36px; border-radius: 50%; border: 3px solid var(--accent); object-fit: cover; z-index: 2; background: var(--card); }
+        .s-user { position: absolute; bottom: 8px; left: 8px; right: 8px; color: white; font-weight: 600; font-size: 12px; z-index: 2; line-height: 1.2; text-shadow: 0 1px 2px rgba(0,0,0,0.8); pointer-events: none;}
+        .s-create .s-plus { position: absolute; bottom: 35px; left: 50%; transform: translateX(-50%); background: var(--accent); color: white; width: 32px; height: 32px; border-radius: 50%; border: 3px solid var(--card); display: flex; align-items: center; justify-content: center; font-size: 18px; z-index: 5; }
+        .s-create .s-label { position: absolute; bottom: 0; width: 100%; background: var(--card); height: 50px; display: flex; justify-content: center; align-items: flex-end; padding-bottom: 8px; color: var(--text); font-weight: 600; font-size: 13px; z-index: 4; }
+
+        /* Post Styles */
+        .post { background: var(--card); margin-bottom: 10px; width: 100%; box-shadow: var(--shadow); }
+        .p-head { padding: 12px 15px; display: flex; align-items: center; gap: 10px; position: relative; }
+        .p-nm h4 { font-size: 15px; font-weight: 600; color: var(--text); cursor: pointer; }
+        .p-nm span { font-size: 12px; color: var(--text-sec); display: block; margin-top: 2px; }
+        .p-del { position: absolute; right: 15px; color: var(--text-sec); cursor: pointer; padding: 8px; font-size: 14px; }
+        .p-txt { font-size: 15px; color: var(--text); padding: 0 15px 12px; line-height: 1.4; word-wrap: break-word; user-select: text; }
+        .p-med { width: 100%; background: #000; display: flex; justify-content: center; align-items: center; max-height: 600px; overflow: hidden; }
+        .p-med img, .p-med iframe { width: 100%; max-height: 600px; object-fit: contain; }
+        .p-med iframe { aspect-ratio: 16/9; border: none; }
+        .p-stat { padding: 10px 15px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); color: var(--text-sec); font-size: 13px; }
+        .p-act { display: flex; height: 44px; align-items: center; padding: 0 5px; }
+        .btn { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text-sec); font-weight: 600; font-size: 14px; gap: 6px; cursor: pointer; height: 36px; border-radius: 4px; transition: 0.2s; margin: 0 2px; }
+        .btn.liked { color: var(--accent); }
+        .btn:active { background: var(--hover); transform: scale(0.97); }
+
+        /* --- Custom Video Player (Clean Look) --- */
+        .cust-vid-wrap { position: relative; width: 100%; background: #000; display: flex; align-items: center; justify-content: center; max-height: 550px; }
+        .cust-vid { width: 100%; max-height: 550px; object-fit: contain; }
+        /* প্লে আইকন এবং ভলিউম আইকন রিমুভ করা হয়েছে */
+        .cv-controls { position: absolute; bottom: 0; left: 0; width: 100%; height: 5px; background: rgba(255,255,255,0.2); display: flex; align-items: flex-end; z-index: 6; pointer-events: auto; }
+        .cv-seek { width: 100%; height: 100%; cursor: pointer; position: relative; }
+        .cv-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.1s linear; }
+
+        /* Profile Styles */
+        .pf-head { background: var(--card); text-align: center; padding-bottom: 20px; margin-bottom: 10px; border-bottom: 1px solid var(--border); }
+        .pf-cvr-wrap { position: relative; width: 100%; height: 200px; }
+        .pf-cvr { width: 100%; height: 100%; object-fit: cover; background: #333; }
+        .pf-main { width: 130px; height: 130px; border-radius: 50%; border: 4px solid var(--card); margin-top: -65px; background: var(--input); object-fit: cover; position: relative; z-index: 2; }
+        .pf-nm { font-size: 26px; font-weight: 700; color: var(--text); margin-top: 10px; }
+        .pf-bio { color: var(--text-sec); margin-bottom: 15px; padding: 0 20px; font-size: 15px; }
+        .pf-act { padding: 0 20px; display: flex; gap: 10px; justify-content: center; }
+        .pf-btn { flex: 1; padding: 10px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn-p { background: var(--accent); color: white; }
+        .btn-s { background: var(--input); color: var(--text); }
+
+        /* Profile Tabs */
+        .pf-tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--border); margin-top: 10px; position: sticky; top: 55px; z-index: 10; }
+        .pf-tab-btn { flex: 1; padding: 15px; text-align: center; font-weight: 600; color: var(--text-sec); cursor: pointer; position: relative; transition: 0.2s; }
+        .pf-tab-btn.active { color: var(--accent); }
+        .pf-tab-btn.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--accent); border-radius: 3px 3px 0 0; }
+        .pf-grid-photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 2px; }
+        .pf-grid-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; cursor: pointer; }
+
+        /* Other Components */
+        .sheet { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card); z-index: 2500; border-radius: 15px 15px 0 0; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.1, 0.7, 0.1, 1); box-shadow: 0 -5px 20px rgba(0,0,0,0.2); height: 75vh; max-height: 90vh; display: flex; flex-direction: column; }
+        .sheet.open { transform: translateY(0); }
+        .sh-drag { width: 40px; height: 4px; background: var(--text-sec); border-radius: 2px; margin: 10px auto; opacity: 0.3; }
+        .sh-head { padding: 10px 15px; text-align: center; border-bottom: 1px solid var(--border); font-weight: 700; color: var(--text); font-size: 16px; position: relative; }
+        .sh-close { position: absolute; right: 15px; top: 10px; font-size: 20px; color: var(--text-sec); padding: 5px; cursor: pointer; }
+        .sh-body { flex: 1; overflow-y: auto; padding: 15px; }
+
+        /* Suggestions */
+        .sugg-container { padding: 15px; background: var(--card); margin-bottom: 10px; box-shadow: var(--shadow); }
+        .sec-title { font-weight: 700; color: var(--text); margin-bottom: 10px; font-size: 16px; }
+        .h-scroll { display: flex; overflow-x: auto; gap: 10px; scrollbar-width: none; padding-bottom: 5px; }
+        .fr-card { min-width: 140px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; align-items: center; padding-bottom: 10px; }
+        .fr-img { width: 100%; height: 140px; object-fit: cover; }
+        .fr-name { font-weight: 600; font-size: 14px; margin: 8px 5px 5px; text-align: center; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 90%; }
+        .fr-btn { background: var(--accent); color: white; border: none; padding: 6px 15px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; margin-top: auto; }
+
+        /* Story Editor */
+        #story-editor { position: fixed; top:0; left:0; width:100%; height:100%; background: #000; z-index: 4000; display:none; flex-direction: column; }
+        .se-prev { flex:1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #111; }
+        .se-img { width: 100%; height: 100%; object-fit: contain; }
+        .se-top-bar { position: absolute; top: 10px; left: 0; width: 100%; padding: 10px 15px; z-index: 20; display: flex; justify-content: space-between; pointer-events: none; }
+        .se-icon-close { pointer-events: auto; width: 40px; height: 40px; background: rgba(0,0,0,0.5); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; backdrop-filter: blur(4px); }
+        .se-sidebar { position: absolute; top: 60px; right: 15px; display: flex; flex-direction: column; gap: 20px; z-index: 25; pointer-events: auto; }
+        .se-tool { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
+        .se-tool i { width: 45px; height: 45px; background: rgba(0,0,0,0.6); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; backdrop-filter: blur(5px); box-shadow: 0 2px 5px rgba(0,0,0,0.3); transition: 0.2s; }
+        .se-tool span { color: white; font-size: 11px; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+        .se-float-inp { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); width: 85%; z-index: 30; display: none; }
+        .se-float-inp.show { display: block; }
+        #se-caption { width: 100%; background: rgba(0,0,0,0.6); border: none; color: white; padding: 15px; border-radius: 12px; font-size: 20px; text-align: center; backdrop-filter: blur(10px); outline: none; font-weight: 600; }
+        .se-txt { position: absolute; color: white; font-weight: 800; font-size: 28px; text-shadow: 0 2px 8px rgba(0,0,0,0.8); cursor: move; width: 100%; text-align: center; top: 50%; left: 0; padding: 10px; pointer-events: auto; user-select: none; }
+        .se-bottom-bar { position: absolute; bottom: 0; left: 0; width: 100%; padding: 20px; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); display: flex; justify-content: space-between; align-items: center; z-index: 20; }
+        .se-user-info { display: flex; align-items: center; gap: 8px; color: white; font-weight: 600; font-size: 14px; opacity: 0.9; }
+        .se-share-btn { background: var(--accent); color: white; border: none; padding: 12px 25px; border-radius: 30px; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(24, 119, 242, 0.4); display: flex; align-items: center; gap: 8px; transition: 0.2s; pointer-events: auto; }
+
+        /* Story Viewer */
+        #story-viewer { position: fixed; top:0; left:0; width:100%; height:100%; background: black; z-index: 5000; display: none; flex-direction: column; }
+        .sv-progress { height: 4px; background: rgba(255,255,255,0.3); margin: 10px 10px 0; border-radius: 2px; overflow: hidden; }
+        .sv-bar { height: 100%; background: white; width: 0%; transition: width 0.1s linear; }
+        .sv-head { display: flex; align-items: center; padding: 15px; gap: 10px; color: white; z-index: 10; }
+        .sv-body { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .sv-img { width: 100%; height: 100%; object-fit: contain; }
+        .sv-txt { position: absolute; width: 100%; text-align: center; color: white; font-weight: 700; font-size: 24px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); pointer-events: none; }
+        .sv-footer { padding: 15px; display: flex; gap: 15px; justify-content: center; align-items: center; padding-bottom: 30px; z-index: 10; }
+        .sv-react { font-size: 35px; transition: 0.2s; cursor: pointer; }
+        .flying-emoji { position: absolute; bottom: 80px; font-size: 40px; animation: flyUp 1.5s ease-out forwards; pointer-events: none; z-index: 100; left: 50%; }
+        @keyframes flyUp { 0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; } 20% { opacity: 1; transform: translate(-50%, -50px) scale(1.2); } 100% { transform: translate(-50%, -300px) scale(1); opacity: 0; } }
+
+        /* Misc */
+        .tag-btn { background: var(--input); padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; border: 1px solid var(--border); transition: 0.2s; }
+        #loader { position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg);z-index:9999;display:flex;justify-content:center;align-items:center;flex-direction:column; transition: 0.3s; }
+        #menu-pg { position: fixed; top: 0; right: 0; width: 280px; height: 100%; background: var(--card); z-index: 2200; transform: translateX(100%); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: -5px 0 20px rgba(0,0,0,0.2); padding-top: 20px; }
+        #menu-pg.open { transform: translateX(0); }
+        .m-row { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 600; cursor: pointer; color: var(--text); font-size: 16px; transition: 0.2s; }
+        #srch-pg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--card); z-index: 2100; display: none; flex-direction: column; }
+        .s-bar { padding: 10px 15px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; height: 60px; }
+        .s-inp { flex: 1; background: var(--input); border: none; padding: 10px 15px; border-radius: 20px; color: var(--text); outline: none; }
+        .s-row { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 8px; cursor: pointer; margin-bottom: 5px; }
+        #edit-mod { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--card); z-index: 3000; display: none; flex-direction: column; }
+        .em-bod { padding: 20px; overflow-y: auto; }
+        .em-grp { margin-bottom: 20px; position: relative; }
+        .em-inp { width: 100%; padding: 12px; border: 1px solid var(--border); background: var(--input); color: var(--text); border-radius: 8px; }
+        .em-btn { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .img-edit-ov { position: absolute; right: 10px; bottom: 10px; background: var(--card); width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); cursor: pointer; }
+        
+        /* Music Sheet Styles */
+        .m-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
+        .m-thumb { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; background: #333; }
+        .m-info { flex: 1; }
+        .m-title { font-weight: 700; font-size: 15px; color: var(--text); margin-bottom: 3px; }
+        .m-artist { font-size: 13px; color: var(--text-sec); }
+        .m-act-box { display: flex; align-items: center; gap: 15px; }
+        .m-play-btn { font-size: 30px; color: var(--accent); cursor: pointer; padding: 5px; transition: 0.2s; }
+        .m-sel-btn { background: var(--input); color: var(--text); border: 1px solid var(--border); padding: 8px 16px; border-radius: 20px; font-weight: 600; cursor: pointer; font-size: 13px; }
+        #music-modal { z-index: 4500 !important; }
+        
+        /* Comments & Share */
+        .cmt-item { display: flex; gap: 10px; margin-bottom: 15px; }
+        .cmt-bub { background: var(--input); padding: 10px 14px; border-radius: 18px; position: relative; max-width: 85%; }
+        .cmt-n { font-weight: 700; font-size: 13px; color: var(--text); margin-bottom: 2px; }
+        .cmt-t { font-size: 14px; color: var(--text); }
+        .cmt-in-box { padding: 15px; border-top: 1px solid var(--border); display: flex; gap: 10px; align-items: flex-end; background: var(--card); }
+        .cmt-in { flex: 1; background: var(--input); border: none; padding: 12px 15px; border-radius: 24px; color: var(--text); outline: none; transition: 0.2s; min-height: 48px; font-size: 15px; }
+        .cmt-send { color: var(--accent); font-size: 22px; padding: 10px; cursor: pointer; margin-bottom: 2px; }
+        .share-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; padding: 20px 10px; }
+        .sh-icon { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
+        .si-box { width: 50px; height: 50px; border-radius: 50%; background: var(--input); display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--text); transition: 0.2s; }
+        .si-lbl { font-size: 12px; color: var(--text-sec); text-align: center; }
+        
+        @keyframes fadeIn { from{opacity:0; transform: translateY(10px);} to{opacity:1; transform: translateY(0);} }
+        
+        /* New Music Overlay Styles */
+        .p-med { position: relative; } /* Ensure relative parent */
+        .music-overlay {
+            position: absolute; bottom: 15px; left: 15px; z-index: 10;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px);
+            padding: 8px 15px 8px 10px; border-radius: 30px;
+            display: flex; align-items: center; gap: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 70%; cursor: pointer; transition: 0.3s;
+        }
+        .music-overlay:active { transform: scale(0.95); background: rgba(0, 0, 0, 0.8); }
+        .mo-icon-box {
+            width: 30px; height: 30px; border-radius: 50%;
+            background: #111; border: 2px solid #222;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden; flex-shrink: 0;
+        }
+        .mo-icon { color: var(--accent); font-size: 16px; }
+        .playing .mo-icon-box { animation: vinylSpin 3s linear infinite; border-color: var(--accent); }
+        .mo-info { overflow: hidden; white-space: nowrap; display: flex; flex-direction: column; }
+        .mo-title { color: white; font-size: 12px; font-weight: 700; width: 100%; overflow: hidden; text-overflow: ellipsis; }
+        .mo-artist { color: #ccc; font-size: 10px; }
+        .mo-wave { display:none; gap:2px; height:12px; align-items:flex-end; margin-left:auto; }
+        .playing .mo-wave { display:flex; }
+        .bar { width: 3px; background: var(--accent); animation: equalizer 0.5s ease infinite alternate; }
+        .bar:nth-child(1) { height: 60%; animation-delay: 0.1s; }
+        .bar:nth-child(2) { height: 30%; animation-delay: 0.2s; }
+        .bar:nth-child(3) { height: 90%; animation-delay: 0.3s; }
+
+        @keyframes vinylSpin { 100% { transform: rotate(360deg); } }
+        @keyframes equalizer { 0% { height: 20%; } 100% { height: 100%; } }
+        
+        /* --- Game Section Styles --- */
+        .online-dot { width: 12px; height: 12px; background: #31a24c; border-radius: 50%; position: absolute; bottom: 2px; right: 2px; border: 2px solid var(--card); }
+        .game-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 15px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; box-shadow: var(--shadow); }
+        .game-icon { font-size: 35px; color: var(--accent); }
+        .invite-btn { background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .invite-btn:active { transform: scale(0.95); }
+        .game-popup { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--card); border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.4); padding: 15px; z-index: 9999; display: none; align-items: center; gap: 15px; width: 90%; max-width: 350px; border-left: 5px solid var(--accent); animation: slideDown 0.4s cubic-bezier(0.1, 0.7, 0.1, 1); }
+        @keyframes slideDown { from { top: -50px; opacity: 0; } to { top: 20px; opacity: 1; } }
+    </style>
+    </style>
+</head>
+<body class="dark-mode"> 
+
+    <div id="loader">
+        <h1 style="color:var(--accent);font-size:45px;font-weight:800;letter-spacing:-2px;margin-bottom:15px;">tio</h1>
+        <i class="fas fa-circle-notch fa-spin" style="color:var(--accent);font-size:30px;"></i>
+    </div>
+
+    <div id="overlay" class="overlay" onclick="closeAll()"></div>
+    <audio id="post-audio" hidden></audio> <!-- এই লাইনটি নতুন -->
+
+    <div class="header">
+        <div class="logo" onclick="nav('home')">tio</div>
+        <div class="h-icons">
+            <div class="h-btn" onclick="openSearch()"><i class="fas fa-search"></i></div>
+            <div class="h-btn" onclick="location.href='chat.html'"><i class="fab fa-facebook-messenger"></i></div>
+            <div class="h-btn" onclick="openMenu()"><i class="fas fa-bars"></i></div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" id="t-home" onclick="nav('home')"><i class="fas fa-house"></i></div>
+        <div class="tab" id="t-video" onclick="nav('video')"><i class="fas fa-play-circle"></i></div>
+        <div class="tab" id="t-friends" onclick="nav('friends')"><i class="fas fa-user-group"></i></div>
+        <div class="tab" id="t-game" onclick="nav('game')"><i class="fas fa-gamepad"></i></div>
+        <div class="tab" id="t-profile" onclick="nav('profile')"><i class="fas fa-user-circle"></i></div>
+    </div>
+
+    <!-- HOME SECTION -->
+    <div id="p-home" class="section active">
+        <div class="create-box">
+            <img id="my-pic" class="u-ava">
+            <div class="c-in" onclick="location.href='post.html'">
+                <span>What's on your mind?</span>
+                <div class="plus-icon-box"><i class="fas fa-plus"></i></div>
+            </div>
+        </div>
+
+        <div class="story-tray" id="s-tray">
+            <div class="story-card s-create" onclick="document.getElementById('s-in').click()">
+                <img id="my-s-pic" class="story-img" style="filter: brightness(0.6);">
+                <div class="story-overlay"></div>
+                <div class="s-plus"><i class="fas fa-plus"></i></div>
+                <div class="s-label">Create Story</div>
+                <input type="file" id="s-in" hidden accept="image/*" onchange="openStoryEditor(this)">
+            </div>
+        </div>
+
+        <div id="feed"></div>
+    </div>
+
+    <!-- VIDEO SECTION -->
+    <div id="p-video" class="section">
+        <div id="v-feed"></div>
+    </div>
+<!-- GAME SECTION -->
+    <div id="p-game" class="section">
+        <!-- গেম লবি (যেকানে গেম সিলেক্ট এবং ফ্রেন্ড ইনভাইট করা হবে) -->
+        <div id="game-lobby">
+            <div class="sugg-container">
+                <div class="sec-title">Select a Game</div>
+                <div class="game-card">
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        <i class="fas fa-times-circle game-icon" style="color:#e74c3c;"></i>
+                        <div style="text-align:left;">
+                            <div style="font-weight:700; font-size:16px; color:var(--text);">Tic-Tac-Toe</div>
+                            <div style="font-size:12px; color:var(--text-sec);">Classic 2 Player Game</div>
+                        </div>
+                    </div>
+                    <span class="tag-btn" style="background:var(--accent); color:white; border:none;">Selected <i class="fas fa-check"></i></span>
+                </div>
+            </div>
+            
+            <div class="sugg-container">
+                <div class="sec-title">Play with Friends <span id="online-cnt" style="color:#31a24c; margin-left:5px; font-size:14px;"><i class="fas fa-circle"></i> Online</span></div>
+                <div id="online-friends-list">
+                    <!-- রিয়েল-টাইমে অনলাইনে থাকা বন্ধুদের লিস্ট এখানে আসবে -->
+                    <div style="padding:20px; text-align:center; color:var(--text-sec);">Loading friends...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- গেম প্লে ফ্রেম (যেখানে games.html লোড হবে) -->
+        <div id="game-frame-container" style="display:none; height: calc(100vh - 100px);">
+            <iframe id="game-frame" src="" style="width:100%; height:100%; border:none; background:var(--bg);"></iframe>
+        </div>
+    </div>
+    <!-- FRIENDS SECTION -->
+    <div id="p-friends" class="section">
+        <div class="sugg-container" id="req-cont" style="display:none">
+            <div class="sec-title">Friend Requests <span id="req-cnt" style="color:var(--accent); margin-left:5px;"></span></div>
+            <div id="req-list"></div>
+        </div>
+        <div class="sugg-container">
+            <div class="sec-title">People You May Know</div>
+            <div class="h-scroll" id="sugg-list"></div>
+        </div>
+    </div>
+
+    <!-- PROFILE SECTION (Updated) -->
+    <div id="p-profile" class="section">
+        <div class="pf-head">
+            <div class="pf-cvr-wrap"><img id="pf-cvr" class="pf-cvr"></div>
+            <img id="pf-img" class="pf-main">
+            <h1 id="pf-nm" class="pf-nm">Loading...</h1>
+            <p id="pf-bio" class="pf-bio"></p>
+            <div class="pf-act">
+                <button class="pf-btn btn-s" onclick="openEdit()"><i class="fas fa-pen"></i> Edit Profile</button>
+                <button class="pf-btn btn-s" onclick="location.href='tiostudio.html'" style="background: linear-gradient(45deg, #FF416C, #FF4B2B); color: white; border:none;"><i class="fas fa-chart-line"></i> Dashboard</button>
+                <button class="pf-btn btn-s" onclick="logout()" style="flex:0.3; background: #ffebee; color:#d32f2f;"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+        
+        <div class="pf-tabs">
+            <div class="pf-tab-btn active" onclick="switchPfTab('posts', this)">Posts</div>
+            <div class="pf-tab-btn" onclick="switchPfTab('reels', this)">Reels</div>
+            <div class="pf-tab-btn" onclick="switchPfTab('photos', this)">Photos</div>
+        </div>
+
+        <div id="pf-content-posts" class="pf-content">
+            <div id="my-posts"></div>
+        </div>
+        <div id="pf-content-reels" class="pf-content" style="display:none">
+            <div id="my-reels" class="pf-grid-photos"></div>
+        </div>
+        <div id="pf-content-photos" class="pf-content" style="display:none">
+            <div id="my-photos" class="pf-grid-photos"></div>
+        </div>
+    </div>
+
+    <!-- VIEW PROFILE SECTION (Updated) -->
+    <div id="p-view" class="section">
+        <div class="pf-head">
+            <i class="fas fa-arrow-left" style="position:absolute;top:70px;left:15px;background:var(--card);padding:10px;border-radius:50%;cursor:pointer;color:var(--text);box-shadow:var(--shadow);z-index:5;" onclick="nav('home')"></i>
+            <div class="pf-cvr-wrap"><img id="vp-cvr" class="pf-cvr"></div>
+            <img id="vp-img" class="pf-main">
+            <h1 id="vp-nm" class="pf-nm"></h1>
+            <p id="vp-bio" class="pf-bio"></p>
+            <div class="pf-act">
+                <button id="vp-btn" class="pf-btn btn-p" onclick="frAct()">Add Friend</button>
+                <button class="pf-btn btn-s"><i class="fab fa-facebook-messenger"></i> Message</button>
+            </div>
+        </div>
+        
+        <div class="pf-tabs">
+            <div class="pf-tab-btn active" id="vt-posts" onclick="switchViewTab('posts')">Posts</div>
+            <div class="pf-tab-btn" id="vt-reels" onclick="switchViewTab('reels')">Reels</div>
+            <div class="pf-tab-btn" id="vt-photos" onclick="switchViewTab('photos')">Photos</div>
+        </div>
+
+        <div id="vp-content-posts" class="vp-content">
+            <div id="vp-posts"></div>
+        </div>
+        <div id="vp-content-reels" class="vp-content" style="display:none">
+            <div id="vp-reels" class="pf-grid-photos"></div>
+        </div>
+        <div id="vp-content-photos" class="vp-content" style="display:none">
+            <div id="vp-photos" class="pf-grid-photos"></div>
+        </div>
+    </div>
+
+    <!-- MODALS & SHEETS -->
+    <div id="menu-pg">
+        <div style="padding: 20px; font-size: 24px; font-weight: 800; border-bottom: 1px solid var(--border);">Menu</div>
+        <div class="m-row" onclick="togDark()"><span>Dark Mode</span><i class="fas fa-moon" id="dk-icn"></i></div>
+        <div class="m-row" onclick="nav('profile'); closeAll()"><span>My Profile</span><i class="fas fa-user"></i></div>
+        <div class="m-row" onclick="logout()" style="color:#ef5350"><span>Log Out</span><i class="fas fa-sign-out-alt"></i></div>
+    </div>
+
+    <div id="srch-pg">
+        <div class="s-bar">
+            <i class="fas fa-arrow-left" style="font-size:20px; color:var(--text-sec); padding:10px;" onclick="closeAll()"></i>
+            <input class="s-inp" id="s-input-box" placeholder="Search people..." onkeyup="doSrch(this.value)">
+        </div>
+        <div id="s-out" style="padding:10px; overflow-y:auto; flex:1;"></div>
+    </div>
+
+    <div id="edit-mod">
+        <div style="padding:15px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="font-size:18px;">Edit Profile</h3> 
+            <i class="fas fa-times" onclick="closeAll()" style="font-size:20px; padding:5px; cursor:pointer;"></i>
+        </div>
+        <div class="em-bod">
+            <div class="em-grp">
+                <label style="display:block;margin-bottom:8px;font-weight:600;">Profile Picture</label>
+                <div style="text-align:center; position:relative; width:100px; margin:0 auto;">
+                    <img id="e-prev-pp" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:1px solid var(--border);">
+                    <label for="e-pp" class="img-edit-ov"><i class="fas fa-camera"></i></label>
+                </div>
+                <input type="file" id="e-pp" hidden accept="image/*" onchange="prevImg(this, 'e-prev-pp')">
+            </div>
+            <div class="em-grp">
+                <label style="display:block;margin-bottom:8px;font-weight:600;">Cover Photo</label>
+                <div style="position:relative;">
+                    <img id="e-prev-cp" style="width:100%; height:120px; object-fit:cover; border-radius:8px; border:1px solid var(--border);">
+                    <label for="e-cp" class="img-edit-ov" style="bottom:5px; right:5px;"><i class="fas fa-camera"></i></label>
+                </div>
+                <input type="file" id="e-cp" hidden accept="image/*" onchange="prevImg(this, 'e-prev-cp')">
+            </div>
+            <div class="em-grp"><label style="display:block;margin-bottom:8px;font-weight:600;">Full Name</label><input id="e-nm" class="em-inp" type="text"></div>
+            <div class="em-grp"><label style="display:block;margin-bottom:8px;font-weight:600;">Bio</label><input id="e-bio" class="em-inp" type="text"></div>
+            <button class="em-btn" onclick="savePf()" id="sv-btn">Save Changes</button>
+        </div>
+    </div>
+
+    <!-- Story Editor -->
+    <div id="story-editor">
+        <div class="se-top-bar"><div class="se-icon-close" onclick="closeStoryEditor()"><i class="fas fa-times"></i></div></div>
+        <div class="se-prev">
+            <img id="se-prev-img" class="se-img">
+            <div id="se-drag-txt" class="se-txt" ontouchstart="dragStart(event)" ontouchmove="dragMove(event)"></div>
+        </div>
+        <div class="se-sidebar">
+            <div class="se-tool" onclick="document.getElementById('se-caption-box').classList.toggle('show'); document.getElementById('se-caption').focus();">
+                <i class="fas fa-font"></i><span>Text</span>
+            </div>
+            <div class="se-tool" onclick="openMusicModal()">
+                <i class="fas fa-music"></i><span id="music-tool-lbl">Music</span>
+            </div>
+        </div>
+        <div id="se-caption-box" class="se-float-inp"><input id="se-caption" placeholder="Type caption..." oninput="updateSeText(this.value)"></div>
+        <div class="se-bottom-bar">
+            <div class="se-user-info"><img id="se-my-pic" class="u-ava" style="width:30px;height:30px;border:none;"><span>Your Story</span></div>
+            <button class="se-share-btn" onclick="uploadStory()" id="st-up-btn">Share <i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <!-- Music Sheet -->
+    <div id="music-modal" class="sheet">
+        <div class="sh-drag"></div>
+        <div class="sh-head">Add Music <i class="fas fa-times sh-close" onclick="document.getElementById('music-modal').classList.remove('open'); document.getElementById('m-preview-player').pause();"></i></div>
+        <div style="padding:10px 15px; display:flex; gap:10px; flex-direction:column;">
+            <input id="m-search" class="s-inp" placeholder="Search song..." onkeyup="searchMusic(this.value)" style="background:var(--input); border:none; padding:12px; border-radius:12px;">
+            <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:5px; scrollbar-width:none;">
+                <span class="tag-btn" onclick="searchMusic('Bangla New Song')">🔥 Trending BD</span>
+                <span class="tag-btn" onclick="searchMusic('Hindi Hits')">❤️ Hindi Hits</span>
+            </div>
+        </div>
+        <div id="m-list" class="sh-body" style="padding-top:0;"></div>
+        <audio id="m-preview-player" hidden></audio>
+    </div>
+
+    <!-- Story Viewer -->
+    <div id="story-viewer">
+        <div class="sv-progress"><div id="sv-bar" class="sv-bar"></div></div>
+        <div class="sv-head">
+            <img id="sv-ava" class="u-ava" style="border:none;">
+            <div style="font-weight:600;" id="sv-name"></div>
+            <i class="fas fa-times" style="margin-left:auto; font-size:22px; cursor:pointer;" onclick="closeStoryView()"></i>
+        </div>
+        <div class="sv-body" onclick="nextStoryStep()">
+            <img id="sv-main-img" class="sv-img">
+            <div id="sv-caption" class="sv-txt"></div>
+        </div>
+        <div class="sv-footer">
+            <div class="sv-react" onclick="sendReact('❤️')">❤️</div>
+            <div class="sv-react" onclick="sendReact('😂')">😂</div>
+            <div class="sv-react" onclick="sendReact('😮')">😮</div>
+            <div class="sv-react" onclick="sendReact('😢')">😢</div>
+            <div class="sv-react" onclick="sendReact('😡')">😡</div>
+            <div class="sv-react" onclick="sendReact('👍')">👍</div>
+        </div>
+    </div>
+
+    <div id="cmt-sht" class="sheet">
+        <div class="sh-drag"></div>
+        <div class="sh-head">Comments <i class="fas fa-times sh-close" onclick="closeAll()"></i></div>
+        <div id="clist" class="sh-body"></div>
+        <div class="cmt-in-box">
+            <img id="cmt-my-pic" class="u-ava" style="width:38px;height:38px;margin-bottom:5px;">
+            <input id="cin" class="cmt-in" placeholder="Write a comment...">
+            <i class="fas fa-paper-plane cmt-send" onclick="postCmt()"></i>
+        </div>
+    </div>
+
+    <div id="shr-sht" class="sheet">
+        <div class="sh-drag"></div>
+        <div class="sh-head">Share</div>
+        <div class="share-grid">
+            <div class="sh-icon" onclick="shareFeed()"><div class="si-box"><i class="fas fa-rss"></i></div><span class="si-lbl">Feed</span></div>
+            <div class="sh-icon" onclick="copyL()"><div class="si-box"><i class="fas fa-link"></i></div><span class="si-lbl">Copy Link</span></div>
+        </div>
+        <button onclick="closeAll()" style="width:90%; margin:0 auto 20px; padding:12px; border:none; background:var(--input); color:var(--text); font-weight:600; border-radius:8px;">Cancel</button>
+    </div>
+<!-- Game Invitation Popup -->
+    <div id="game-invite-popup" class="game-popup">
+        <img id="gip-img" class="u-ava" style="width:45px;height:45px;border:none;">
+        <div style="flex:1;">
+            <div id="gip-text" style="font-weight:600; font-size:14px; margin-bottom:8px; color:var(--text);">Loading...</div>
+            <div style="display:flex; gap:10px;">
+                <button onclick="acceptGameInvite()" style="flex:1; background:#31a24c; color:white; border:none; padding:8px; border-radius:6px; font-weight:600; cursor:pointer;">Accept</button>
+                <button onclick="declineGameInvite()" style="flex:1; background:#e74c3c; color:white; border:none; padding:8px; border-radius:6px; font-weight:600; cursor:pointer;">Decline</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs, updateDoc, arrayUnion, arrayRemove, addDoc, deleteDoc, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const cfg = { apiKey: "AIzaSyD_HBGuQSh_GzqrHqHbgdaoBikLZsK3Qqs", authDomain: "new-all-f99f7.firebaseapp.com", projectId: "new-all-f99f7", storageBucket: "new-all-f99f7.appspot.com", messagingSenderId: "1069748173900", appId: "1:1069748173900:web:158d6336c0f4628133c8e9" };
+        const C_URL = "https://api.cloudinary.com/v1_1/dwgvvzbvn/auto/upload";
+        const C_PRE = "storyapp";
+        
+        const app = initializeApp(cfg);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- FIXED NAVIGATION & HISTORY LOGIC ---
+        window.history.replaceState({modal: null, page: 'home'}, '', '');
+
+        window.onpopstate = (event) => {
+            // ১. আগে মডাল বন্ধ করার চেষ্টা
+            const visibleModal = document.querySelector('.sheet.open') || 
+                                 (document.getElementById('menu-pg').classList.contains('open') ? document.getElementById('menu-pg') : null) ||
+                                 (document.getElementById('srch-pg').style.display === 'flex' ? document.getElementById('srch-pg') : null) ||
+                                 (document.getElementById('edit-mod').style.display === 'flex' ? document.getElementById('edit-mod') : null) ||
+                                 (document.getElementById('story-editor').style.display === 'flex' ? document.getElementById('story-editor') : null) ||
+                                 (document.getElementById('story-viewer').style.display === 'flex' ? document.getElementById('story-viewer') : null);
+
+            if (visibleModal) {
+                closeModalUI();
+                return;
+            }
+
+            // ২. মডাল না থাকলে ট্যাব চেইঞ্জ
+            if(event.state && event.state.page) {
+                switchTab(event.state.page, false);
+            } else {
+                switchTab('home', false);
+            }
+        };
+
+        function closeModalUI() {
+            const openSheet = document.querySelector('.sheet.open');
+            const storyEditor = document.getElementById('story-editor');
+
+            // ১. যদি মিউজিক বা অন্য কোনো শিট খোলা থাকে
+            if (openSheet) {
+                openSheet.classList.remove('open');
+                if(typeof previewAudio !== 'undefined') { previewAudio.pause(); }
+                
+                // যদি পেছনে স্টোরি এডিটর খোলা থাকে, তাহলে এখানেই থামুন। এডিটর বন্ধ করবেন না।
+                if (storyEditor.style.display === 'flex') {
+                    return; 
+                }
+            }
+
+            // ২. শিট না থাকলে বা সাধারণ অবস্থায় সব বন্ধ করুন
+            document.querySelectorAll('.sheet').forEach(e => e.classList.remove('open'));
+            document.getElementById('overlay').classList.remove('active');
+            document.getElementById('menu-pg').classList.remove('open');
+            document.getElementById('srch-pg').style.display='none';
+            document.getElementById('edit-mod').style.display='none';
+            document.getElementById('story-editor').style.display='none';
+            document.getElementById('story-viewer').style.display='none';
+            
+            if(typeof storyAudio !== 'undefined') { storyAudio.pause(); storyAudio.currentTime = 0; }
+            if(typeof previewAudio !== 'undefined') { previewAudio.pause(); }
+        }
+
+        // ক্লোজ বাটন এবং ব্যাক বাটন উভয়ই এটি ব্যবহার করবে
+        window.closeAll = () => {
+            window.history.back();
+        }
+
+        let me = null, actP = null, guestId = null, storyFile = null, storyYPos = 50, activeStoryTimer = null, selectedMusic = null;
+        let videoObserver = null;
+
+        const initTheme = () => {
+            const t = localStorage.getItem('theme');
+            if(t === 'light') { document.body.classList.remove('dark-mode'); document.getElementById('dk-icn').className = 'fas fa-sun'; } 
+            else { document.body.classList.add('dark-mode'); document.getElementById('dk-icn').className = 'fas fa-moon'; }
+        };
+        initTheme();
+
+        window.togDark = () => {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.getElementById('dk-icn').className = isDark ? 'fas fa-moon' : 'fas fa-sun';
+        };
+
+        onAuthStateChanged(auth, async (u) => {
+            if(u) {
+                me = u;
+                const d = (await getDoc(doc(db,"users",u.uid))).data();
+                document.getElementById('my-pic').src = d.profilePic;
+                document.getElementById('my-s-pic').src = d.profilePic;
+                document.getElementById('cmt-my-pic').src = d.profilePic;
+                document.getElementById('pf-img').src = d.profilePic;
+                document.getElementById('pf-cvr').src = d.coverPic || '';
+                const badge = d.isVerified ? ` <i class="fas fa-check-circle" style="color:var(--accent); font-size:18px; margin-left:5px;"></i>` : '';
+                document.getElementById('pf-nm').innerHTML = d.fullName + badge;
+                document.getElementById('pf-bio').innerText = d.bio || "";
+                loadAll();
+                setTimeout(() => document.getElementById('loader').style.display='none', 500);
+            } else { location.href="Account.html"; }
+        });
+
+        function loadAll() { loadFeed(); loadSt(); loadReq(); loadSugg(); }
+
+        window.nav = (p) => { switchTab(p, true); }
+
+        function switchTab(p, pushToHistory) {
+            // Pause all videos & Music
+            document.querySelectorAll('video').forEach(v => v.pause());
+            const audio = document.getElementById('post-audio');
+            if(audio) { audio.pause(); audio.src = ""; } // Stop global music
+            document.querySelectorAll('.music-overlay').forEach(b => b.classList.remove('playing'));
+
+            document.querySelectorAll('.section').forEach(e => e.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(e => e.classList.remove('active'));
+            document.getElementById('p-'+p).classList.add('active');
+            if(p !== 'view') document.getElementById('t-'+p).classList.add('active');
+            window.scrollTo(0,0);
+            
+            if(pushToHistory) {
+                window.history.pushState({page: p, modal: null}, '', '');
+            }
+
+            if(videoObserver) videoObserver.disconnect();
+            if(p === 'video') loadVid();
+            if(p === 'profile') loadMyP();
+            if(p === 'home') loadFeed();
+            if(p === 'friends') loadReq();
+            if(p === 'game') loadGameLobby(); // নতুন গেম লবি লোড ফাংশন
+        }
+
+        // Updated Intersection Observer for Video AND Music
+        function initScrollPlay(sectionId) {
+            if(videoObserver) videoObserver.disconnect();
+            const options = { root: null, threshold: 0.65 };
+            
+            videoObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const el = entry.target; 
+                    
+                    // Logic for VIDEO
+                    if(el.tagName === 'VIDEO') {
+                         if(entry.isIntersecting) {
+                            document.querySelectorAll('video').forEach(v => { if(v !== el && !v.paused) v.pause(); });
+                            el.play().catch(()=>{});
+                        } else {
+                            if(!el.paused) el.pause();
+                        }
+                    }
+
+                    // Logic for MUSIC
+                    if(el.classList.contains('post')) {
+                        const mUrl = el.getAttribute('data-music-url');
+                        const pid = el.getAttribute('data-pid');
+                        
+                        if(mUrl) {
+                            if(entry.isIntersecting) {
+                                togglePostMusic(mUrl, pid, true); 
+                            } else {
+                                const audio = document.getElementById('post-audio');
+                                const btn = document.getElementById(`mo-${pid}`);
+                                if(audio.src === mUrl && !audio.paused) {
+                                    audio.pause();
+                                    if(btn) btn.classList.remove('playing');
+                                }
+                            }
+                        }
+                    }
+                });
+            }, options);
+
+            const activeSec = document.getElementById(sectionId || 'p-home');
+            if(activeSec) {
+                activeSec.querySelectorAll('.cust-vid').forEach(v => videoObserver.observe(v));
+                activeSec.querySelectorAll('.post').forEach(p => videoObserver.observe(p));
+            }
+        }
+
+        async function loadFeed() {
+            const c = document.getElementById('feed');
+            const s = await getDocs(query(collection(db,"posts"), orderBy("timestamp","desc"), limit(20)));
+            let h = "";
+            s.forEach(d => h += mkP(d.data(), d.id, 'feed'));
+            c.innerHTML = h;
+            setTimeout(() => initScrollPlay('p-home'), 500);
+        }
+
+        function mkP(p, id, loc) {
+            const isLiked = p.likes?.includes(me.uid);
+            const lkCls = isLiked ? 'liked' : '';
+            const lkCnt = p.likes?.length || 0;
+            const del = p.uid === me.uid ? `<i class="fas fa-trash p-del" onclick="delP('${id}', '${loc}')"></i>` : '';
+            const badge = p.isVerified ? `<i class="fas fa-check-circle" style="color:var(--accent); font-size:14px; margin-left:4px;" title="Verified"></i>` : '';
+            
+            const uVidId = `vid-${id}-${loc}`;
+            const uBarId = `vbar-${id}-${loc}`;
+
+            let m = "";
+            let txtHtml = `<div class="p-txt">${urlify(p.text)}</div>`;
+
+            // --- 🎵 NEW MUSIC OVERLAY GENERATOR ---
+            let musicHtml = "";
+            if(p.music) {
+                musicHtml = `<div class="music-overlay" id="mo-${id}" onclick="togglePostMusic('${p.music.url}', '${id}')">
+                    <div class="mo-icon-box"><i class="fas fa-compact-disc mo-icon"></i></div>
+                    <div class="mo-info">
+                        <div class="mo-title">${p.music.title}</div>
+                        <div class="mo-artist">${p.music.artist}</div>
+                    </div>
+                    <div class="mo-wave"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+                </div>`;
+            }
+
+            // --- MEDIA GENERATION ---
+            if(p.type === 'bg_text') {
+                txtHtml = ""; 
+                m = `<div class="p-med" style="background:${p.mediaUrl}; min-height:320px; display:flex; align-items:center; justify-content:center; padding:30px; text-align:center; font-weight:700; font-size:26px; color:white; line-height:1.4; position:relative;">${p.text} ${musicHtml}</div>`;
+            } 
+            else if(p.mediaUrl) {
+                if(p.type === 'video') {
+                    m = `<div class="cust-vid-wrap">
+                            <video src="${p.mediaUrl}" class="cust-vid" id="${uVidId}" loop playsinline onclick="togVid('${id}', '${loc}')"></video>
+                            ${musicHtml}
+                            <div class="cv-controls"><div class="cv-seek" onclick="seekVid(event, '${id}', '${loc}')"><div class="cv-fill" id="${uBarId}"></div></div></div>
+                         </div>`;
+                }
+                else if(p.type === 'youtube') m = `<div class="p-med"><iframe src="${p.mediaUrl}" allowfullscreen></iframe></div>`;
+                else m = `<div class="p-med" style="position:relative;"><img src="${p.mediaUrl}" loading="lazy">${musicHtml}</div>`;
+            } else {
+                 if(musicHtml) txtHtml += `<div style="padding:0 15px;">${musicHtml.replace('music-overlay', 'p-music').replace('position: absolute;', 'position:relative; margin-bottom:10px;')}</div>`;
+            }
+
+            return `<div class="post" id="post-${id}-${loc}" data-music-url="${p.music ? p.music.url : ''}" data-pid="${id}">
+                <div class="p-head">
+                    <img src="${p.userPic}" class="u-ava" onclick="vwProf('${p.uid}')">
+                    <div class="p-nm"><h4 onclick="vwProf('${p.uid}')">${p.userName} ${badge}</h4><span>${timeAgo(new Date(p.timestamp))}</span></div>${del}
+                </div>
+                ${txtHtml}
+                ${m}
+                <div class="p-stat"><span><i class="fas fa-thumbs-up"></i> <span id="lc-${id}">${lkCnt}</span></span><span onclick="opCmt('${id}')">Comments</span></div>
+                <div class="p-act">
+                    <div class="btn ${lkCls}" id="lb-${id}" onclick="lk('${id}')"><i class="${isLiked ? 'fas' : 'far'} fa-thumbs-up"></i> Like</div>
+                    <div class="btn" onclick="opCmt('${id}')"><i class="far fa-comment-alt"></i> Comment</div>
+                    <div class="btn" onclick="opShr('${id}')"><i class="fas fa-share"></i> Share</div>
+                </div>
+            </div>`;
+        }
+
+        // --- Simplified Video Control ---
+        window.togVid = (id, loc) => {
+            const vidId = `vid-${id}-${loc}`;
+            const barId = `vbar-${id}-${loc}`;
+            const v = document.getElementById(vidId);
+            if(!v) return;
+
+            if(v.paused) {
+                document.querySelectorAll('video').forEach(vid => { if(vid.id !== vidId) vid.pause(); });
+                v.play();
+                v.ontimeupdate = () => {
+                    const perc = (v.currentTime / v.duration) * 100;
+                    const bar = document.getElementById(barId);
+                    if(bar) bar.style.width = perc + '%';
+                };
+            } else {
+                v.pause();
+            }
+        }
+
+        window.seekVid = (e, id, loc) => {
+            e.stopPropagation(); e.preventDefault();
+            const v = document.getElementById(`vid-${id}-${loc}`);
+            if(!v) return;
+            const rect = e.target.closest('.cv-seek').getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            if(isFinite(pos) && isFinite(v.duration)) {
+                v.currentTime = pos * v.duration;
+            }
+        }
+
+        window.switchPfTab = (tab, btn) => {
+            document.querySelectorAll('.pf-tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.pf-content').forEach(c => c.style.display = 'none');
+            document.getElementById('pf-content-'+tab).style.display = 'block';
+        }
+
+        async function loadMyP() {
+            const cPosts = document.getElementById('my-posts');
+            const cReels = document.getElementById('my-reels');
+            const cPhotos = document.getElementById('my-photos');
+            cPosts.innerHTML = '<div style="padding:20px;text-align:center;">Loading...</div>';
+            
+            const s = await getDocs(query(collection(db,"posts"), orderBy("timestamp","desc")));
+            let hP = "", hR = "", hPh = "";
+            
+            s.forEach(d => {
+                const data = d.data();
+                if(data.uid === me.uid) {
+                    hP += mkP(data, d.id, 'my');
+                    if(data.type === 'video') {
+                        hR += `<div style="position:relative;" onclick="location.href='#post-${d.id}-my'; switchPfTab('posts', document.querySelector('.pf-tab-btn'))">
+                                <video src="${data.mediaUrl}" class="pf-grid-img" style="object-fit:cover;"></video>
+                               </div>`;
+                    }
+                    if(!data.type || data.type === 'text' || (data.mediaUrl && data.type !== 'video' && data.type !== 'youtube')) {
+                        if(data.mediaUrl) hPh += `<img src="${data.mediaUrl}" class="pf-grid-img" onclick="location.href='#post-${d.id}-my'; switchPfTab('posts', document.querySelector('.pf-tab-btn'))">`;
+                    }
+                }
+            });
+
+            cPosts.innerHTML = hP || '<div style="padding:20px;text-align:center;color:var(--text-sec)">No posts yet</div>';
+            cReels.innerHTML = hR || '<div style="padding:20px;text-align:center;color:var(--text-sec);grid-column:1/-1;">No reels shared</div>';
+            cPhotos.innerHTML = hPh || '<div style="padding:20px;text-align:center;color:var(--text-sec);grid-column:1/-1;">No photos shared</div>';
+            
+            setTimeout(() => initScrollPlay('p-profile'), 500);
+        }
+
+        window.vwProf = async(id) => {
+    document.getElementById('srch-pg').style.display='none';
+            if(id === me.uid) { nav('profile'); return; }
+            
+            // Push State for Back Button support
+            window.history.pushState({modal: 'view_profile'}, '', '');
+            
+            document.getElementById('loader').style.display='flex';
+            guestId = id;
+            
+            document.querySelectorAll('.vp-content').forEach(e=>e.style.display='none');
+            document.getElementById('vp-content-posts').style.display='block';
+            document.querySelectorAll('#p-view .pf-tab-btn').forEach(e=>e.classList.remove('active'));
+            document.getElementById('vt-posts').classList.add('active');
+
+            const d = (await getDoc(doc(db,"users",id))).data();
+            document.getElementById('vp-cvr').src = d.coverPic || '';
+            document.getElementById('vp-img').src = d.profilePic;
+            document.getElementById('vp-nm').innerText = d.fullName;
+            document.getElementById('vp-bio').innerText = d.bio || "No bio";
+            
+            const myD = (await getDoc(doc(db,"users",me.uid))).data();
+            const btn = document.getElementById('vp-btn');
+            
+            const msgBtn = document.querySelector('#p-view .btn-s');
+            if(msgBtn) {
+                msgBtn.innerHTML = '<i class="fab fa-facebook-messenger"></i> Message';
+                msgBtn.setAttribute('onclick', `location.href='chat.html?uid=${id}'`);
+            }
+
+            const friends = myD.friends || [];
+            const incoming = myD.friendRequests || [];
+            const outgoing = d.friendRequests || [];
+            
+            btn.disabled = false; btn.className = "pf-btn btn-p"; btn.onclick = () => frAct();
+            if(friends.includes(id)) { btn.innerHTML = '<i class="fas fa-check"></i> Friends'; btn.className = "pf-btn btn-s"; btn.onclick = null; }
+            else if(outgoing.includes(me.uid)) { btn.innerHTML = '<i class="fas fa-paper-plane"></i> Sent'; btn.disabled = true; btn.className = "pf-btn btn-s"; }
+            else if(incoming.includes(id)) { btn.innerHTML = 'Respond'; btn.onclick = () => { nav('friends'); }; }
+            else { btn.innerHTML = '<i class="fas fa-user-plus"></i> Add Friend'; }
+
+            const cPosts = document.getElementById('vp-posts');
+            const cReels = document.getElementById('vp-reels');
+            const cPhotos = document.getElementById('vp-photos');
+            cPosts.innerHTML = 'Loading...';
+            
+            const s = await getDocs(query(collection(db,"posts"), orderBy("timestamp","desc")));
+            let hP = "", hR = "", hPh = "";
+            
+            s.forEach(x => { 
+                const data = x.data();
+                if(data.uid === id) {
+                    hP += mkP(data, x.id, 'view');
+                    if(data.type === 'video') {
+                        hR += `<div style="position:relative;" onclick="location.href='#post-${x.id}-view'; switchViewTab('posts')">
+                                <video src="${data.mediaUrl}" class="pf-grid-img" style="object-fit:cover;"></video>
+                               </div>`;
+                    }
+                    if(!data.type || data.type === 'text' || (data.mediaUrl && data.type !== 'video' && data.type !== 'youtube')) {
+                        if(data.mediaUrl) hPh += `<img src="${data.mediaUrl}" class="pf-grid-img" onclick="location.href='#post-${x.id}-view'; switchViewTab('posts')">`;
+                    }
+                } 
+            });
+            cPosts.innerHTML = hP || '<div style="padding:20px;text-align:center;color:var(--text-sec)">No posts yet</div>';
+            cReels.innerHTML = hR || '<div style="padding:20px;text-align:center;color:var(--text-sec);grid-column:1/-1;">No reels shared</div>';
+            cPhotos.innerHTML = hPh || '<div style="padding:20px;text-align:center;color:var(--text-sec);grid-column:1/-1;">No photos shared</div>';
+
+            // Show view section manually since it's treated as a modal overlay in history
+            document.querySelectorAll('.section').forEach(e => e.classList.remove('active'));
+            document.getElementById('p-view').classList.add('active');
+            window.scrollTo(0,0);
+            
+            setTimeout(() => initScrollPlay('p-view'), 500);
+            document.getElementById('loader').style.display='none';
+        }
+
+        window.switchViewTab = (tab) => {
+            document.querySelectorAll('#p-view .pf-tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('vt-'+tab).classList.add('active');
+            document.querySelectorAll('.vp-content').forEach(c => c.style.display = 'none');
+            document.getElementById('vp-content-'+tab).style.display = 'block';
+        }
+
+        window.lk = async(id) => {
+            const btns = document.querySelectorAll(`[id="lb-${id}"]`);
+            const cnts = document.querySelectorAll(`[id="lc-${id}"]`);
+            if(btns.length === 0) return;
+            const isLiked = btns[0].classList.contains('liked');
+            btns.forEach(b => {
+                const icon = b.querySelector('i');
+                if(isLiked) { b.classList.remove('liked'); icon.className = 'far fa-thumbs-up'; } 
+                else { b.classList.add('liked'); icon.className = 'fas fa-thumbs-up'; }
+            });
+            cnts.forEach(c => { let cv = parseInt(c.innerText); c.innerText = isLiked ? (cv > 0 ? cv - 1 : 0) : (cv + 1); });
+            if(isLiked) await updateDoc(doc(db,"posts",id), { likes: arrayRemove(me.uid) });
+            else await updateDoc(doc(db,"posts",id), { likes: arrayUnion(me.uid) });
+        }
+
+        function timeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            let interval = seconds / 31536000;
+            if (interval > 1) return Math.floor(interval) + "y";
+            interval = seconds / 2592000;
+            if (interval > 1) return Math.floor(interval) + "mo";
+            interval = seconds / 86400;
+            if (interval > 1) return Math.floor(interval) + "d";
+            interval = seconds / 3600;
+            if (interval > 1) return Math.floor(interval) + "h";
+            interval = seconds / 60;
+            if (interval > 1) return Math.floor(interval) + "m";
+            return "Just now";
+        }
+        
+        function urlify(text) {
+            var urlRegex = /(https?:\/\/[^\s]+)/g;
+            return text.replace(urlRegex, function(url) {
+                return '<a href="' + url + '" style="color:var(--accent);text-decoration:none;" target="_blank">' + url + '</a>';
+            });
+        }
+
+        window.delP = async(id, loc) => { 
+    if(confirm("Delete this post?")) { 
+        // সঠিক ID তৈরি করা হচ্ছে (loc সহ)
+        const elId = `post-${id}-${loc}`;
+        const el = document.getElementById(elId);
+        
+        // UI তে ঝাপসা করা
+        if(el) el.style.opacity = '0.5'; 
+        
+        try {
+            // ডাটাবেস থেকে ডিলিট
+            await deleteDoc(doc(db, "posts", id)); 
+            
+            // সফল হলে UI থেকে রিমুভ
+            if(el) el.remove(); 
+            
+            // যদি পোস্টটি অন্য কোনো ট্যাবেও লোড করা থাকে, সেগুলোর জন্যও চেক করা (অপশনাল)
+            // যেমন প্রোফাইল বা ফিড উভয় জায়গা থেকেই সরানোর জন্য:
+            const otherLocs = ['feed', 'my', 'view'];
+            otherLocs.forEach(l => {
+                const otherEl = document.getElementById(`post-${id}-${l}`);
+                if(otherEl) otherEl.remove();
+            });
+
+        } catch (e) {
+            alert("Error deleting post");
+            if(el) el.style.opacity = '1'; // এরর হলে আবার আগের অবস্থায় আনা
+        }
+    } 
+}
+
+        // --- OPEN MODALS WITH HISTORY PUSH ---
+        window.opCmt = async(id) => {
+            actP = id; 
+            window.history.pushState({modal: 'comments'}, '', ''); // Fix Close Button
+            document.getElementById('overlay').classList.add('active'); document.getElementById('cmt-sht').classList.add('open');
+            const c = document.getElementById('clist'); c.innerHTML = '<div style="text-align:center;padding:20px;">Loading...</div>';
+            const s = await getDocs(query(collection(db,"posts",id,"comments"), orderBy("timestamp","asc")));
+            let h = ""; s.forEach(d => { const k = d.data(); h += `<div class="cmt-item"><img src="${k.uPic}" class="u-ava" style="width:32px;height:32px;"><div class="cmt-bub"><div class="cmt-n">${k.uName}</div><div class="cmt-t">${k.txt}</div></div></div>`; });
+            c.innerHTML = h || '<div style="text-align:center;padding:20px;">No comments yet.</div>'; c.scrollTop = c.scrollHeight;
+        }
+
+        window.postCmt = async() => {
+            const inBox = document.getElementById('cin'); const t = inBox.value.trim(); if(!t) return; inBox.value = ""; 
+            const u = (await getDoc(doc(db,"users",me.uid))).data();
+            const tempHtml = `<div class="cmt-item" style="opacity:0.7;"><img src="${u.profilePic}" class="u-ava" style="width:32px;height:32px;"><div class="cmt-bub"><div class="cmt-n">${u.fullName}</div><div class="cmt-t">${t}</div></div></div>`;
+            const c = document.getElementById('clist'); if(c.innerHTML.includes('No comments')) c.innerHTML = ""; c.insertAdjacentHTML('beforeend', tempHtml); c.scrollTop = c.scrollHeight;
+            await addDoc(collection(db,"posts",actP,"comments"), { uid: me.uid, uName: u.fullName, uPic: u.profilePic, txt: t, timestamp: new Date().toISOString() });
+            window.opCmt(actP);
+        }
+
+        async function loadSt() {
+            const t = document.getElementById('s-tray'); while(t.children.length > 1) t.removeChild(t.lastChild);
+            const s = await getDocs(query(collection(db,"stories"), orderBy("timestamp","desc")));
+            s.forEach(async d => {
+                const k = d.data(); const timeDiff = new Date().getTime() - new Date(k.timestamp).getTime();
+                if(timeDiff > 86400000) { await deleteDoc(doc(db,"stories",d.id)); return; } 
+                const v = document.createElement('div'); v.className = 'story-card';
+                v.innerHTML = `<img src="${k.url}" class="story-img"><div class="story-overlay"></div><img src="${k.userPic}" class="s-ava"><div class="s-user">${k.userName}</div>`;
+                v.onclick = () => viewStory(k); t.appendChild(v);
+            });
+        }
+        window.openStoryEditor = async (inp) => {
+            if(inp.files && inp.files[0]) {
+                window.history.pushState({modal: 'editor'}, '', ''); // Fix Close Button
+                storyFile = inp.files[0]; selectedMusic = null;
+                document.getElementById('se-caption').value = ''; document.getElementById('se-drag-txt').innerText = ''; document.getElementById('se-caption-box').classList.remove('show');
+                document.getElementById('music-tool-lbl').innerText = "Music"; document.getElementById('music-tool-lbl').style.color = "white";
+                const d = (await getDoc(doc(db,"users",me.uid))).data(); document.getElementById('se-my-pic').src = d.profilePic;
+                const r = new FileReader(); r.onload = (e) => { document.getElementById('se-prev-img').src = e.target.result; document.getElementById('story-editor').style.display = 'flex'; }
+                r.readAsDataURL(storyFile);
+            }
+        }
+        window.closeStoryEditor = () => { window.history.back(); }
+        window.updateSeText = (val) => { document.getElementById('se-drag-txt').innerText = val; }
+        window.dragStart = (e) => { e.preventDefault(); }
+        window.dragMove = (e) => {
+            e.preventDefault(); const touch = e.touches[0]; const cont = document.querySelector('.se-prev'); const rect = cont.getBoundingClientRect();
+            let y = touch.clientY - rect.top; if(y < 0) y = 0; if(y > rect.height) y = rect.height;
+            const yPerc = (y / rect.height) * 100; storyYPos = yPerc; document.getElementById('se-drag-txt').style.top = yPerc + '%';
+        }
+        window.uploadStory = async() => {
+            const b = document.getElementById('st-up-btn'); const originalText = b.innerText; b.innerText = "Sharing..."; b.disabled = true;
+            try {
+                let url = null; if (storyFile) { const fd = new FormData(); fd.append('file', storyFile); fd.append('upload_preset', C_PRE); const r = await fetch(C_URL, {method:'POST', body:fd}); const d = await r.json(); url = d.secure_url; }
+                const u = (await getDoc(doc(db,"users",me.uid))).data();
+                await addDoc(collection(db,"stories"),{ uid: me.uid, url: url, userName: u.fullName, userPic: u.profilePic, timestamp: new Date().toISOString(), caption: document.getElementById('se-caption').value, yPos: storyYPos, musicUrl: selectedMusic ? selectedMusic.url : null, musicName: selectedMusic ? selectedMusic.name : null });
+                window.history.back(); loadSt(); alert("Story Shared Successfully!"); 
+            } catch(e) { alert("Error sharing story"); } finally { b.innerText = originalText; b.disabled = false; }
+        }
+        let storyAudio = new Audio();
+        window.viewStory = (data) => {
+            window.history.pushState({modal: 'story'}, '', ''); // Fix Close Button
+            document.getElementById('story-viewer').style.display = 'flex';
+            document.getElementById('sv-main-img').src = data.url; document.getElementById('sv-ava').src = data.userPic;
+            let nameTxt = data.userName; if(data.musicName) nameTxt += ` 🎵 ${data.musicName}`; document.getElementById('sv-name').innerText = nameTxt;
+            const cap = document.getElementById('sv-caption'); cap.innerText = data.caption || ""; cap.style.top = (data.yPos || 50) + '%';
+            if(data.musicUrl) { storyAudio.src = data.musicUrl; storyAudio.volume = 1.0; storyAudio.play().catch(e => console.log("Auto-play blocked")); }
+            const bar = document.getElementById('sv-bar'); bar.style.width = '0%'; setTimeout(() => bar.style.width = '100%', 100); bar.style.transition = 'width 15s linear';
+if(activeStoryTimer) clearTimeout(activeStoryTimer); activeStoryTimer = setTimeout(closeStoryView, 15000);
+        }
+        window.closeStoryView = () => { window.history.back(); }
+        window.sendReact = (emoji) => { const el = document.createElement('div'); el.className = 'flying-emoji'; el.innerText = emoji; document.getElementById('story-viewer').appendChild(el); setTimeout(() => el.remove(), 1500); }
+
+        window.openSearch = () => { window.history.pushState({modal: 'search'}, '', ''); document.getElementById('srch-pg').style.display='flex'; document.getElementById('s-input-box').focus(); }
+        window.doSrch = async(v) => {
+            if(v.length < 2) return; const r = document.getElementById('s-out'); const end = v + "\uf8ff";
+            const s = await getDocs(query(collection(db,"users"), where("fullName", ">=", v), where("fullName", "<=", end)));
+            r.innerHTML=""; s.forEach(d => { const k = d.data(); r.innerHTML += `<div class="s-row" onclick="vwProf('${k.uid}')"><img src="${k.profilePic}" class="u-ava"><div><div style="font-weight:600;color:var(--text)">${k.fullName}</div><div style="font-size:12px;color:var(--text-sec)">User</div></div></div>`; });
+        }
+
+        window.frAct = async() => { const btn = document.getElementById('vp-btn'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; await updateDoc(doc(db,"users",guestId), { friendRequests: arrayUnion(me.uid) }); btn.innerHTML = '<i class="fas fa-paper-plane"></i> Sent'; btn.className = "pf-btn btn-s"; btn.disabled = true; }
+        
+        window.openEdit = () => { 
+            window.history.pushState({modal: 'edit'}, '', ''); // Fix Close Button
+            document.getElementById('edit-mod').style.display='flex'; document.getElementById('e-nm').value = document.getElementById('pf-nm').innerText; document.getElementById('e-bio').value = document.getElementById('pf-bio').innerText; document.getElementById('e-prev-pp').src = document.getElementById('pf-img').src; document.getElementById('e-prev-cp').src = document.getElementById('pf-cvr').src || ''; 
+        }
+        
+        window.prevImg = (inpt, imgId) => { if (inpt.files && inpt.files[0]) { var reader = new FileReader(); reader.onload = function(e) { document.getElementById(imgId).src = e.target.result; }; reader.readAsDataURL(inpt.files[0]); } }
+        window.savePf = async() => {
+            const b = document.getElementById('sv-btn'); b.innerText = "Saving..."; b.disabled = true;
+            const n = document.getElementById('e-nm').value; const bio = document.getElementById('e-bio').value; const pp = document.getElementById('e-pp').files[0]; const cp = document.getElementById('e-cp').files[0];
+            const upD = { fullName: n, bio: bio };
+            try {
+                if(pp) { const fd = new FormData(); fd.append('file', pp); fd.append('upload_preset', C_PRE); const r = await fetch(C_URL, {method:'POST', body:fd}); const d = await r.json(); upD.profilePic = d.secure_url; }
+                if(cp) { const fd = new FormData(); fd.append('file', cp); fd.append('upload_preset', C_PRE); const r = await fetch(C_URL, {method:'POST', body:fd}); const d = await r.json(); upD.coverPic = d.secure_url; }
+                await updateDoc(doc(db,"users",me.uid), upD); location.reload();
+            } catch(e) { alert("Error"); b.innerText = "Save Changes"; b.disabled = false; }
+        }
+
+        function loadReq() {
+            onSnapshot(doc(db, "users", me.uid), (ds) => {
+                if (!ds.exists()) return; const u = ds.data(); const reqs = u.friendRequests || []; const cont = document.getElementById('req-cont'); const list = document.getElementById('req-list');
+                if(reqs.length === 0) { cont.style.display = 'none'; return; } cont.style.display = 'block'; document.getElementById('req-cnt').innerText = reqs.length; list.innerHTML = "";
+                reqs.forEach(async id => { const f = (await getDoc(doc(db,"users",id))).data(); const div = document.createElement('div'); div.className = 's-row'; div.style.background = 'var(--bg)'; div.innerHTML = `<img src="${f.profilePic}" class="u-ava" style="width:50px;height:50px;"><div style="flex:1;"><div style="font-weight:600; margin-bottom:5px;">${f.fullName}</div><div style="display:flex; gap:10px;"><button onclick="acp('${id}', this)" style="flex:1;background:var(--accent);color:white;border:none;padding:6px;border-radius:6px;font-weight:600;">Confirm</button><button onclick="delReq('${id}', this)" style="flex:1;background:var(--input);color:var(--text);border:none;padding:6px;border-radius:6px;font-weight:600;">Delete</button></div></div>`; list.appendChild(div); });
+            });
+        }
+        window.acp = async(id, btn) => { btn.parentNode.parentNode.innerHTML = '<span style="color:var(--text-sec)">Accepted</span>'; await updateDoc(doc(db,"users",me.uid), { friendRequests: arrayRemove(id), friends: arrayUnion(id) }); await updateDoc(doc(db,"users",id), { friends: arrayUnion(me.uid) }); }
+        window.delReq = async(id, btn) => { btn.parentNode.parentNode.innerHTML = '<span style="color:var(--text-sec)">Removed</span>'; await updateDoc(doc(db,"users",me.uid), { friendRequests: arrayRemove(id) }); }
+
+        async function loadSugg() {
+            const c = document.getElementById('sugg-list'); const s = await getDocs(collection(db,"users")); const md = (await getDoc(doc(db,"users",me.uid))).data(); const friends = md.friends || []; const reqs = md.friendRequests || []; c.innerHTML = "";
+            s.forEach(d => { const u = d.data(); if(u.uid !== me.uid && !friends.includes(u.uid) && !reqs.includes(u.uid)) { const isSent = u.friendRequests && u.friendRequests.includes(me.uid); let btn = `<button class="fr-btn" onclick="snd('${u.uid}',this)">Add Friend</button>`; if(isSent) btn = `<button class="fr-btn" style="background:var(--input); color:var(--text); cursor:default;">Sent</button>`; c.innerHTML += `<div class="fr-card"><img src="${u.profilePic}" class="fr-img" onclick="vwProf('${u.uid}')"><div class="fr-name">${u.fullName}</div>${btn}</div>`; } });
+        }
+        window.snd = async(id, b) => { b.innerText = "Sent"; b.style.background = "var(--input)"; b.style.color = "var(--text)"; await updateDoc(doc(db,"users",id), { friendRequests: arrayUnion(me.uid) }); }
+
+        function loadVid() { document.getElementById('v-feed').innerHTML = `<iframe src="reels.html" style="position:fixed; top:100px; left:0; width:100%; height:calc(100% - 100px); border:none; background:black; z-index:5;"></iframe>`; }
+        window.openMenu = () => { window.history.pushState({modal: 'menu'}, '', ''); document.getElementById('overlay').classList.add('active'); document.getElementById('menu-pg').classList.add('open'); }
+        window.opShr = (id) => { actP = id; window.history.pushState({modal: 'share'}, '', ''); document.getElementById('overlay').classList.add('active'); document.getElementById('shr-sht').classList.add('open'); }
+        
+        window.shareFeed = async () => { const btn = document.querySelector('.sh-icon'); if(!actP) return; try { const pDoc = await getDoc(doc(db, "posts", actP)); if(!pDoc.exists()) return; const pData = pDoc.data(); const uData = (await getDoc(doc(db,"users",me.uid))).data(); await addDoc(collection(db,"posts"), { uid: me.uid, userName: uData.fullName, userPic: uData.profilePic, text: `Shared a post: ${pData.text || ''}`, mediaUrl: pData.mediaUrl || null, type: pData.type || 'text', likes: [], timestamp: new Date().toISOString() }); alert("Shared!"); window.history.back(); loadFeed(); } catch(e) { alert("Error"); } }
+        window.copyL = () => { navigator.clipboard.writeText("tio.app/p/"+actP); alert("Link Copied"); window.history.back(); }
+        window.logout = () => signOut(auth);
+
+        window.openMusicModal = () => { window.history.pushState({modal: 'music'}, '', ''); document.getElementById('music-modal').classList.add('open'); if(document.getElementById('m-list').innerHTML === "") { searchMusic('Tanveer Evan'); } }
+        let previewAudio = document.getElementById('m-preview-player');
+        window.searchMusic = async (q) => {
+            if(q.length < 2) return; const resBox = document.getElementById('m-list'); resBox.innerHTML = '<div style="padding:20px; text-align:center;">Loading...</div>'; previewAudio.pause();
+            const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&entity=song&limit=20`;
+            try {
+                const req = await fetch(url); const data = await req.json(); resBox.innerHTML = "";
+                data.results.forEach(track => {
+                    const safeName = track.trackName.replace(/'/g, "\\'").replace(/"/g, '&quot;'); const safeUrl = track.previewUrl;
+                    resBox.innerHTML += `<div class="m-item"><img src="${track.artworkUrl100}" class="m-thumb"><div class="m-info"><div class="m-title">${track.trackName}</div><div class="m-artist">${track.artistName}</div></div><div class="m-act-box"><i class="fas fa-play-circle m-play-btn" onclick="playPreview('${safeUrl}', this)"></i><button class="m-sel-btn" onclick="selectMusic('${safeUrl}', '${safeName}')">Select</button></div></div>`;
+                });
+            } catch(e) { resBox.innerHTML = 'Error'; }
+        }
+        window.playPreview = (url, btn) => { if(previewAudio.src === url && !previewAudio.paused) { previewAudio.pause(); btn.className = "fas fa-play-circle m-play-btn"; return; } document.querySelectorAll('.m-play-btn').forEach(b => b.className = "fas fa-play-circle m-play-btn"); previewAudio.src = url; previewAudio.volume = 0.8; previewAudio.play(); btn.className = "fas fa-pause-circle m-play-btn"; }
+        window.selectMusic = (url, name) => { previewAudio.pause(); selectedMusic = { url: url, name: name }; const shortName = name.length > 12 ? name.substring(0,10)+'..' : name; document.getElementById('music-tool-lbl').innerText = shortName; document.getElementById('music-tool-lbl').style.color = '#4cd137'; window.history.back(); }
+
+        // --- Advanced Post Music Logic ---
+        window.togglePostMusic = (url, id, isAuto = false) => {
+            const audio = document.getElementById('post-audio');
+            const btn = document.getElementById(`mo-${id}`); // Overlay ID
+            const allBtns = document.querySelectorAll('.music-overlay');
+            
+            // Check if same song is playing
+            if(audio.src === url && !audio.paused) {
+                if(!isAuto) { // Only pause on click, not on scroll re-trigger
+                    audio.pause();
+                    if(btn) btn.classList.remove('playing');
+                }
+            } else {
+                // Stop others
+                allBtns.forEach(b => b.classList.remove('playing'));
+                
+                audio.src = url;
+                // Attempt to play (Browser might block auto-play if no interaction happened yet)
+                audio.play().then(() => {
+                    if(btn) btn.classList.add('playing');
+                }).catch(e => {
+                    console.log("Auto-play blocked by browser. User interaction needed.");
+                });
+            }
+        }
+            
+// --- GAME SYSTEM LOGIC (Phase 2: Real Database & Friends) ---
+        
+        window.loadGameLobby = async () => {
+            document.getElementById('game-frame-container').style.display = 'none';
+            document.getElementById('game-lobby').style.display = 'block';
+            
+            const list = document.getElementById('online-friends-list');
+            list.innerHTML = '<div style="padding:20px; text-align:center;"><i class="fas fa-spinner fa-spin" style="font-size:24px; color:var(--accent);"></i><br>Loading friends...</div>';
+            
+            try {
+                // নিজের ডাটা থেকে বন্ধুদের লিস্ট (UID) বের করা
+                const myD = (await getDoc(doc(db, "users", me.uid))).data();
+                const friends = myD.friends ||[];
+                
+                if(friends.length === 0) {
+                    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-sec)">You have no friends to play with. Add some friends first!</div>';
+                    document.getElementById('online-cnt').innerHTML = `0 Online`;
+                    return;
+                }
+                
+                let h = "";
+                document.getElementById('online-cnt').innerHTML = `<i class="fas fa-circle"></i> ${friends.length} Friends`;
+
+                // প্রত্যেক ফ্রেন্ডের ডাটাবেস থেকে প্রোফাইল পিকচার ও নাম নিয়ে আসা
+                for(let id of friends) {
+                    const fD = (await getDoc(doc(db, "users", id))).data();
+                    if(fD) {
+                        h += `
+                        <div class="s-row" style="background:var(--bg);">
+                            <div style="position:relative;">
+                                <img src="${fD.profilePic}" class="u-ava" style="width:50px;height:50px;">
+                                <div class="online-dot"></div>
+                            </div>
+                            <div style="flex:1;">
+                                <div style="font-weight:600; margin-bottom:5px; color:var(--text);">${fD.fullName}</div>
+                                <button class="invite-btn" onclick="sendGameInvite('${id}', '${fD.fullName}', '${fD.profilePic}', this)">Invite to Play</button>
+                            </div>
+                        </div>`;
+                    }
+                }
+                list.innerHTML = h || '<div style="padding:20px;text-align:center;color:var(--text-sec)">Error loading friends.</div>';
+            } catch(e) {
+                console.error("Lobby Load Error:", e);
+            }
+        };
+
+        window.sendGameInvite = (friendId, friendName, friendPic, btn) => {
+            btn.innerText = "Inviting...";
+            btn.style.background = "var(--input)";
+            btn.style.color = "var(--text)";
+            btn.disabled = true;
+            
+            // আপাতত পপ-আপ টেস্ট করার জন্য নিজেকেই ইনভাইট সেন্ড করা হচ্ছে (পরের ধাপে ২য় ইউজারের ফোনে যাবে)
+            setTimeout(() => {
+                showGamePopup(friendName, friendPic);
+                btn.innerText = "Invite to Play";
+                btn.style.background = "var(--accent)";
+                btn.style.color = "white";
+                btn.disabled = false;
+            }, 2000);
+        };
+
+        // পপ-আপ দেখানোর ফাংশন
+        window.showGamePopup = (friendName, friendPic) => {
+            document.getElementById('gip-img').src = friendPic;
+            document.getElementById('gip-text').innerHTML = `<b>${friendName}</b> wants to play Tic-Tac-Toe with you!`;
+            document.getElementById('game-invite-popup').style.display = 'flex';
+        };
+
+        // ইনভাইট একসেপ্ট করার ফাংশন
+        window.acceptGameInvite = () => {
+            document.getElementById('game-invite-popup').style.display = 'none';
+            
+            // গেম ট্যাবে নিয়ে যাওয়া
+            nav('game');
+            
+            // লবি হাইড করে iframe লোড করা
+            document.getElementById('game-lobby').style.display = 'none';
+            document.getElementById('game-frame-container').style.display = 'block';
+            
+            // games.html ফাইলটি লোড করা (প্যারামিটার হিসেবে রুম আইডি পাঠানো হবে)
+            document.getElementById('game-frame').src = "games.html?room=test_room_123";
+        };
+
+        // ইনভাইট ডিক্লাইন করার ফাংশন
+        window.declineGameInvite = () => {
+            document.getElementById('game-invite-popup').style.display = 'none';
+        };
+        // গেম থেকে বের হওয়ার মেসেজ রিসিভ করা
+        window.addEventListener('message', (e) => {
+            if(e.data === "leave_game") {
+                document.getElementById('game-frame-container').style.display = 'none';
+                document.getElementById('game-lobby').style.display = 'block';
+                document.getElementById('game-frame').src = "";
+            }
+        });
+    </script>
+</body>
+</html>
