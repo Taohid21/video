@@ -612,10 +612,31 @@
             document.getElementById('dk-icn').className = isDark ? 'fas fa-moon' : 'fas fa-sun';
         };
 
+        let myDataGlobal = null; // গ্লোবাল ভেরিয়েবল
         onAuthStateChanged(auth, async (u) => {
             if(u) {
                 me = u;
-                const d = (await getDoc(doc(db,"users",u.uid))).data();
+                myDataGlobal = (await getDoc(doc(db,"users",u.uid))).data();
+                const d = myDataGlobal;
+
+                // ১. নিজেকে অনলাইনে অ্যাক্টিভ করা
+                await updateDoc(doc(db, "users", u.uid), { isOnline: true });
+                
+                // অ্যাপ ক্লোজ করলে অফলাইন করে দেওয়া
+                window.addEventListener("beforeunload", () => {
+                    updateDoc(doc(db, "users", u.uid), { isOnline: false });
+                });
+
+                // ২. ব্যাকগ্রাউন্ডে গেম ইনভাইট শোনা (Global Listener)
+                onSnapshot(query(collection(db, "Game_Invites"), where("receiverId", "==", u.uid), where("status", "==", "pending")), (snapshot) => {
+                    snapshot.docChanges().forEach((change) => {
+                        if (change.type === "added") {
+                            const inviteData = change.doc.data();
+                            // বন্ধুর স্ক্রিনে পপ-আপ দেখানো
+                            showGamePopup(inviteData.senderName, inviteData.senderPic, change.doc.id, inviteData.roomId);
+                        }
+                    });
+                });
                 document.getElementById('my-pic').src = d.profilePic;
                 document.getElementById('my-s-pic').src = d.profilePic;
                 document.getElementById('cmt-my-pic').src = d.profilePic;
@@ -1159,17 +1180,19 @@ if(activeStoryTimer) clearTimeout(activeStoryTimer); activeStoryTimer = setTimeo
             }
         }
             
-// --- GAME SYSTEM LOGIC (Phase 2: Real Database & Friends) ---
+// --- GAME SYSTEM LOGIC (Phase 3: Real Presence & Sync) ---
         
+        let currentInviteId = null;
+        let currentGameRoomId = null;
+
         window.loadGameLobby = async () => {
             document.getElementById('game-frame-container').style.display = 'none';
             document.getElementById('game-lobby').style.display = 'block';
             
             const list = document.getElementById('online-friends-list');
-            list.innerHTML = '<div style="padding:20px; text-align:center;"><i class="fas fa-spinner fa-spin" style="font-size:24px; color:var(--accent);"></i><br>Loading friends...</div>';
+            list.innerHTML = '<div style="padding:20px; text-align:center;"><i class="fas fa-spinner fa-spin" style="font-size:24px; color:var(--accent);"></i><br>Finding online friends...</div>';
             
             try {
-                // নিজের ডাটা থেকে বন্ধুদের লিস্ট (UID) বের করা
                 const myD = (await getDoc(doc(db, "users", me.uid))).data();
                 const friends = myD.friends ||[];
                 
