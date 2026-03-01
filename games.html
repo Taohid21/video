@@ -159,16 +159,29 @@
         let role = null;
         
         // ==========================================
-        // WebRTC Variables & Fixes (UPDATED)
+        // 1. WEBRTC SETUP & CRITICAL FIXES
         // ==========================================
         const servers = { iceServers: [{ urls:['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
         const pc = new RTCPeerConnection(servers);
         let localStream = null;
+        let pendingIceCandidates =[]; // নেটওয়ার্ক ক্র্যাশ রোধ করার জন্য বাফার
 
-        // অডিওর জন্য আগে থেকেই কানেকশন তৈরি রাখা
-        pc.addTransceiver('audio', { direction: 'sendrecv' });
+        // FIX 1: মোবাইল ব্রাউজারের One-Way অডিও সমস্যা দূর করতে একটি Silent Track তৈরি করা
+        function createSilentTrack() {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const dest = ctx.createMediaStreamDestination();
+            const osc = ctx.createOscillator();
+            osc.connect(dest);
+            osc.start();
+            const track = dest.stream.getAudioTracks()[0];
+            track.enabled = false; // একদম মিউট থাকবে
+            return track;
+        }
+        
+        // কানেকশন তৈরির শুরুতেই Silent Track যুক্ত করা হলো যাতে Bidirectional চ্যানেল তৈরি হয়
+        pc.addTrack(createSilentTrack());
 
-        // Receive Remote Audio
+        // রিমোট অডিও রিসিভ করা
         const remoteAudio = document.getElementById('remote-audio');
         pc.ontrack = (event) => {
             const stream = (event.streams && event.streams[0]) ? event.streams[0] : new MediaStream([event.track]);
@@ -178,15 +191,27 @@
             remoteAudio.play().catch(e => console.warn("Autoplay blocked:", e));
         };
 
-        // ব্রাউজারের অটোপ্লে পলিসি বাইপাস করার জন্য যেকোনো ক্লিকে অডিও প্লে নিশ্চিত করা
+        // ব্রাউজারের অটোপ্লে পলিসি বাইপাস
         document.body.addEventListener('click', () => {
-            if (remoteAudio.paused && remoteAudio.srcObject) {
-                remoteAudio.play().catch(() => {});
-            }
+            if (remoteAudio.paused && remoteAudio.srcObject) remoteAudio.play().catch(() => {});
         });
 
+        // ICE Candidate Race Condition ফিক্স
+        function addIceCandidateSafely(candidateData) {
+            if (pc.remoteDescription && pc.remoteDescription.type) {
+                pc.addIceCandidate(new RTCIceCandidate(candidateData)).catch(e => console.error(e));
+            } else {
+                pendingIceCandidates.push(candidateData);
+            }
+        }
+
+        function flushIceCandidates() {
+            pendingIceCandidates.forEach(c => pc.addIceCandidate(new RTCIceCandidate(c)).catch(e => console.error(e)));
+            pendingIceCandidates =[];
+        }
+
         // ==========================================
-        // FIREBASE AUTH & ROOM LOGIC
+        // 2. FIREBASE AUTH & ROOM LOGIC
         // ==========================================
         onAuthStateChanged(auth, async (u) => {
             if (u) {
@@ -206,10 +231,7 @@
                 role = "X";
                 await setDoc(roomRef, {
                     player1: { uid: me.uid, name: myData.fullName, pic: myData.profilePic, pts: 0 },
-                    player2: null,
-                    board:["", "", "", "", "", "", "", "", ""],
-                    turn: "X",
-                    winner: null
+                    player2: null, board:["", "", "", "", "", "", "", "", ""], turn: "X", winner: null
                 });
                 document.getElementById('load-text').innerText = "Waiting for friend to join...";
                 setupWebRTCOffer(roomRef);
@@ -231,7 +253,6 @@
                 }
             }
 
-            // Real-Time Sync
             onSnapshot(roomRef, (snapshot) => {
                 if (!snapshot.exists()) return;
                 const d = snapshot.data();
@@ -241,7 +262,7 @@
         }
 
         // ==========================================
-        // UI & GAME LOGIC
+        // 3. UI & GAMEPLAY LOGIC
         // ==========================================
         const winConditions = [[0,1,2], [3,4,5],[6,7,8], [0,3,6], [1,4,7], [2,5,8],[0,4,8], [2,4,6]];
 
@@ -325,23 +346,20 @@
 
         window.requestRematch = async () => {
             const roomRef = doc(db, "Game_Rooms", roomId);
-            await updateDoc(roomRef, {
-                board:["", "", "", "", "", "", "", "", ""], turn: "X", winner: null
-            });
+            await updateDoc(roomRef, { board:["", "", "", "", "", "", "", "", ""], turn: "X", winner: null });
         };
 
         function fireConfetti() {
-            var duration = 3 * 1000;
-            var end = Date.now() + duration;
+            var duration = 3 * 1000; var end = Date.now() + duration;
             (function frame() {
-                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ef4444', '#3b82f6'] });
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors:['#ef4444', '#3b82f6'] });
                 confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors:['#10b981', '#fbbf24'] });
                 if (Date.now() < end) requestAnimationFrame(frame);
             }());
         }
 
         // ==========================================
-        // MIC & WEBRTC LOGIC (FIXED ECHO & AUTOPLAY)
+        // 4. WEBRTC VOICE CHAT (Echo Fixed & Track Replaced)
         // ==========================================
         let isMicOn = false;
 
@@ -351,21 +369,21 @@
 
             if (!localStream) {
                 try {
-                    // Echo Cancellation এবং Noise Suppression যুক্ত করা হয়েছে যাতে নিজের কথা নিজে শুনতে না পান
+                    // Echo Cancellation যুক্ত করা হয়েছে 
                     localStream = await navigator.mediaDevices.getUserMedia({ 
                         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, 
                         video: false 
                     });
-                    const audioTrack = localStream.getAudioTracks()[0];
+                    const realAudioTrack = localStream.getAudioTracks()[0];
                     
-                    // Existing ট্রান্সসিভারে ট্র্যাক রিপ্লেস করা
+                    // Silent track-টিকে আসল অডিও দিয়ে রিপ্লেস করা হচ্ছে
                     const senders = pc.getSenders();
                     const audioSender = senders.find(s => s.track === null || (s.track && s.track.kind === 'audio'));
                     
                     if (audioSender) {
-                        await audioSender.replaceTrack(audioTrack);
+                        await audioSender.replaceTrack(realAudioTrack);
                     } else {
-                        pc.addTrack(audioTrack, localStream);
+                        pc.addTrack(realAudioTrack, localStream);
                     }
                 } catch (err) {
                     alert("Microphone access denied! " + err.message);
@@ -400,32 +418,34 @@
             await pc.setLocalDescription(offerDescription);
             await updateDoc(roomRef, { offer: { type: offerDescription.type, sdp: offerDescription.sdp } });
 
-            onSnapshot(roomRef, (snapshot) => {
+            onSnapshot(roomRef, async (snapshot) => {
                 const data = snapshot.data();
                 if (data && data.answer && !pc.currentRemoteDescription) {
-                    pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+                    await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+                    flushIceCandidates(); // Safe to add ICE now
                 }
             });
 
             onSnapshot(collection(roomRef, "calleeCandidates"), snapshot => {
                 snapshot.docChanges().forEach(change => {
-                    if (change.type === "added") pc.addIceCandidate(new RTCIceCandidate(change.doc.data()));
+                    if (change.type === "added") addIceCandidateSafely(change.doc.data());
                 });
             });
         }
 
-        // Guest logic fixes
+        // Guest logic
         async function setupWebRTCAnswer(roomRef) {
             const calleeCandidates = collection(roomRef, "calleeCandidates");
             pc.onicecandidate = event => {
                 if (event.candidate) addDoc(calleeCandidates, event.candidate.toJSON());
             };
 
-            // FIX 3: Wait specifically for offer, don't just return if not found immediately
             onSnapshot(roomRef, async (snapshot) => {
                 const data = snapshot.data();
                 if (data && data.offer && !pc.currentRemoteDescription) {
                     await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+                    flushIceCandidates(); // Safe to add ICE now
+                    
                     const answerDescription = await pc.createAnswer();
                     await pc.setLocalDescription(answerDescription);
                     await updateDoc(roomRef, { answer: { type: answerDescription.type, sdp: answerDescription.sdp } });
@@ -434,7 +454,7 @@
 
             onSnapshot(collection(roomRef, "callerCandidates"), snapshot => {
                 snapshot.docChanges().forEach(change => {
-                    if (change.type === "added") pc.addIceCandidate(new RTCIceCandidate(change.doc.data()));
+                    if (change.type === "added") addIceCandidateSafely(change.doc.data());
                 });
             });
         }
@@ -446,6 +466,7 @@
                 window.parent.postMessage("leave_game", "*");
             }
         };
+                                                                            
     </script>
 </body>
 </html>
