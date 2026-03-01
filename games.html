@@ -17,49 +17,59 @@
             --accent: #3b82f6;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        /* UI Fixed for Mobile */
+        body { 
+            background-color: var(--bg); 
+            color: var(--text); 
+            min-height: 100dvh; /* Changed from 100vh for mobile browser support */
+            display: flex; 
+            flex-direction: column; 
+            overflow-x: hidden; 
+            overflow-y: auto; /* Allow scrolling if screen is too small */
+        }
 
         /* Modern Top Bar */
         .top-bar { height: 65px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 10;}
-        .game-title { font-weight: 800; font-size: 20px; background: linear-gradient(45deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
-        .leave-btn { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px 18px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .game-title { font-weight: 800; font-size: clamp(16px, 5vw, 20px); background: linear-gradient(45deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px; }
+        .leave-btn { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px 15px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.3s; }
         .leave-btn:active { transform: scale(0.95); background: #ef4444; color: white; }
 
         /* Game Area */
-        .game-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 20px; }
+        .game-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 20px; padding-bottom: 60px; /* Space for Mic button */ }
         
-        .turn-box { background: var(--card); padding: 12px 30px; border-radius: 30px; font-weight: 600; font-size: 16px; margin-bottom: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 10px; transition: 0.3s; }
+        .turn-box { background: var(--card); padding: 12px 25px; border-radius: 30px; font-weight: 600; font-size: clamp(14px, 4vw, 16px); margin-bottom: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; gap: 10px; transition: 0.3s; text-align: center; }
         .turn-box.x-turn { border-bottom: 3px solid var(--x-color); box-shadow: 0 10px 25px var(--x-glow); }
         .turn-box.o-turn { border-bottom: 3px solid var(--o-color); box-shadow: 0 10px 25px var(--o-glow); }
 
         /* Neon Board */
-        .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; max-width: 340px; }
-        .cell { width: 100%; aspect-ratio: 1; background: rgba(30, 41, 59, 0.5); border-radius: 20px; display: flex; justify-content: center; align-items: center; font-size: 70px; font-weight: 800; cursor: pointer; transition: 0.3s; border: 2px solid rgba(255,255,255,0.05); box-shadow: inset 0 4px 10px rgba(0,0,0,0.2); }
+        .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 340px; margin: 0 auto; }
+        .cell { width: 100%; aspect-ratio: 1; background: rgba(30, 41, 59, 0.5); border-radius: 15px; display: flex; justify-content: center; align-items: center; font-size: clamp(40px, 15vw, 70px); font-weight: 800; cursor: pointer; transition: 0.3s; border: 2px solid rgba(255,255,255,0.05); box-shadow: inset 0 4px 10px rgba(0,0,0,0.2); }
         .cell:active { transform: scale(0.95); }
         .cell.x { color: var(--x-color); text-shadow: 0 0 20px var(--x-glow); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .cell.o { color: var(--o-color); text-shadow: 0 0 20px var(--o-glow); animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
         /* Player Stats (Bottom Bar) */
-        .player-bar { height: 100px; background: rgba(30, 41, 59, 0.9); backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; position: relative; padding-bottom: 10px; }
-        .player { display: flex; align-items: center; gap: 12px; width: 35%; }
+        .player-bar { height: 90px; background: rgba(30, 41, 59, 0.9); backdrop-filter: blur(10px); border-top: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; position: relative; margin-top: auto; }
+        .player { display: flex; align-items: center; gap: 10px; width: 38%; }
         .p-img-box { position: relative; }
-        .p-img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 3px solid #333; background: #222; }
-        .player.x-side .p-img { border-color: var(--x-color); box-shadow: 0 0 15px var(--x-glow); }
-        .player.o-side .p-img { border-color: var(--o-color); box-shadow: 0 0 15px var(--o-glow); }
-        .p-name { font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px; }
-        .p-score { font-size: 12px; color: var(--text-sec); font-weight: 600; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 10px; display: inline-block; margin-top: 4px; }
+        .p-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 3px solid #333; background: #222; }
+        .player.x-side .p-img { border-color: var(--x-color); box-shadow: 0 0 10px var(--x-glow); }
+        .player.o-side .p-img { border-color: var(--o-color); box-shadow: 0 0 10px var(--o-glow); }
+        .p-name { font-weight: 700; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80px; }
+        .p-score { font-size: 11px; color: var(--text-sec); font-weight: 600; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 10px; display: inline-block; margin-top: 2px; }
 
-        /* Smart Mic Button */
-        .mic-wrapper { position: absolute; left: 50%; transform: translateX(-50%); top: -35px; display: flex; flex-direction: column; align-items: center; }
-        .mic-btn { width: 70px; height: 70px; border-radius: 50%; background: var(--card); display: flex; justify-content: center; align-items: center; font-size: 26px; color: var(--text-sec); cursor: pointer; border: 4px solid var(--bg); transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.5); z-index: 20; }
-        .mic-btn.active { background: var(--accent); color: white; box-shadow: 0 0 25px rgba(59, 130, 246, 0.6); animation: micPulse 2s infinite; border-color: var(--bg); }
-        .voice-status { font-size: 10px; color: var(--text-sec); font-weight: 600; margin-top: 5px; letter-spacing: 1px; text-transform: uppercase; }
-        @keyframes micPulse { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); } 70% { box-shadow: 0 0 0 20px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
+        /* Smart Mic Button - Fixed Position */
+        .mic-wrapper { position: absolute; left: 50%; transform: translateX(-50%); top: -40px; display: flex; flex-direction: column; align-items: center; z-index: 20;}
+        .mic-btn { width: 65px; height: 65px; border-radius: 50%; background: var(--card); display: flex; justify-content: center; align-items: center; font-size: 24px; color: var(--text-sec); cursor: pointer; border: 4px solid var(--bg); transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .mic-btn.active { background: var(--accent); color: white; box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); animation: micPulse 2s infinite; border-color: var(--bg); }
+        .voice-status { font-size: 10px; color: var(--text-sec); font-weight: 600; margin-top: 5px; letter-spacing: 0.5px; text-transform: uppercase; background: var(--bg); padding: 2px 8px; border-radius: 10px; }
+        @keyframes micPulse { 0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); } 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); } }
 
         /* Fullscreen Overlay Messages */
-        .overlay-msg { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(15, 23, 42, 0.9); z-index: 50; display: none; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
-        .win-text { font-size: 45px; font-weight: 800; color: white; text-shadow: 0 10px 20px rgba(0,0,0,0.5); margin-bottom: 30px; text-align: center; }
+        .overlay-msg { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(15, 23, 42, 0.95); z-index: 50; display: none; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
+        .win-text { font-size: clamp(35px, 10vw, 50px); font-weight: 800; color: white; text-shadow: 0 10px 20px rgba(0,0,0,0.5); margin-bottom: 30px; text-align: center; }
         .action-btn { background: linear-gradient(45deg, var(--accent), #8b5cf6); color: white; border: none; padding: 15px 35px; border-radius: 30px; font-weight: 700; font-size: 18px; cursor: pointer; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4); transition: 0.3s; display: flex; align-items: center; gap: 10px; }
         .action-btn:active { transform: scale(0.95); }
         
@@ -79,7 +89,7 @@
     </div>
 
     <div class="game-area">
-        <div id="turn-txt" class="turn-box">Connecting to Server...</div>
+        <div id="turn-txt" class="turn-box">Connecting...</div>
         
         <div class="board" id="board">
             <div class="cell" onclick="makeMove(0)"></div>
@@ -92,18 +102,18 @@
             <div class="cell" onclick="makeMove(7)"></div>
             <div class="cell" onclick="makeMove(8)"></div>
         </div>
+    </div>
 
-        <!-- Result / Winner Overlay -->
-        <div id="result-overlay" class="overlay-msg">
-            <div id="result-text" class="win-text">Winner!</div>
-            <button class="action-btn" onclick="requestRematch()"><i class="fas fa-redo"></i> Play Again</button>
-        </div>
+    <!-- Result / Winner Overlay -->
+    <div id="result-overlay" class="overlay-msg">
+        <div id="result-text" class="win-text">Winner!</div>
+        <button class="action-btn" onclick="requestRematch()"><i class="fas fa-redo"></i> Play Again</button>
+    </div>
 
-        <!-- Loading / Waiting Overlay -->
-        <div id="loader-screen" class="overlay-msg">
-            <div class="spinner"></div>
-            <h2 id="load-text" style="font-weight:700;">Setting up match...</h2>
-        </div>
+    <!-- Loading / Waiting Overlay -->
+    <div id="loader-screen" class="overlay-msg">
+        <div class="spinner"></div>
+        <h2 id="load-text" style="font-weight:700; text-align:center; padding: 0 20px;">Setting up match...</h2>
     </div>
 
     <div class="player-bar">
@@ -135,7 +145,6 @@
     </div>
 
     <script type="module">
-        // Firebase Config (আপনার অ্যাপের ডাটাবেস)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -147,53 +156,64 @@
 
         let me = null, myData = null;
         let roomId = new URLSearchParams(window.location.search).get('room') || "test_room_123";
-        let role = null; // 'X' or 'O'
+        let role = null;
         
-        // WebRTC Variables (Google STUN Servers for Voice Call)
+        // ==========================================
+        // WebRTC Variables & Fixes
+        // ==========================================
         const servers = { iceServers: [{ urls:['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
         const pc = new RTCPeerConnection(servers);
         let localStream = null;
 
+        // FIX 1: অডিওর জন্য আগে থেকেই লাইন ক্লিয়ার রাখা (যাতে পরে ট্র্যাক এড করলে এরর না দেয়)
+        pc.addTransceiver('audio', { direction: 'sendrecv' });
+
+        // Receive Remote Audio
+        const remoteAudio = document.getElementById('remote-audio');
+        pc.ontrack = (event) => {
+            if (event.streams && event.streams[0]) {
+                remoteAudio.srcObject = event.streams[0];
+            } else {
+                let inboundStream = new MediaStream();
+                inboundStream.addTrack(event.track);
+                remoteAudio.srcObject = inboundStream;
+            }
+        };
+
         // ==========================================
-        // 1. INITIALIZATION & FIREBASE AUTH
+        // FIREBASE AUTH & ROOM LOGIC
         // ==========================================
         onAuthStateChanged(auth, async (u) => {
             if (u) {
                 me = u;
-                myData = (await getDoc(doc(db, "users", u.uid))).data();
+                myData = (await getDoc(doc(db, "users", u.uid))).data() || { fullName: "Player", profilePic: "https://via.placeholder.com/50" };
                 joinOrCreateRoom();
             } else {
                 document.getElementById('load-text').innerText = "Please login first!";
             }
         });
 
-        // ==========================================
-        // 2. ROOM LOGIC (Firebase Sync)
-        // ==========================================
         async function joinOrCreateRoom() {
             const roomRef = doc(db, "Game_Rooms", roomId);
             const roomSnap = await getDoc(roomRef);
 
             if (!roomSnap.exists() || !roomSnap.data().player1) {
-                // I am Player 1 (Host - X)
                 role = "X";
                 await setDoc(roomRef, {
                     player1: { uid: me.uid, name: myData.fullName, pic: myData.profilePic, pts: 0 },
                     player2: null,
                     board:["", "", "", "", "", "", "", "", ""],
                     turn: "X",
-                    winner: null,
-                    rematchReq: 0
+                    winner: null
                 });
                 document.getElementById('load-text').innerText = "Waiting for friend to join...";
                 setupWebRTCOffer(roomRef);
             } else {
                 const data = roomSnap.data();
                 if (data.player1.uid === me.uid) {
-                    role = "X"; // Host re-joined
-                    document.getElementById('load-text').innerText = "Reconnected. Waiting for friend...";
+                    role = "X"; 
+                    document.getElementById('load-text').innerText = "Waiting for friend...";
                 } else if (!data.player2 || data.player2.uid === me.uid) {
-                    // I am Player 2 (Guest - O)
                     role = "O";
                     await updateDoc(roomRef, {
                         player2: { uid: me.uid, name: myData.fullName, pic: myData.profilePic, pts: data.player2 ? data.player2.pts : 0 }
@@ -206,7 +226,7 @@
                 }
             }
 
-            // Listen for Real-Time Updates
+            // Real-Time Sync
             onSnapshot(roomRef, (snapshot) => {
                 if (!snapshot.exists()) return;
                 const d = snapshot.data();
@@ -216,12 +236,11 @@
         }
 
         // ==========================================
-        // 3. UI & GAMEPLAY LOGIC
+        // UI & GAME LOGIC
         // ==========================================
         const winConditions = [[0,1,2], [3,4,5],[6,7,8], [0,3,6], [1,4,7], [2,5,8],[0,4,8], [2,4,6]];
 
         function updateUI(data) {
-            // Update Profiles
             if (data.player1) {
                 document.getElementById('p1-name').innerText = data.player1.uid === me.uid ? "You" : data.player1.name;
                 document.getElementById('p1-img').src = data.player1.pic;
@@ -233,7 +252,6 @@
                 document.getElementById('p2-pts').innerText = data.player2.pts;
             }
 
-            // Update Board
             const cells = document.querySelectorAll('.cell');
             data.board.forEach((val, i) => {
                 cells[i].innerText = val;
@@ -241,13 +259,12 @@
                 if (val) cells[i].classList.add(val.toLowerCase());
             });
 
-            // Update Turn
             const turnBox = document.getElementById('turn-txt');
             turnBox.className = "turn-box " + (data.turn === 'X' ? 'x-turn' : 'o-turn');
             
             if (data.winner) {
                 turnBox.innerHTML = "Game Over!";
-                showResult(data.winner, data.turn); // Passing turn just for styling context
+                showResult(data.winner);
             } else {
                 document.getElementById('result-overlay').style.display = 'none';
                 if (data.turn === role) {
@@ -263,23 +280,20 @@
             const snap = await getDoc(roomRef);
             const data = snap.data();
 
-            if (data.winner || data.turn !== role || data.board[index] !== "") return; // Not my turn or cell full
+            if (data.winner || data.turn !== role || data.board[index] !== "") return;
 
             data.board[index] = role;
             let nextTurn = role === 'X' ? 'O' : 'X';
             let winner = null;
 
-            // Check Win
             for (let condition of winConditions) {
                 const [a, b, c] = condition;
                 if (data.board[a] && data.board[a] === data.board[b] && data.board[a] === data.board[c]) {
                     winner = role; break;
                 }
             }
-            // Check Draw
             if (!winner && !data.board.includes("")) winner = "Draw";
 
-            // Add Points
             if (winner === 'X') data.player1.pts += 10;
             if (winner === 'O') data.player2.pts += 10;
 
@@ -307,13 +321,10 @@
         window.requestRematch = async () => {
             const roomRef = doc(db, "Game_Rooms", roomId);
             await updateDoc(roomRef, {
-                board:["", "", "", "", "", "", "", "", ""],
-                turn: "X",
-                winner: null
+                board:["", "", "", "", "", "", "", "", ""], turn: "X", winner: null
             });
         };
 
-        // Confetti Effect
         function fireConfetti() {
             var duration = 3 * 1000;
             var end = Date.now() + duration;
@@ -325,7 +336,7 @@
         }
 
         // ==========================================
-        // 4. WEBRTC VOICE CHAT (LIVE AUDIO)
+        // MIC & WEBRTC LOGIC (FIXED)
         // ==========================================
         let isMicOn = false;
 
@@ -335,11 +346,18 @@
 
             if (!localStream) {
                 try {
-                    // Ask for Mic Permission
                     localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-                    localStream.getTracks().forEach(track => {
-                        pc.addTrack(track, localStream);
-                    });
+                    const audioTrack = localStream.getAudioTracks()[0];
+                    
+                    // FIX 2: Existing ট্রান্সসিভারে ট্র্যাক রিপ্লেস করা
+                    const senders = pc.getSenders();
+                    const audioSender = senders.find(s => s.track === null || (s.track && s.track.kind === 'audio'));
+                    
+                    if (audioSender) {
+                        audioSender.replaceTrack(audioTrack);
+                    } else {
+                        pc.addTrack(audioTrack, localStream);
+                    }
                 } catch (err) {
                     alert("Microphone access denied! " + err.message);
                     return;
@@ -347,7 +365,7 @@
             }
 
             isMicOn = !isMicOn;
-            localStream.getAudioTracks()[0].enabled = isMicOn; // Mute / Unmute
+            localStream.getAudioTracks()[0].enabled = isMicOn;
 
             if (isMicOn) {
                 btn.classList.add('active');
@@ -362,16 +380,7 @@
             }
         };
 
-        // Receive Remote Audio
-        const remoteAudio = document.getElementById('remote-audio');
-        pc.ontrack = (event) => {
-            if(remoteAudio.srcObject !== event.streams[0]) {
-                remoteAudio.srcObject = event.streams[0];
-                remoteAudio.play().catch(e => console.log("Autoplay prevented:", e));
-            }
-        };
-
-        // WebRTC Signaling (Host creates Offer)
+        // Host creates Offer
         async function setupWebRTCOffer(roomRef) {
             const callerCandidates = collection(roomRef, "callerCandidates");
             pc.onicecandidate = event => {
@@ -380,68 +389,50 @@
 
             const offerDescription = await pc.createOffer();
             await pc.setLocalDescription(offerDescription);
-
             await updateDoc(roomRef, { offer: { type: offerDescription.type, sdp: offerDescription.sdp } });
 
-            // Listen for Answer
             onSnapshot(roomRef, (snapshot) => {
                 const data = snapshot.data();
-                if (!pc.currentRemoteDescription && data && data.answer) {
-                    const answerDescription = new RTCSessionDescription(data.answer);
-                    pc.setRemoteDescription(answerDescription);
+                if (data && data.answer && !pc.currentRemoteDescription) {
+                    pc.setRemoteDescription(new RTCSessionDescription(data.answer));
                 }
             });
 
-            // Listen for Remote ICE Candidates
             onSnapshot(collection(roomRef, "calleeCandidates"), snapshot => {
                 snapshot.docChanges().forEach(change => {
-                    if (change.type === "added") {
-                        let candidate = new RTCIceCandidate(change.doc.data());
-                        pc.addIceCandidate(candidate);
-                    }
+                    if (change.type === "added") pc.addIceCandidate(new RTCIceCandidate(change.doc.data()));
                 });
             });
         }
 
-        // WebRTC Signaling (Guest creates Answer)
+        // Guest logic fixes
         async function setupWebRTCAnswer(roomRef) {
-            const roomSnap = await getDoc(roomRef);
-            const data = roomSnap.data();
-            
-            if(!data.offer) return; // Wait for offer if not ready
-
             const calleeCandidates = collection(roomRef, "calleeCandidates");
             pc.onicecandidate = event => {
                 if (event.candidate) addDoc(calleeCandidates, event.candidate.toJSON());
             };
 
-            const offerDescription = new RTCSessionDescription(data.offer);
-            await pc.setRemoteDescription(offerDescription);
+            // FIX 3: Wait specifically for offer, don't just return if not found immediately
+            onSnapshot(roomRef, async (snapshot) => {
+                const data = snapshot.data();
+                if (data && data.offer && !pc.currentRemoteDescription) {
+                    await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+                    const answerDescription = await pc.createAnswer();
+                    await pc.setLocalDescription(answerDescription);
+                    await updateDoc(roomRef, { answer: { type: answerDescription.type, sdp: answerDescription.sdp } });
+                }
+            });
 
-            const answerDescription = await pc.createAnswer();
-            await pc.setLocalDescription(answerDescription);
-
-            await updateDoc(roomRef, { answer: { type: answerDescription.type, sdp: answerDescription.sdp } });
-
-            // Listen for Remote ICE Candidates
             onSnapshot(collection(roomRef, "callerCandidates"), snapshot => {
                 snapshot.docChanges().forEach(change => {
-                    if (change.type === "added") {
-                        let candidate = new RTCIceCandidate(change.doc.data());
-                        pc.addIceCandidate(candidate);
-                    }
+                    if (change.type === "added") pc.addIceCandidate(new RTCIceCandidate(change.doc.data()));
                 });
             });
         }
 
-        // ==========================================
-        // 5. LEAVE GAME ROUTING
-        // ==========================================
         window.leaveGame = () => {
             if(confirm("Exit the game room?")) {
-                if(localStream) {
-                    localStream.getTracks().forEach(track => track.stop());
-                }
+                if(localStream) localStream.getTracks().forEach(track => track.stop());
                 pc.close();
                 window.parent.postMessage("leave_game", "*");
             }
