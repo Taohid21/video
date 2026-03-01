@@ -159,26 +159,31 @@
         let role = null;
         
         // ==========================================
-        // WebRTC Variables & Fixes
+        // WebRTC Variables & Fixes (UPDATED)
         // ==========================================
         const servers = { iceServers: [{ urls:['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
         const pc = new RTCPeerConnection(servers);
         let localStream = null;
 
-        // FIX 1: অডিওর জন্য আগে থেকেই লাইন ক্লিয়ার রাখা (যাতে পরে ট্র্যাক এড করলে এরর না দেয়)
+        // অডিওর জন্য আগে থেকেই কানেকশন তৈরি রাখা
         pc.addTransceiver('audio', { direction: 'sendrecv' });
 
         // Receive Remote Audio
         const remoteAudio = document.getElementById('remote-audio');
         pc.ontrack = (event) => {
-            if (event.streams && event.streams[0]) {
-                remoteAudio.srcObject = event.streams[0];
-            } else {
-                let inboundStream = new MediaStream();
-                inboundStream.addTrack(event.track);
-                remoteAudio.srcObject = inboundStream;
+            const stream = (event.streams && event.streams[0]) ? event.streams[0] : new MediaStream([event.track]);
+            if (remoteAudio.srcObject !== stream) {
+                remoteAudio.srcObject = stream;
             }
+            remoteAudio.play().catch(e => console.warn("Autoplay blocked:", e));
         };
+
+        // ব্রাউজারের অটোপ্লে পলিসি বাইপাস করার জন্য যেকোনো ক্লিকে অডিও প্লে নিশ্চিত করা
+        document.body.addEventListener('click', () => {
+            if (remoteAudio.paused && remoteAudio.srcObject) {
+                remoteAudio.play().catch(() => {});
+            }
+        });
 
         // ==========================================
         // FIREBASE AUTH & ROOM LOGIC
@@ -336,7 +341,7 @@
         }
 
         // ==========================================
-        // MIC & WEBRTC LOGIC (FIXED)
+        // MIC & WEBRTC LOGIC (FIXED ECHO & AUTOPLAY)
         // ==========================================
         let isMicOn = false;
 
@@ -346,15 +351,19 @@
 
             if (!localStream) {
                 try {
-                    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                    // Echo Cancellation এবং Noise Suppression যুক্ত করা হয়েছে যাতে নিজের কথা নিজে শুনতে না পান
+                    localStream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, 
+                        video: false 
+                    });
                     const audioTrack = localStream.getAudioTracks()[0];
                     
-                    // FIX 2: Existing ট্রান্সসিভারে ট্র্যাক রিপ্লেস করা
+                    // Existing ট্রান্সসিভারে ট্র্যাক রিপ্লেস করা
                     const senders = pc.getSenders();
                     const audioSender = senders.find(s => s.track === null || (s.track && s.track.kind === 'audio'));
                     
                     if (audioSender) {
-                        audioSender.replaceTrack(audioTrack);
+                        await audioSender.replaceTrack(audioTrack);
                     } else {
                         pc.addTrack(audioTrack, localStream);
                     }
